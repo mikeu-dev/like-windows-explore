@@ -61,7 +61,9 @@ describe("ExplorerService Unit Tests", () => {
       return Promise.resolve(null);
     }),
     searchFolders: mock((_query: string) => Promise.resolve([])),
-    create: mock((_folder: any) => Promise.resolve({} as any))
+    create: mock((_folder: any) => Promise.resolve({} as any)),
+    delete: mock((_id: string) => Promise.resolve()),
+    update: mock((_id: string, _folder: any) => Promise.resolve({} as any))
   };
 
   const mockFileRepo: IFileRepository = {
@@ -69,8 +71,14 @@ describe("ExplorerService Unit Tests", () => {
       if (folderId === "1") return Promise.resolve(mockFiles);
       return Promise.resolve([]);
     }),
+    findById: mock((id: string) => {
+      if (id === "101") return Promise.resolve(mockFiles[0]);
+      return Promise.resolve(null);
+    }),
     searchFiles: mock((_query: string) => Promise.resolve([])),
-    create: mock((_file: any) => Promise.resolve({} as any))
+    create: mock((_file: any) => Promise.resolve({} as any)),
+    delete: mock((_id: string) => Promise.resolve()),
+    update: mock((_id: string, _file: any) => Promise.resolve({} as any))
   };
 
   const service = new ExplorerService(mockFolderRepo, mockFileRepo);
