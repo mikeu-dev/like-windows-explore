@@ -17,8 +17,8 @@
 </template>
 
 <script setup lang="ts">
-import { ClientFolderNode } from '../composables/useExplorer';
-import FolderTreeNode from './FolderTreeNode.vue';
+import { ClientFolderNode } from "../composables/useExplorer";
+import FolderTreeNode from "./FolderTreeNode.vue";
 
 defineProps<{
   folders: ClientFolderNode[];
@@ -26,7 +26,7 @@ defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'select', id: string): void;
-  (e: 'expand', folder: ClientFolderNode): void;
+  (e: "select", id: string): void;
+  (e: "expand", folder: ClientFolderNode): void;
 }>();
 </script>

@@ -5,8 +5,8 @@
       :id="'folder-node-' + folder.id"
       class="flex items-center py-1.5 px-2 rounded-md cursor-pointer transition-colors duration-150 hover:bg-explorer-border/50 text-sm group"
       :class="[
-        selectedId === folder.id 
-          ? 'bg-explorer-active text-explorer-bg font-medium' 
+        selectedId === folder.id
+          ? 'bg-explorer-active text-explorer-bg font-medium'
           : 'text-explorer-text'
       ]"
       @click="emit('select', folder.id)"
@@ -54,7 +54,7 @@
 </template>
 
 <script setup lang="ts">
-import { ClientFolderNode } from '../composables/useExplorer';
+import { ClientFolderNode } from "../composables/useExplorer";
 
 const props = defineProps<{
   folder: ClientFolderNode;
@@ -62,13 +62,13 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'select', id: string): void;
-  (e: 'expand', folder: ClientFolderNode): void;
+  (e: "select", id: string): void;
+  (e: "expand", folder: ClientFolderNode): void;
 }>();
 
 const toggleExpand = () => {
   if (props.folder.hasChildren) {
-    emit('expand', props.folder);
+    emit("expand", props.folder);
   }
 };
 </script>

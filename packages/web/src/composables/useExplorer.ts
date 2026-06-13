@@ -27,7 +27,7 @@ export function useExplorer() {
   // Memuat folder tingkat teratas (Root)
   async function loadRootFolders() {
     const data = await explorerApi.getSubfolders(null);
-    rootFolders.value = data.map(f => {
+    rootFolders.value = data.map((f) => {
       const node: ClientFolderNode = {
         ...f,
         children: [],
@@ -56,7 +56,7 @@ export function useExplorer() {
     folder.isLoading = true;
     try {
       const childrenData = await explorerApi.getSubfolders(folder.id);
-      folder.children = childrenData.map(f => {
+      folder.children = childrenData.map((f) => {
         const node: ClientFolderNode = {
           ...f,
           children: [],

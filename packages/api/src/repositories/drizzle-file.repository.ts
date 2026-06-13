@@ -6,11 +6,7 @@ import { eq, ilike } from "drizzle-orm";
 
 export class DrizzleFileRepository implements IFileRepository {
   async findFilesByFolderId(folderId: string): Promise<File[]> {
-    return await db
-      .select()
-      .from(files)
-      .where(eq(files.folderId, folderId))
-      .orderBy(files.name);
+    return await db.select().from(files).where(eq(files.folderId, folderId)).orderBy(files.name);
   }
 
   async searchFiles(query: string): Promise<File[]> {

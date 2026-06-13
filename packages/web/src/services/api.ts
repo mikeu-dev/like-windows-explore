@@ -6,7 +6,7 @@ export const explorerApi = {
   // Ambil subfolder langsung (untuk tree view)
   async getSubfolders(parentId: string | null = null): Promise<FolderDTO[]> {
     try {
-      const url = parentId 
+      const url = parentId
         ? `${API_BASE_URL}/folders?parentId=${parentId}`
         : `${API_BASE_URL}/folders`;
       const response = await fetch(url);

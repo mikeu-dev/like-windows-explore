@@ -11,7 +11,7 @@ export class ExplorerService {
   // Mengambil subfolder bertingkat (lazy loading)
   async getSubfolders(parentId: string | null): Promise<FolderDTO[]> {
     const folders = await this.folderRepo.findSubfolders(parentId);
-    return folders.map(f => ({
+    return folders.map((f) => ({
       id: f.id,
       name: f.name,
       parentId: f.parentId,
@@ -27,13 +27,13 @@ export class ExplorerService {
     ]);
 
     return {
-      subfolders: folders.map(f => ({
+      subfolders: folders.map((f) => ({
         id: f.id,
         name: f.name,
         parentId: f.parentId,
         hasChildren: f.hasChildren
       })),
-      files: files.map(f => ({
+      files: files.map((f) => ({
         id: f.id,
         name: f.name,
         size: f.size,
@@ -52,7 +52,7 @@ export class ExplorerService {
     while (currentId !== null) {
       const folder = await this.folderRepo.findById(currentId);
       if (!folder) break;
-      
+
       path.unshift({
         id: folder.id,
         name: folder.name,
@@ -77,12 +77,12 @@ export class ExplorerService {
     ]);
 
     return {
-      folders: folders.map(f => ({
+      folders: folders.map((f) => ({
         id: f.id,
         name: f.name,
         parentId: f.parentId
       })),
-      files: files.map(f => ({
+      files: files.map((f) => ({
         id: f.id,
         name: f.name,
         size: f.size,

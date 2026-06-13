@@ -8,16 +8,44 @@ import { File } from "../domain/entities/file";
 describe("ExplorerService Unit Tests", () => {
   // Mock Data
   const mockFolders: (Folder & { hasChildren: boolean })[] = [
-    { id: "1", name: "Documents", parentId: null, createdAt: new Date(), updatedAt: new Date(), hasChildren: true },
-    { id: "2", name: "Pictures", parentId: null, createdAt: new Date(), updatedAt: new Date(), hasChildren: false }
+    {
+      id: "1",
+      name: "Documents",
+      parentId: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      hasChildren: true
+    },
+    {
+      id: "2",
+      name: "Pictures",
+      parentId: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      hasChildren: false
+    }
   ];
 
   const mockSubfolders: (Folder & { hasChildren: boolean })[] = [
-    { id: "3", name: "Work", parentId: "1", createdAt: new Date(), updatedAt: new Date(), hasChildren: false }
+    {
+      id: "3",
+      name: "Work",
+      parentId: "1",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      hasChildren: false
+    }
   ];
 
   const mockFiles: File[] = [
-    { id: "101", name: "resume.pdf", size: 500, folderId: "1", createdAt: new Date(), updatedAt: new Date() }
+    {
+      id: "101",
+      name: "resume.pdf",
+      size: 500,
+      folderId: "1",
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }
   ];
 
   // Mock Repositories
