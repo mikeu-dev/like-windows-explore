@@ -15,7 +15,7 @@ jobs:
         image: postgres:15
         env:
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: Developer28*
+          POSTGRES_PASSWORD: password
           POSTGRES_DB: db-like-windows-explore
         ports:
           - 5432:5432
@@ -26,7 +26,7 @@ jobs:
           --health-retries 5
 
     env:
-      DATABASE_URL: "postgres://postgres:Developer28*@127.0.0.1:5432/db-like-windows-explore"
+      DATABASE_URL: "postgres://postgres:password@127.0.0.1:5432/db-like-windows-explore"
 
     steps:
       - name: Checkout repository
