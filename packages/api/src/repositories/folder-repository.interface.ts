@@ -6,5 +6,8 @@ export interface IFolderRepository {
   searchFolders(query: string): Promise<Folder[]>;
   create(folder: Omit<Folder, "id" | "createdAt" | "updatedAt">): Promise<Folder>;
   delete(id: string): Promise<void>;
-  update(id: string, folder: Partial<Omit<Folder, "id" | "createdAt" | "updatedAt">>): Promise<Folder>;
+  update(
+    id: string,
+    folder: Partial<Omit<Folder, "id" | "createdAt" | "updatedAt">>
+  ): Promise<Folder>;
 }

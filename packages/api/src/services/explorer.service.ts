@@ -228,9 +228,10 @@ export class ExplorerService {
     const srcFile = await this.fileRepo.findById(id);
     if (!srcFile) throw new Error("Berkas sumber tidak ditemukan");
 
-    const name = srcFile.folderId === folderId
-      ? `${srcFile.name.split(".").shift()} - Copy.${srcFile.name.split(".").pop()}`
-      : srcFile.name;
+    const name =
+      srcFile.folderId === folderId
+        ? `${srcFile.name.split(".").shift()} - Copy.${srcFile.name.split(".").pop()}`
+        : srcFile.name;
 
     const copiedFile = await this.fileRepo.create({
       name,

@@ -22,16 +22,16 @@
         @click.stop="toggleExpand"
       >
         <span v-if="folder.isLoading" class="animate-spin text-[10px]">⌛</span>
-        <span v-else-if="folder.hasChildren" class="material-symbols-outlined scale-75">chevron_right</span>
+        <span v-else-if="folder.hasChildren" class="material-symbols-outlined scale-75"
+          >chevron_right</span
+        >
         <span v-else class="text-[8px]">•</span>
       </span>
 
       <!-- Folder Icon -->
       <span
         class="material-symbols-outlined mr-2 scale-90 transition-colors"
-        :class="[
-          selectedId === folder.id ? 'text-primary' : 'text-[#ffc107]'
-        ]"
+        :class="[selectedId === folder.id ? 'text-primary' : 'text-[#ffc107]']"
         :style="{ fontVariationSettings: '\'FILL\' 1' }"
       >
         folder
@@ -80,7 +80,7 @@ const toggleExpand = () => {
 
 <style scoped>
 .sidebar-item-active::before {
-  content: '';
+  content: "";
   position: absolute;
   left: 0;
   top: 6px;

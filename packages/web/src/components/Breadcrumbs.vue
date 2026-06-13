@@ -7,7 +7,9 @@
     <!-- Home / Root Node -->
     <span class="flex items-center text-primary">
       <span class="material-symbols-outlined scale-90 mr-1.5">computer</span>
-      <span class="hover:bg-secondary-container/50 px-1 rounded cursor-default font-medium">Ini PC</span>
+      <span class="hover:bg-secondary-container/50 px-1 rounded cursor-default font-medium"
+        >Ini PC</span
+      >
     </span>
 
     <!-- Separator -->
@@ -30,7 +32,11 @@
       </button>
 
       <!-- Separator di antara items -->
-      <span v-if="index < path.length - 1" class="material-symbols-outlined text-on-surface-variant scale-75">chevron_right</span>
+      <span
+        v-if="index < path.length - 1"
+        class="material-symbols-outlined text-on-surface-variant scale-75"
+        >chevron_right</span
+      >
     </template>
   </nav>
 </template>

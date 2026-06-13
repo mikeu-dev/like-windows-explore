@@ -10,7 +10,6 @@ This repository contains the implementation of a hierarchical web-based file man
 - **Local Sorting**: Interactive sorting by Name (A-Z/Z-A), File Type, and File Size.
 - **State Synchronization & Mutating Backend API**: All modifications (creation, deletion, rename, copy, recursive folder copy, move) are sent to PostgreSQL via Elysia API routes and saved permanently.
 
-
 ## Workspace Structure
 
 The project is divided into four main packages within the packages directory:

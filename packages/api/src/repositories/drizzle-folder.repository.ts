@@ -54,7 +54,10 @@ export class DrizzleFolderRepository implements IFolderRepository {
     await db.delete(folders).where(eq(folders.id, id));
   }
 
-  async update(id: string, folder: Partial<Omit<Folder, "id" | "createdAt" | "updatedAt">>): Promise<Folder> {
+  async update(
+    id: string,
+    folder: Partial<Omit<Folder, "id" | "createdAt" | "updatedAt">>
+  ): Promise<Folder> {
     const result = await db
       .update(folders)
       .set({ ...folder, updatedAt: new Date() })

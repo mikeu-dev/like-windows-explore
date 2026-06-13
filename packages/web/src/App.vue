@@ -3,7 +3,9 @@
     class="h-screen w-screen flex flex-col bg-explorer-bg text-on-surface overflow-hidden select-none font-sans"
   >
     <!-- Header / Navbar Utama -->
-    <header class="bg-surface-container-lowest flex flex-col shrink-0 border-b border-outline-variant/50">
+    <header
+      class="bg-surface-container-lowest flex flex-col shrink-0 border-b border-outline-variant/50"
+    >
       <!-- Window Controls & Tab Bar -->
       <div class="h-10 flex items-center px-4 border-b border-outline-variant/30 bg-[#f3f3f3]/60">
         <div class="flex items-center space-x-3">
@@ -37,7 +39,11 @@
           </button>
           <button
             class="w-8 h-8 flex items-center justify-center text-on-surface-variant rounded transition-colors"
-            :class="(!selectedFolderId || breadcrumbs.length <= 1) ? 'opacity-40 cursor-default' : 'hover:bg-black/5'"
+            :class="
+              !selectedFolderId || breadcrumbs.length <= 1
+                ? 'opacity-40 cursor-default'
+                : 'hover:bg-black/5'
+            "
             :disabled="!selectedFolderId || breadcrumbs.length <= 1"
             @click="goUp"
           >
@@ -54,7 +60,9 @@
         </div>
 
         <!-- Breadcrumb Address Bar -->
-        <div class="flex-1 flex items-center h-8 bg-surface-container border border-outline-variant rounded-sm px-2 gap-1 overflow-hidden">
+        <div
+          class="flex-1 flex items-center h-8 bg-surface-container border border-outline-variant rounded-sm px-2 gap-1 overflow-hidden"
+        >
           <Breadcrumbs :path="breadcrumbs" @navigate="selectFolder" />
         </div>
 
@@ -63,7 +71,9 @@
       </div>
 
       <!-- Toolbar Row -->
-      <div class="flex items-center px-4 h-toolbar-height bg-surface-container-lowest border-t border-outline-variant/30 w-full relative">
+      <div
+        class="flex items-center px-4 h-toolbar-height bg-surface-container-lowest border-t border-outline-variant/30 w-full relative"
+      >
         <div class="flex items-center gap-2">
           <!-- Action Buttons -->
           <!-- New Button & Dropdown -->
@@ -74,7 +84,11 @@
               :disabled="!selectedFolderId"
               @click="isNewMenuOpen = !isNewMenuOpen"
             >
-              <span class="material-symbols-outlined text-primary scale-90" :style="{ fontVariationSettings: '\'FILL\' 1' }">add</span>
+              <span
+                class="material-symbols-outlined text-primary scale-90"
+                :style="{ fontVariationSettings: '\'FILL\' 1' }"
+                >add</span
+              >
               <span class="font-body-sm text-body-sm text-on-surface">New</span>
               <span class="material-symbols-outlined scale-75">expand_more</span>
             </button>
@@ -86,7 +100,11 @@
                 class="w-full text-left px-4 py-2 text-body-sm hover:bg-black/5 flex items-center gap-2"
                 @click="createNewItem('folder')"
               >
-                <span class="material-symbols-outlined text-[#ffc107] scale-90" :style="{ fontVariationSettings: '\'FILL\' 1' }">folder</span>
+                <span
+                  class="material-symbols-outlined text-[#ffc107] scale-90"
+                  :style="{ fontVariationSettings: '\'FILL\' 1' }"
+                  >folder</span
+                >
                 Folder Baru
               </button>
               <button
@@ -174,40 +192,54 @@
             >
               <button
                 class="w-full text-left px-4 py-2 text-body-sm hover:bg-black/5 flex items-center justify-between"
-                :class="{'text-primary font-medium': sortBy === 'name' && sortOrder === 'asc'}"
+                :class="{ 'text-primary font-medium': sortBy === 'name' && sortOrder === 'asc' }"
                 @click="setSort('name', 'asc')"
               >
                 Nama (A-Z)
-                <span v-if="sortBy === 'name' && sortOrder === 'asc'" class="material-symbols-outlined scale-75">check</span>
+                <span
+                  v-if="sortBy === 'name' && sortOrder === 'asc'"
+                  class="material-symbols-outlined scale-75"
+                  >check</span
+                >
               </button>
               <button
                 class="w-full text-left px-4 py-2 text-body-sm hover:bg-black/5 flex items-center justify-between"
-                :class="{'text-primary font-medium': sortBy === 'name' && sortOrder === 'desc'}"
+                :class="{ 'text-primary font-medium': sortBy === 'name' && sortOrder === 'desc' }"
                 @click="setSort('name', 'desc')"
               >
                 Nama (Z-A)
-                <span v-if="sortBy === 'name' && sortOrder === 'desc'" class="material-symbols-outlined scale-75">check</span>
+                <span
+                  v-if="sortBy === 'name' && sortOrder === 'desc'"
+                  class="material-symbols-outlined scale-75"
+                  >check</span
+                >
               </button>
               <button
                 class="w-full text-left px-4 py-2 text-body-sm hover:bg-black/5 flex items-center justify-between"
-                :class="{'text-primary font-medium': sortBy === 'type'}"
+                :class="{ 'text-primary font-medium': sortBy === 'type' }"
                 @click="setSort('type', 'asc')"
               >
                 Tipe
-                <span v-if="sortBy === 'type'" class="material-symbols-outlined scale-75">check</span>
+                <span v-if="sortBy === 'type'" class="material-symbols-outlined scale-75"
+                  >check</span
+                >
               </button>
               <button
                 class="w-full text-left px-4 py-2 text-body-sm hover:bg-black/5 flex items-center justify-between"
-                :class="{'text-primary font-medium': sortBy === 'size'}"
+                :class="{ 'text-primary font-medium': sortBy === 'size' }"
                 @click="setSort('size', 'asc')"
               >
                 Ukuran
-                <span v-if="sortBy === 'size'" class="material-symbols-outlined scale-75">check</span>
+                <span v-if="sortBy === 'size'" class="material-symbols-outlined scale-75"
+                  >check</span
+                >
               </button>
             </div>
           </div>
 
-          <button class="flex items-center gap-1.5 px-3 py-1.5 hover:bg-black/5 rounded transition-colors text-on-surface-variant">
+          <button
+            class="flex items-center gap-1.5 px-3 py-1.5 hover:bg-black/5 rounded transition-colors text-on-surface-variant"
+          >
             <span class="material-symbols-outlined scale-90">view_list</span>
             <span class="font-body-sm text-body-sm text-on-surface">View</span>
             <span class="material-symbols-outlined scale-75">expand_more</span>
@@ -224,8 +256,14 @@
       >
         <!-- Quick access and systems structure -->
         <div class="flex items-center px-2 py-1 mb-2 text-primary">
-          <span class="material-symbols-outlined scale-90 mr-2" :style="{ fontVariationSettings: '\'FILL\' 1' }">star</span>
-          <span class="font-title-sm text-title-sm text-on-surface font-semibold">Quick access</span>
+          <span
+            class="material-symbols-outlined scale-90 mr-2"
+            :style="{ fontVariationSettings: '\'FILL\' 1' }"
+            >star</span
+          >
+          <span class="font-title-sm text-title-sm text-on-surface font-semibold"
+            >Quick access</span
+          >
         </div>
 
         <div class="flex-1 overflow-y-auto no-scrollbar">
@@ -384,10 +422,11 @@ async function renameItem() {
 
 function cutItem() {
   if (!activeItem.value || !selectedFolderId.value) return;
-  const target = activeItem.value.type === "folder"
-    ? selectedFolderContents.value.subfolders.find((f) => f.id === activeItem.value!.id)
-    : selectedFolderContents.value.files.find((f) => f.id === activeItem.value!.id);
-  
+  const target =
+    activeItem.value.type === "folder"
+      ? selectedFolderContents.value.subfolders.find((f) => f.id === activeItem.value!.id)
+      : selectedFolderContents.value.files.find((f) => f.id === activeItem.value!.id);
+
   if (target) {
     clipboard.value = {
       item: { ...target },
@@ -400,10 +439,11 @@ function cutItem() {
 
 function copyItem() {
   if (!activeItem.value || !selectedFolderId.value) return;
-  const target = activeItem.value.type === "folder"
-    ? selectedFolderContents.value.subfolders.find((f) => f.id === activeItem.value!.id)
-    : selectedFolderContents.value.files.find((f) => f.id === activeItem.value!.id);
-  
+  const target =
+    activeItem.value.type === "folder"
+      ? selectedFolderContents.value.subfolders.find((f) => f.id === activeItem.value!.id)
+      : selectedFolderContents.value.files.find((f) => f.id === activeItem.value!.id);
+
   if (target) {
     clipboard.value = {
       item: { ...target },
@@ -416,15 +456,15 @@ function copyItem() {
 
 async function pasteItem() {
   if (!clipboard.value || !selectedFolderId.value) return;
-  
+
   const { item, type, action, sourceFolderId } = clipboard.value;
-  
+
   if (action === "cut") {
     if (sourceFolderId === selectedFolderId.value) {
       clipboard.value = null;
       return;
     }
-    
+
     if (type === "folder") {
       await explorerApi.moveFolder(item.id, selectedFolderId.value);
     } else {

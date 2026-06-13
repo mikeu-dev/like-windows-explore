@@ -1,7 +1,9 @@
 <template>
   <div class="h-full flex flex-col">
     <!-- Toolbar Panel Kanan -->
-    <div class="flex items-center justify-between pb-4 border-b border-outline-variant/30 mb-4 shrink-0">
+    <div
+      class="flex items-center justify-between pb-4 border-b border-outline-variant/30 mb-4 shrink-0"
+    >
       <div class="text-body-sm text-on-surface-variant">
         <span v-if="isSearching"
           >Hasil Pencarian untuk:
@@ -116,7 +118,9 @@
           <span class="text-body-sm text-on-surface font-medium line-clamp-1 w-full break-all">{{
             file.name
           }}</span>
-          <span class="text-label-md text-on-surface-variant mt-1">{{ formatBytes(file.size) }}</span>
+          <span class="text-label-md text-on-surface-variant mt-1">{{
+            formatBytes(file.size)
+          }}</span>
         </div>
       </div>
 
@@ -140,9 +144,7 @@
               :key="subfolder.id"
               class="hover:bg-black/5 transition-colors duration-100 cursor-pointer select-none"
               :class="[
-                selectedItem?.id === subfolder.id
-                  ? 'bg-primary/10 text-primary'
-                  : 'text-on-surface'
+                selectedItem?.id === subfolder.id ? 'bg-primary/10 text-primary' : 'text-on-surface'
               ]"
               @click="selectItem(subfolder, 'folder')"
               @dblclick="openFolder(subfolder.id)"
@@ -167,9 +169,7 @@
               :key="file.id"
               class="hover:bg-black/5 transition-colors duration-100 cursor-pointer select-none"
               :class="[
-                selectedItem?.id === file.id
-                  ? 'bg-primary/10 text-primary'
-                  : 'text-on-surface'
+                selectedItem?.id === file.id ? 'bg-primary/10 text-primary' : 'text-on-surface'
               ]"
               @click="selectItem(file, 'file')"
               @dblclick="openFile(file)"
@@ -228,7 +228,9 @@
             ×
           </button>
         </div>
-        <div class="border-t border-outline-variant/30 pt-4 space-y-2 text-label-md text-on-surface-variant">
+        <div
+          class="border-t border-outline-variant/30 pt-4 space-y-2 text-label-md text-on-surface-variant"
+        >
           <div class="flex justify-between">
             <span>Ukuran File:</span>
             <span class="text-on-surface font-mono font-medium"

@@ -32,7 +32,10 @@ export class DrizzleFileRepository implements IFileRepository {
     await db.delete(files).where(eq(files.id, id));
   }
 
-  async update(id: string, file: Partial<Omit<File, "id" | "createdAt" | "updatedAt">>): Promise<File> {
+  async update(
+    id: string,
+    file: Partial<Omit<File, "id" | "createdAt" | "updatedAt">>
+  ): Promise<File> {
     const result = await db
       .update(files)
       .set({ ...file, updatedAt: new Date() })

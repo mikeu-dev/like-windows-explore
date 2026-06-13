@@ -1,5 +1,7 @@
 <template>
-  <div class="w-64 h-8 bg-surface-container border border-outline-variant rounded-sm px-2 flex items-center gap-2 group focus-within:ring-1 focus-within:ring-primary focus-within:bg-surface-container-lowest relative">
+  <div
+    class="w-64 h-8 bg-surface-container border border-outline-variant rounded-sm px-2 flex items-center gap-2 group focus-within:ring-1 focus-within:ring-primary focus-within:bg-surface-container-lowest relative"
+  >
     <!-- Search Icon -->
     <span class="material-symbols-outlined text-on-surface-variant scale-90 pointer-events-none">
       search
