@@ -14,7 +14,10 @@
     <span class="text-explorer-muted/50">/</span>
 
     <!-- Iterasi Rantai Path Folder -->
-    <template v-for="(folder, index) in path" :key="folder.id">
+    <template
+      v-for="(folder, index) in path"
+      :key="folder.id"
+    >
       <button
         :id="'breadcrumb-item-' + folder.id"
         class="hover:text-explorer-active hover:underline transition-colors focus:outline-none font-medium whitespace-nowrap"
@@ -30,7 +33,10 @@
       </button>
 
       <!-- Separator di antara items -->
-      <span v-if="index < path.length - 1" class="text-explorer-muted/50">/</span>
+      <span
+        v-if="index < path.length - 1"
+        class="text-explorer-muted/50"
+      >/</span>
     </template>
   </nav>
 </template>

@@ -10,18 +10,18 @@
     <!-- Input Box -->
     <input
       id="search-input"
-      type="text"
       v-model="localQuery"
+      type="text"
       placeholder="Cari file atau folder..."
       class="w-full pl-9 pr-8 py-2 text-xs bg-explorer-sidebar text-explorer-text placeholder-explorer-muted border border-explorer-border rounded-lg focus:outline-none focus:border-explorer-active focus:ring-1 focus:ring-explorer-active transition-all"
-    />
+    >
 
     <!-- Clear Button -->
     <button
       v-if="localQuery"
       id="search-clear-btn"
-      @click="clearSearch"
       class="absolute inset-y-0 right-0 flex items-center pr-3 text-explorer-muted hover:text-explorer-text text-sm"
+      @click="clearSearch"
     >
       ×
     </button>

@@ -21,9 +21,15 @@
         ]"
         @click.stop="toggleExpand"
       >
-        <span v-if="folder.isLoading" class="animate-spin text-[10px]">⌛</span>
+        <span
+          v-if="folder.isLoading"
+          class="animate-spin text-[10px]"
+        >⌛</span>
         <span v-else-if="folder.hasChildren">▶</span>
-        <span v-else class="text-[8px]">●</span>
+        <span
+          v-else
+          class="text-[8px]"
+        >●</span>
       </span>
 
       <!-- Folder Icon -->
@@ -45,7 +51,7 @@
         v-for="subfolder in folder.children"
         :key="subfolder.id"
         :folder="subfolder"
-        :selectedId="selectedId"
+        :selected-id="selectedId"
         @select="emit('select', $event)"
         @expand="emit('expand', $event)"
       />

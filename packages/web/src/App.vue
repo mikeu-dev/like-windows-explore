@@ -10,13 +10,20 @@
       <div class="flex items-center space-x-3">
         <span class="text-2xl">🖥️</span>
         <div>
-          <h1 class="text-base font-bold tracking-tight text-white">File Explorer</h1>
-          <p class="text-[10px] text-explorer-muted">Sistem Manajemen Folder Hirarkis</p>
+          <h1 class="text-base font-bold tracking-tight text-white">
+            File Explorer
+          </h1>
+          <p class="text-[10px] text-explorer-muted">
+            Sistem Manajemen Folder Hirarkis
+          </p>
         </div>
       </div>
 
       <!-- Komponen Pencarian Global -->
-      <ExplorerSearch v-model="searchQuery" @search="performSearch" />
+      <ExplorerSearch
+        v-model="searchQuery"
+        @search="performSearch"
+      />
     </header>
 
     <!-- Area Kerja Utama (Split Panel) -->
@@ -36,7 +43,7 @@
           >
             <div
               class="w-4 h-4 border-2 border-explorer-active border-t-transparent rounded-full animate-spin"
-            ></div>
+            />
             <span>Memuat pohon folder...</span>
           </div>
           <FolderTree
@@ -55,7 +62,10 @@
         <div
           class="h-8 mb-4 bg-explorer-sidebar/30 border border-explorer-border/50 rounded-lg flex items-center px-4 overflow-hidden"
         >
-          <Breadcrumbs :path="breadcrumbs" @navigate="selectFolder" />
+          <Breadcrumbs
+            :path="breadcrumbs"
+            @navigate="selectFolder"
+          />
         </div>
 
         <!-- Area Tampilan Isi Folder -->
@@ -68,7 +78,9 @@
           >
             <span class="text-6xl animate-bounce duration-1000">👈</span>
             <div class="text-center">
-              <h3 class="text-sm font-semibold text-explorer-text">Belum ada folder terpilih</h3>
+              <h3 class="text-sm font-semibold text-explorer-text">
+                Belum ada folder terpilih
+              </h3>
               <p class="text-xs mt-1">
                 Silakan klik salah satu folder di panel navigasi kiri untuk melihat isinya.
               </p>
