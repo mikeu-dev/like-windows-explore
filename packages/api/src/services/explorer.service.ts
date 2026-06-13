@@ -1,6 +1,6 @@
 import { IFolderRepository } from "../repositories/folder-repository.interface";
 import { IFileRepository } from "../repositories/file-repository.interface";
-import { FolderDTO, FileDTO, FolderContentsDTO, SearchResultsDTO } from "@explorer/common";
+import { FolderDTO, FolderContentsDTO, SearchResultsDTO } from "@explorer/common";
 
 export class ExplorerService {
   constructor(

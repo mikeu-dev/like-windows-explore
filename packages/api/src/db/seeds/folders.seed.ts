@@ -3,7 +3,7 @@ import { folders } from "../schema";
 
 export async function seedFolders(db: DbType) {
   // 1. Root Level Folders
-  const [docFolder, picFolder, musicFolder, downloadFolder] = await db
+  const [docFolder, picFolder, , downloadFolder] = await db
     .insert(folders)
     .values([
       { name: "Documents", parentId: null },
@@ -33,7 +33,7 @@ export async function seedFolders(db: DbType) {
     .returning();
 
   // 4. Nested Folder under Archive (3rd Level)
-  const [archive2024, archive2025] = await db
+  const [archive2024] = await db
     .insert(folders)
     .values([
       { name: "2024 Records", parentId: archiveFolder.id },
