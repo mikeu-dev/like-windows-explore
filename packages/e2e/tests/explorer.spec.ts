@@ -138,4 +138,157 @@ test.describe("File Explorer App", () => {
     // Verifikasi modal tertutup
     await expect(modal).not.toBeVisible();
   });
+
+  test("should navigate using history controls (Back, Forward, Up, Refresh)", async ({ page }) => {
+    // 1. Masuk ke Documents
+    await page.locator("aside >> text=Documents").click();
+    await expect(page.locator("#breadcrumbs-nav")).toContainText("Documents");
+
+    // 2. Masuk ke Work
+    await page.locator('[id^="content-folder-"]:has-text("Work")').dblclick();
+    await expect(page.locator("#breadcrumbs-nav")).toContainText("Work");
+
+    // 3. Uji Tombol Back
+    const backBtn = page.locator('button:has-text("arrow_back")');
+    await backBtn.click();
+    await expect(page.locator("#breadcrumbs-nav")).toContainText("Documents");
+    await expect(page.locator("#breadcrumbs-nav")).not.toContainText("Work");
+
+    // 4. Uji Tombol Forward
+    const forwardBtn = page.locator('button:has-text("arrow_forward")');
+    await forwardBtn.click();
+    await expect(page.locator("#breadcrumbs-nav")).toContainText("Work");
+
+    // 5. Uji Tombol Up
+    const upBtn = page.locator('button:has-text("arrow_upward")');
+    await upBtn.click();
+    await expect(page.locator("#breadcrumbs-nav")).toContainText("Documents");
+
+    // 6. Uji Tombol Refresh
+    const refreshBtn = page.locator('button:has-text("refresh")');
+    await refreshBtn.click();
+    // Memastikan konten Documents (Work, Personal, Archive) tetap ada setelah refresh
+    await expect(page.locator("main >> text=Work")).toBeVisible();
+  });
+
+  test("should sort items by name correctly", async ({ page }) => {
+    // Masuk ke Documents
+    await page.locator("aside >> text=Documents").click();
+    
+    // Pastikan view mode diatur ke Grid agar item terlihat
+    const gridBtn = page.locator("#view-grid-btn");
+    await gridBtn.click();
+
+    // Pastikan item-item termuat
+    await expect(page.locator("main >> text=Work")).toBeVisible();
+    await expect(page.locator("main >> text=Personal")).toBeVisible();
+    await expect(page.locator("main >> text=Archive")).toBeVisible();
+
+    // Klik tombol Sort
+    const sortBtn = page.locator('button:has-text("Sort")');
+    await sortBtn.click();
+
+    // Pilih Nama (Z-A)
+    await page.locator('button:has-text("Nama (Z-A)")').click();
+
+    // Verifikasi urutan item: Work (W), Personal (P), Archive (A)
+    // Di urutan Z-A, Work berada di paling pertama
+    const foldersZA = page.locator('[id^="content-folder-"]');
+    await expect(foldersZA.nth(0)).toContainText("Work");
+    await expect(foldersZA.nth(1)).toContainText("Personal");
+    await expect(foldersZA.nth(2)).toContainText("Archive");
+
+    // Klik Sort lagi
+    await sortBtn.click();
+
+    // Pilih Nama (A-Z)
+    await page.locator('button:has-text("Nama (A-Z)")').click();
+
+    // Verifikasi urutan kembali ke A-Z: Archive (A), Personal (P), Work (W)
+    const foldersAZ = page.locator('[id^="content-folder-"]');
+    await expect(foldersAZ.nth(0)).toContainText("Archive");
+    await expect(foldersAZ.nth(1)).toContainText("Personal");
+    await expect(foldersAZ.nth(2)).toContainText("Work");
+  });
+
+  test("should perform complete CRUD operations and clipboard actions", async ({ page }) => {
+    // Masuk ke Documents
+    await page.locator("aside >> text=Documents").click();
+
+    // 1. Buat folder baru
+    const newBtn = page.locator('button:has-text("New")');
+    await newBtn.click();
+    await page.locator('button:has-text("Folder Baru")').click();
+
+    // Pastikan folder default dibuat
+    await expect(page.locator("main >> text=New Folder")).toBeVisible();
+
+    // 2. Ubah nama folder menjadi TestCrudFolder
+    await page.locator('[id^="content-folder-"]:has-text("New Folder")').click();
+    
+    // Set handler dialog prompt sebelum klik Rename
+    page.once("dialog", async dialog => {
+      expect(dialog.type()).toBe("prompt");
+      await dialog.accept("TestCrudFolder");
+    });
+    await page.locator('button[title="Rename"]').click();
+
+    // Pastikan nama folder berubah
+    await expect(page.locator("main >> text=TestCrudFolder")).toBeVisible();
+    await expect(page.locator("main >> text=New Folder")).not.toBeVisible();
+
+    // 3. Masuk ke TestCrudFolder
+    await page.locator('[id^="content-folder-"]:has-text("TestCrudFolder")').dblclick();
+    await expect(page.locator("#breadcrumbs-nav")).toContainText("TestCrudFolder");
+
+    // 4. Buat berkas baru
+    await newBtn.click();
+    await page.locator('button:has-text("Berkas Baru")').click();
+    await expect(page.locator("main >> text=New File.txt")).toBeVisible();
+
+    // 5. Salin berkas (Copy)
+    await page.locator('[id^="content-file-"]:has-text("New File.txt")').click();
+    await page.locator('button[title="Copy"]').click();
+
+    // 6. Navigasi Up kembali ke Documents
+    await page.locator('button:has-text("arrow_upward")').click();
+    await expect(page.locator("#breadcrumbs-nav")).toContainText("Documents");
+
+    // 7. Tempel berkas (Paste)
+    await page.locator('button[title="Paste"]').click();
+    await expect(page.locator("main >> text=New File.txt")).toBeVisible();
+
+    // 8. Masuk kembali ke TestCrudFolder untuk memverifikasi file asli masih ada (karena Copy)
+    await page.locator('[id^="content-folder-"]:has-text("TestCrudFolder")').dblclick();
+    await expect(page.locator("main >> text=New File.txt")).toBeVisible();
+
+    // 9. Hapus berkas di dalam TestCrudFolder
+    await page.locator('[id^="content-file-"]:has-text("New File.txt")').click();
+    page.once("dialog", async dialog => {
+      expect(dialog.type()).toBe("confirm");
+      await dialog.accept();
+    });
+    await page.locator('button[title="Delete"]').click();
+    await expect(page.locator("main >> text=New File.txt")).not.toBeVisible();
+
+    // 10. Kembali ke Documents
+    await page.locator('button:has-text("arrow_upward")').click();
+
+    // 11. Hapus berkas kopian New File.txt di Documents
+    await page.locator('[id^="content-file-"]:has-text("New File.txt")').click();
+    page.once("dialog", async dialog => {
+      await dialog.accept();
+    });
+    await page.locator('button[title="Delete"]').click();
+    await expect(page.locator("main >> text=New File.txt")).not.toBeVisible();
+
+    // 12. Hapus TestCrudFolder di Documents
+    await page.locator('[id^="content-folder-"]:has-text("TestCrudFolder")').click();
+    page.once("dialog", async dialog => {
+      await dialog.accept();
+    });
+    await page.locator('button[title="Delete"]').click();
+    await expect(page.locator("main >> text=TestCrudFolder")).not.toBeVisible();
+  });
 });
+
