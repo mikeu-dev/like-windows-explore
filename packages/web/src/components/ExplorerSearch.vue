@@ -1,10 +1,10 @@
 <template>
-  <div class="relative w-full max-w-sm">
+  <div
+    class="w-64 h-8 bg-surface-container border border-outline-variant rounded-sm px-2 flex items-center gap-2 group focus-within:ring-1 focus-within:ring-primary focus-within:bg-surface-container-lowest relative"
+  >
     <!-- Search Icon -->
-    <span
-      class="absolute inset-y-0 left-0 flex items-center pl-3 text-explorer-muted pointer-events-none"
-    >
-      🔍
+    <span class="material-symbols-outlined text-on-surface-variant scale-90 pointer-events-none">
+      search
     </span>
 
     <!-- Input Box -->
@@ -12,15 +12,15 @@
       id="search-input"
       v-model="localQuery"
       type="text"
-      placeholder="Cari file atau folder..."
-      class="w-full pl-9 pr-8 py-2 text-xs bg-explorer-sidebar text-explorer-text placeholder-explorer-muted border border-explorer-border rounded-lg focus:outline-none focus:border-explorer-active focus:ring-1 focus:ring-explorer-active transition-all"
-    >
+      placeholder="Search like-windows-explorer"
+      class="bg-transparent border-none focus:ring-0 text-body-sm font-body-sm w-full h-full p-0 pr-6 placeholder:text-on-surface-variant/60 outline-none"
+    />
 
     <!-- Clear Button -->
     <button
       v-if="localQuery"
       id="search-clear-btn"
-      class="absolute inset-y-0 right-0 flex items-center pr-3 text-explorer-muted hover:text-explorer-text text-sm"
+      class="absolute inset-y-0 right-2 flex items-center text-on-surface-variant hover:text-on-surface text-sm font-bold"
       @click="clearSearch"
     >
       ×

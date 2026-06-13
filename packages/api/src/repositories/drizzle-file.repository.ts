@@ -9,6 +9,11 @@ export class DrizzleFileRepository implements IFileRepository {
     return await db.select().from(files).where(eq(files.folderId, folderId)).orderBy(files.name);
   }
 
+  async findById(id: string): Promise<File | null> {
+    const result = await db.select().from(files).where(eq(files.id, id));
+    return result[0] || null;
+  }
+
   async searchFiles(query: string): Promise<File[]> {
     return await db
       .select()
@@ -20,6 +25,22 @@ export class DrizzleFileRepository implements IFileRepository {
 
   async create(file: Omit<File, "id" | "createdAt" | "updatedAt">): Promise<File> {
     const result = await db.insert(files).values(file).returning();
+    return result[0];
+  }
+
+  async delete(id: string): Promise<void> {
+    await db.delete(files).where(eq(files.id, id));
+  }
+
+  async update(
+    id: string,
+    file: Partial<Omit<File, "id" | "createdAt" | "updatedAt">>
+  ): Promise<File> {
+    const result = await db
+      .update(files)
+      .set({ ...file, updatedAt: new Date() })
+      .where(eq(files.id, id))
+      .returning();
     return result[0];
   }
 }

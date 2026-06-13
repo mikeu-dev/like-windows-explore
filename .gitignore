@@ -24,3 +24,5 @@ packages/*/dist/
 *.sln
 *.sw?
 .DS_Store
+
+*.code-workspace
