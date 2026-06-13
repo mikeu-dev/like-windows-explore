@@ -94,3 +94,21 @@ Validates Vue Single File Components (SFCs) statics to assure props binding, tem
 ### End-to-End (E2E) Testing (Playwright)
 
 Validates full system integration by orchestrating local server environments automatically and simulating user behavior (folder navigation, tree traversal, searching, toggling views, and metadata overlays).
+
+---
+
+## 5. State Mutations & Navigation History
+
+To transition the explorer from a static viewer to a dynamic manager, specific design choices were made for data mutations and historical navigation:
+
+### Client-Side History Stacks
+
+The history stack tracks paths traversed by the user in `packages/web/src/composables/useExplorer.ts`.
+- **Back & Forward**: Handled via two array stacks (`historyStack` and `forwardStack`). When the user navigates into a folder, the current location is pushed onto the history stack, and the forward stack is cleared. Clicking "Back" pops from the history stack and pushes the current directory onto the forward stack.
+- **Up-ward Navigation**: Calculates the immediate parent directory from the active breadcrumbs route to shift the node focus one level higher.
+
+### Recursive Folder Copying & DB Mutations
+
+Directory tree copying presents unique challenges because copying a folder requires duplicating its entire recursive child tree structure (folders and files).
+- **Service Layer Recursion**: `ExplorerService.copyFolder` reads the source folder, duplicates it, and recursively calls `copyFolderInternal` on all subdirectories, while copying files using bulk inserts in the repository.
+- **Unified Mutating Endpoints**: Elysia REST endpoints (POST, PATCH, DELETE) validate incoming payload params using TypeBox schemas, passing requests down to the Drizzle adapter layer to sync all directory CRUD events straight to PostgreSQL.

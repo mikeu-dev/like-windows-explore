@@ -2,6 +2,15 @@
 
 This repository contains the implementation of a hierarchical web-based file management application resembling Windows Explorer. The project is developed using a monorepo architecture with Bun Workspaces for clean and modular separation of concerns.
 
+## Key Features Implemented
+
+- **Windows 11 Fluent Light Mode UI**: A pixel-perfect 1:1 Windows 11 Explorer visual experience with light mode styling, system-inspired yellow folder icons, and custom file type icons.
+- **History Navigation**: Fully functional Back, Forward, Up, and Refresh controls driven by history stacks.
+- **Toolbar Actions & Clipboard**: Support for creating new files/folders, deleting, renaming, and copy/cut/paste actions.
+- **Local Sorting**: Interactive sorting by Name (A-Z/Z-A), File Type, and File Size.
+- **State Synchronization & Mutating Backend API**: All modifications (creation, deletion, rename, copy, recursive folder copy, move) are sent to PostgreSQL via Elysia API routes and saved permanently.
+
+
 ## Workspace Structure
 
 The project is divided into four main packages within the packages directory:
