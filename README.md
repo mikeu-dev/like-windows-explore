@@ -14,6 +14,7 @@ The project is divided into four main packages within the packages directory:
 ## Technical Requirements
 
 To run this project locally, you will need:
+
 - Bun (version 1.0.0 or later)
 - PostgreSQL (database server running locally)
 
@@ -22,29 +23,39 @@ To run this project locally, you will need:
 ## Installation and Quick Start Guide
 
 ### Step 1: Install Dependencies
+
 Run the following command in the root directory to install dependencies across all workspace packages:
+
 ```bash
 bun install
 ```
 
 ### Step 2: Configure Environment Variables
+
 Create a `.env` file inside the `packages/api/` directory and configure your database connection:
+
 ```env
 DATABASE_URL="postgres://username:password@127.0.0.1:5432/database_name"
 ```
 
 ### Step 3: Database Migration and Seeding
+
 Synchronize the database schema and insert initial structured mock data by running:
+
 ```bash
 bun db:setup
 ```
-*Note: This runs Drizzle schema push and database seed scripts sequentially.*
+
+_Note: This runs Drizzle schema push and database seed scripts sequentially._
 
 ### Step 4: Run the Application in Development Mode
+
 To start both backend and frontend servers concurrently, run the following command in the root directory:
+
 ```bash
 bun dev
 ```
+
 - Frontend client will be running on: http://localhost:5173
 - Backend API server will be running on: http://127.0.0.1:3001
 
@@ -55,15 +66,18 @@ bun dev
 All project management tasks can be run centrally from the root directory:
 
 ### Development and Build
+
 - bun dev: Run both backend and frontend servers in development mode.
 - bun dev:api: Run the backend API server only.
 - bun dev:web: Run the frontend client only.
 - bun build: Build production assets for all packages.
 
 ### Database Administration
+
 - bun db:setup: Perform database schema synchronization and database seeding sequentially.
 
 ### Testing and Quality Assurance
+
 - bun test: Run unit tests.
 - bun test:e2e: Run Playwright End-to-End tests.
 - bun check: Run TypeScript compiler diagnostics across all packages (api, web, e2e, common).

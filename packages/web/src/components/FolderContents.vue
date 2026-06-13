@@ -3,8 +3,10 @@
     <!-- Toolbar Panel Kanan -->
     <div class="flex items-center justify-between pb-4 border-b border-explorer-border/50 mb-4">
       <div class="text-sm text-explorer-muted">
-        <span v-if="isSearching">Hasil Pencarian untuk:
-          <strong class="text-explorer-text">"{{ searchQuery }}"</strong></span>
+        <span v-if="isSearching"
+          >Hasil Pencarian untuk:
+          <strong class="text-explorer-text">"{{ searchQuery }}"</strong></span
+        >
         <span v-else>{{ itemsCount }} item ditemukan</span>
       </div>
 
@@ -107,24 +109,15 @@
       </div>
 
       <!-- Tampilan List (Detail List) -->
-      <div
-        v-else
-        class="w-full overflow-x-auto"
-      >
+      <div v-else class="w-full overflow-x-auto">
         <table class="w-full text-left border-collapse">
           <thead>
             <tr
               class="border-b border-explorer-border/40 text-xs text-explorer-muted font-semibold uppercase tracking-wider"
             >
-              <th class="pb-3 pl-2">
-                Nama
-              </th>
-              <th class="pb-3">
-                Tipe
-              </th>
-              <th class="pb-3 text-right pr-2">
-                Ukuran
-              </th>
+              <th class="pb-3 pl-2">Nama</th>
+              <th class="pb-3">Tipe</th>
+              <th class="pb-3 text-right pr-2">Ukuran</th>
             </tr>
           </thead>
           <tbody class="text-sm divide-y divide-explorer-border/20">
@@ -145,12 +138,8 @@
                 <span class="mr-2.5 text-base">📁</span>
                 <span class="font-medium truncate">{{ subfolder.name }}</span>
               </td>
-              <td class="py-2.5 text-explorer-muted text-xs">
-                Folder
-              </td>
-              <td class="py-2.5 text-right pr-2 text-explorer-muted text-xs">
-                —
-              </td>
+              <td class="py-2.5 text-explorer-muted text-xs">Folder</td>
+              <td class="py-2.5 text-right pr-2 text-explorer-muted text-xs">—</td>
             </tr>
 
             <!-- Files -->
@@ -213,7 +202,9 @@
         <div class="border-t border-explorer-border/50 pt-4 space-y-2 text-xs text-explorer-muted">
           <div class="flex justify-between">
             <span>Ukuran File:</span>
-            <span class="text-explorer-text font-mono font-medium">{{ modalFile.size.toLocaleString() }} bytes ({{ formatBytes(modalFile.size) }})</span>
+            <span class="text-explorer-text font-mono font-medium"
+              >{{ modalFile.size.toLocaleString() }} bytes ({{ formatBytes(modalFile.size) }})</span
+            >
           </div>
           <div class="flex justify-between">
             <span>Lokasi:</span>

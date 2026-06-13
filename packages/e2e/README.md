@@ -5,6 +5,7 @@ This package contains the End-to-End (E2E) testing module using Playwright to va
 ## Automatic Orchestration
 
 To run tests reliably in a single command, the `playwright.config.ts` configuration includes a `webServer` block that launches the development servers automatically:
+
 - Backend API Server: Launched on port 3001 (`http://127.0.0.1:3001/api/v1/folders`).
 - Frontend Client: Launched on port 5173 (`http://localhost:5173`).
 
@@ -25,25 +26,33 @@ The test suite in `tests/explorer.spec.ts` covers the following workflows:
 Make sure you are at the root directory of the monorepo workspace when executing these commands:
 
 ### Step 1: Install Playwright Browser Binaries
+
 Playwright runs tests on dedicated browser binaries (Chromium, Firefox, Webkit). Run this command once after installing npm dependencies:
+
 ```bash
 bun --cwd packages/e2e playwright install --with-deps
 ```
 
 ### Step 2: Run Tests (Headless Mode)
+
 Run the E2E tests automatically in the background:
+
 ```bash
 bun test:e2e
 ```
 
 ### Step 3: Run Tests in Playwright UI Mode
+
 To run tests with a visual UI inspector to debug test steps interactively:
+
 ```bash
 bun --cwd packages/e2e playwright test --ui
 ```
 
 ### Step 4: Show Test Reports
+
 Open the generated HTML test report in your browser:
+
 ```bash
 bun --cwd packages/e2e playwright show-report
 ```

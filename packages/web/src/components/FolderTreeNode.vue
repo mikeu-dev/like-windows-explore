@@ -21,15 +21,9 @@
         ]"
         @click.stop="toggleExpand"
       >
-        <span
-          v-if="folder.isLoading"
-          class="animate-spin text-[10px]"
-        >⌛</span>
+        <span v-if="folder.isLoading" class="animate-spin text-[10px]">⌛</span>
         <span v-else-if="folder.hasChildren">▶</span>
-        <span
-          v-else
-          class="text-[8px]"
-        >●</span>
+        <span v-else class="text-[8px]">●</span>
       </span>
 
       <!-- Folder Icon -->

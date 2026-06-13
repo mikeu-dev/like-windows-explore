@@ -3,6 +3,7 @@
 This frontend client is a web-based file explorer dashboard built using Vue 3, Vite, and Tailwind CSS. It simulates the interactive experience of Windows Explorer.
 
 ## Features
+
 - Folder Tree Sidebar: Responsive nested directory sidebar at the left panel, supporting lazy loading and unlimited recursive tree expansion.
 - Split Pane Layout: Dual-panel layout dividing the navigation sidebar (left) and folder contents panel (right) cleanly.
 - Breadcrumbs Nav: Address path navigation bar rendering active paths and supporting backward navigation clicks.
@@ -27,11 +28,12 @@ This frontend client is a web-based file explorer dashboard built using Vue 3, V
 ## Theme and Styling
 
 The project features a sleek dark mode theme using custom variables for active state highlighting and hover transitions:
+
 ```css
 :root {
   --hover-color: rgba(51, 65, 85, 0.4);
-  --active-color: #38BDF8;
-  --active-text-color: #0F172A;
+  --active-color: #38bdf8;
+  --active-text-color: #0f172a;
   --border-color: rgba(51, 65, 85, 0.5);
 }
 ```
@@ -39,6 +41,7 @@ The project features a sleek dark mode theme using custom variables for active s
 ## Development Reference
 
 Run these commands inside the `packages/web/` directory:
+
 - bun dev: Spin up Vite local server (http://localhost:5173).
 - bun build: Run TypeScript check and compile production-ready assets to `dist/`.
 - bun preview: Serve production-build assets locally.

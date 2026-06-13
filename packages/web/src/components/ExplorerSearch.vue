@@ -14,7 +14,7 @@
       type="text"
       placeholder="Cari file atau folder..."
       class="w-full pl-9 pr-8 py-2 text-xs bg-explorer-sidebar text-explorer-text placeholder-explorer-muted border border-explorer-border rounded-lg focus:outline-none focus:border-explorer-active focus:ring-1 focus:ring-explorer-active transition-all"
-    >
+    />
 
     <!-- Clear Button -->
     <button
