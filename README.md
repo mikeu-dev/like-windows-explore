@@ -94,3 +94,9 @@ All project management tasks can be run centrally from the root directory:
 - bun lint:fix: Attempt to auto-fix eslint layout and styling warnings.
 - bun format: Format codebase source files using Prettier.
 - bun format:check: Verify formatting compliance using Prettier check.
+
+---
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
