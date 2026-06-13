@@ -21,6 +21,10 @@ export function useExplorer() {
   const isSearching = ref(false);
   const searchLoading = ref(false);
 
+  // Stack navigasi riwayat
+  const historyStack = ref<string[]>([]);
+  const forwardStack = ref<string[]>([]);
+
   // Map untuk akses cepat O(1) ke node mana pun dalam pohon
   const folderMap = new Map<string, ClientFolderNode>();
 
@@ -77,7 +81,13 @@ export function useExplorer() {
   }
 
   // Memilih folder, memuat isinya di panel kanan, serta memuat breadcrumb path
-  async function selectFolder(folderId: string) {
+  async function selectFolder(folderId: string, pushToHistory = true) {
+    // Navigasi riwayat: simpan state lama
+    if (pushToHistory && selectedFolderId.value && selectedFolderId.value !== folderId) {
+      historyStack.value.push(selectedFolderId.value);
+      forwardStack.value = []; // Reset forward stack pada aksi navigasi baru
+    }
+
     selectedFolderId.value = folderId;
     selectedFolderContentsLoading.value = true;
     isSearching.value = false; // Keluar dari mode pencarian jika memilih folder
@@ -103,6 +113,43 @@ export function useExplorer() {
       console.error("Gagal memilih folder", e);
     } finally {
       selectedFolderContentsLoading.value = false;
+    }
+  }
+
+  // Kembali ke folder sebelumnya
+  function goBack() {
+    if (historyStack.value.length > 0) {
+      const prevId = historyStack.value.pop()!;
+      if (selectedFolderId.value) {
+        forwardStack.value.push(selectedFolderId.value);
+      }
+      selectFolder(prevId, false);
+    }
+  }
+
+  // Maju ke folder selanjutnya (setelah Back)
+  function goForward() {
+    if (forwardStack.value.length > 0) {
+      const nextId = forwardStack.value.pop()!;
+      if (selectedFolderId.value) {
+        historyStack.value.push(selectedFolderId.value);
+      }
+      selectFolder(nextId, false);
+    }
+  }
+
+  // Naik satu level ke folder induk (Up)
+  function goUp() {
+    if (selectedFolderId.value) {
+      // Jika parentId ada di database, gunakan itu
+      const currentFolder = folderMap.get(selectedFolderId.value);
+      if (currentFolder && currentFolder.parentId) {
+        selectFolder(currentFolder.parentId);
+      } else if (breadcrumbs.value.length > 1) {
+        // Ambil parent dari breadcrumb path
+        const parentFolder = breadcrumbs.value[breadcrumbs.value.length - 2];
+        selectFolder(parentFolder.id);
+      }
     }
   }
 
@@ -148,9 +195,14 @@ export function useExplorer() {
     searchResults,
     isSearching,
     searchLoading,
+    historyStack,
+    forwardStack,
     loadRootFolders,
     expandFolder,
     selectFolder,
-    performSearch
+    performSearch,
+    goBack,
+    goForward,
+    goUp
   };
 }

@@ -70,7 +70,7 @@
       >
         <!-- Loop Subfolders -->
         <div
-          v-for="subfolder in subfolders"
+          v-for="subfolder in sortedSubfolders"
           :id="'content-folder-' + subfolder.id"
           :key="subfolder.id"
           class="flex flex-col items-center p-3 rounded border border-transparent transition-all duration-150 hover:bg-black/5 cursor-pointer select-none text-center"
@@ -95,7 +95,7 @@
 
         <!-- Loop Files -->
         <div
-          v-for="file in files"
+          v-for="file in sortedFiles"
           :id="'content-file-' + file.id"
           :key="file.id"
           class="flex flex-col items-center p-3 rounded border border-transparent transition-all duration-150 hover:bg-black/5 cursor-pointer select-none text-center"
@@ -135,7 +135,7 @@
           <tbody class="text-body-sm divide-y divide-outline-variant/20">
             <!-- Subfolders -->
             <tr
-              v-for="subfolder in subfolders"
+              v-for="subfolder in sortedSubfolders"
               :id="'content-folder-' + subfolder.id"
               :key="subfolder.id"
               class="hover:bg-black/5 transition-colors duration-100 cursor-pointer select-none"
@@ -162,7 +162,7 @@
 
             <!-- Files -->
             <tr
-              v-for="file in files"
+              v-for="file in sortedFiles"
               :id="'content-file-' + file.id"
               :key="file.id"
               class="hover:bg-black/5 transition-colors duration-100 cursor-pointer select-none"
@@ -263,10 +263,13 @@ const props = defineProps<{
   isLoading: boolean;
   isSearching: boolean;
   searchQuery: string;
+  sortBy?: "name" | "type" | "size";
+  sortOrder?: "asc" | "desc";
 }>();
 
 const emit = defineEmits<{
   (e: "navigate", folderId: string): void;
+  (e: "select-item", item: { id: string; type: "folder" | "file"; name: string } | null): void;
 }>();
 
 const viewMode = ref<"grid" | "list">("grid");
@@ -276,13 +279,48 @@ const modalFile = ref<FileDTO | null>(null);
 const itemsCount = computed(() => props.subfolders.length + props.files.length);
 const isEmpty = computed(() => props.subfolders.length === 0 && props.files.length === 0);
 
+const activeSortBy = computed(() => props.sortBy || "name");
+const activeSortOrder = computed(() => props.sortOrder || "asc");
+
+const sortedSubfolders = computed(() => {
+  const folders = [...props.subfolders];
+  folders.sort((a, b) => {
+    let comparison = 0;
+    if (activeSortBy.value === "name") {
+      comparison = a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
+    }
+    return activeSortOrder.value === "asc" ? comparison : -comparison;
+  });
+  return folders;
+});
+
+const sortedFiles = computed(() => {
+  const filesList = [...props.files];
+  filesList.sort((a, b) => {
+    let comparison = 0;
+    if (activeSortBy.value === "name") {
+      comparison = a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
+    } else if (activeSortBy.value === "size") {
+      comparison = a.size - b.size;
+    } else if (activeSortBy.value === "type") {
+      const extA = a.name.split(".").pop()?.toLowerCase() || "";
+      const extB = b.name.split(".").pop()?.toLowerCase() || "";
+      comparison = extA.localeCompare(extB);
+    }
+    return activeSortOrder.value === "asc" ? comparison : -comparison;
+  });
+  return filesList;
+});
+
 const selectItem = (item: any, type: "folder" | "file") => {
   selectedItem.value = { id: item.id, type };
+  emit("select-item", { id: item.id, type, name: item.name });
 };
 
 const openFolder = (folderId: string) => {
   emit("navigate", folderId);
   selectedItem.value = null;
+  emit("select-item", null);
 };
 
 const openFile = (file: FileDTO) => {
@@ -305,13 +343,17 @@ const getFileIconDetails = (fileName: string) => {
       return { icon: "table_view", color: "text-[#107c41]" };
     case "jpg":
     case "jpeg":
+      return { icon: "image", color: "text-[#0078d4]" };
     case "png":
     case "gif":
     case "svg":
       return { icon: "image", color: "text-[#0078d4]" };
     case "zip":
+      return { icon: "folder_zip", color: "text-[#f39c12]" };
     case "rar":
+      return { icon: "folder_zip", color: "text-[#f39c12]" };
     case "tar":
+      return { icon: "folder_zip", color: "text-[#f39c12]" };
     case "gz":
       return { icon: "folder_zip", color: "text-[#f39c12]" };
     default:

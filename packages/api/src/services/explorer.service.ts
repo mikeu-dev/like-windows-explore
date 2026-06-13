@@ -1,6 +1,6 @@
 import { IFolderRepository } from "../repositories/folder-repository.interface";
 import { IFileRepository } from "../repositories/file-repository.interface";
-import { FolderDTO, FolderContentsDTO, SearchResultsDTO } from "@explorer/common";
+import { FolderDTO, FileDTO, FolderContentsDTO, SearchResultsDTO } from "@explorer/common";
 
 export class ExplorerService {
   constructor(
@@ -88,6 +88,161 @@ export class ExplorerService {
         size: f.size,
         folderId: f.folderId
       }))
+    };
+  }
+
+  // Membuat Folder Baru
+  async createFolder(name: string, parentId: string | null): Promise<FolderDTO> {
+    const folder = await this.folderRepo.create({ name, parentId });
+    return {
+      id: folder.id,
+      name: folder.name,
+      parentId: folder.parentId,
+      hasChildren: false
+    };
+  }
+
+  // Membuat Berkas Baru
+  async createFile(name: string, folderId: string, size: number = 0): Promise<FileDTO> {
+    const file = await this.fileRepo.create({ name, folderId, size });
+    return {
+      id: file.id,
+      name: file.name,
+      size: file.size,
+      folderId: file.folderId
+    };
+  }
+
+  // Menghapus Folder
+  async deleteFolder(id: string): Promise<void> {
+    await this.folderRepo.delete(id);
+  }
+
+  // Menghapus Berkas
+  async deleteFile(id: string): Promise<void> {
+    await this.fileRepo.delete(id);
+  }
+
+  // Mengubah Nama Folder
+  async renameFolder(id: string, name: string): Promise<FolderDTO> {
+    const folder = await this.folderRepo.update(id, { name });
+    const subfolders = await this.folderRepo.findSubfolders(id);
+    return {
+      id: folder.id,
+      name: folder.name,
+      parentId: folder.parentId,
+      hasChildren: subfolders.length > 0
+    };
+  }
+
+  // Mengubah Nama Berkas
+  async renameFile(id: string, name: string): Promise<FileDTO> {
+    const file = await this.fileRepo.update(id, { name });
+    return {
+      id: file.id,
+      name: file.name,
+      size: file.size,
+      folderId: file.folderId
+    };
+  }
+
+  // Memindahkan Folder (Cut & Paste)
+  async moveFolder(id: string, parentId: string | null): Promise<FolderDTO> {
+    const folder = await this.folderRepo.update(id, { parentId });
+    const subfolders = await this.folderRepo.findSubfolders(id);
+    return {
+      id: folder.id,
+      name: folder.name,
+      parentId: folder.parentId,
+      hasChildren: subfolders.length > 0
+    };
+  }
+
+  // Memindahkan Berkas (Cut & Paste)
+  async moveFile(id: string, folderId: string): Promise<FileDTO> {
+    const file = await this.fileRepo.update(id, { folderId });
+    return {
+      id: file.id,
+      name: file.name,
+      size: file.size,
+      folderId: file.folderId
+    };
+  }
+
+  // Menyalin Folder secara Rekursif (Copy & Paste)
+  async copyFolder(id: string, parentId: string | null): Promise<FolderDTO> {
+    const srcFolder = await this.folderRepo.findById(id);
+    if (!srcFolder) throw new Error("Folder sumber tidak ditemukan");
+
+    // Tentukan nama untuk folder duplikat jika berada di tingkat yang sama
+    const name = srcFolder.parentId === parentId ? `${srcFolder.name} - Copy` : srcFolder.name;
+    const copiedFolder = await this.folderRepo.create({ name, parentId });
+
+    // Rekursi untuk menyalin semua subfolder di dalamnya
+    const subfolders = await this.folderRepo.findSubfolders(id);
+    for (const sub of subfolders) {
+      await this.copyFolderInternal(sub.id, copiedFolder.id);
+    }
+
+    // Salin semua berkas di dalamnya
+    const files = await this.fileRepo.findFilesByFolderId(id);
+    for (const file of files) {
+      await this.fileRepo.create({
+        name: file.name,
+        size: file.size,
+        folderId: copiedFolder.id
+      });
+    }
+
+    return {
+      id: copiedFolder.id,
+      name: copiedFolder.name,
+      parentId: copiedFolder.parentId,
+      hasChildren: subfolders.length > 0
+    };
+  }
+
+  private async copyFolderInternal(id: string, parentId: string | null): Promise<void> {
+    const srcFolder = await this.folderRepo.findById(id);
+    if (!srcFolder) return;
+
+    const copiedFolder = await this.folderRepo.create({ name: srcFolder.name, parentId });
+
+    const subfolders = await this.folderRepo.findSubfolders(id);
+    for (const sub of subfolders) {
+      await this.copyFolderInternal(sub.id, copiedFolder.id);
+    }
+
+    const files = await this.fileRepo.findFilesByFolderId(id);
+    for (const file of files) {
+      await this.fileRepo.create({
+        name: file.name,
+        size: file.size,
+        folderId: copiedFolder.id
+      });
+    }
+  }
+
+  // Menyalin Berkas (Copy & Paste)
+  async copyFile(id: string, folderId: string): Promise<FileDTO> {
+    const srcFile = await this.fileRepo.findById(id);
+    if (!srcFile) throw new Error("Berkas sumber tidak ditemukan");
+
+    const name = srcFile.folderId === folderId
+      ? `${srcFile.name.split(".").shift()} - Copy.${srcFile.name.split(".").pop()}`
+      : srcFile.name;
+
+    const copiedFile = await this.fileRepo.create({
+      name,
+      size: srcFile.size,
+      folderId
+    });
+
+    return {
+      id: copiedFile.id,
+      name: copiedFile.name,
+      size: copiedFile.size,
+      folderId: copiedFile.folderId
     };
   }
 }

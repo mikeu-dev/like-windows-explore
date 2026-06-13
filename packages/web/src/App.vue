@@ -24,16 +24,36 @@
       <div class="h-12 flex items-center px-4 gap-3 bg-surface-container-lowest">
         <!-- Navigation Controls -->
         <div class="flex items-center gap-1 shrink-0">
-          <button class="w-8 h-8 flex items-center justify-center text-on-surface-variant opacity-40 cursor-default">
+          <button
+            class="w-8 h-8 flex items-center justify-center text-on-surface-variant rounded transition-colors"
+            :class="historyStack.length === 0 ? 'opacity-40 cursor-default' : 'hover:bg-black/5'"
+            :disabled="historyStack.length === 0"
+            @click="goBack"
+          >
             <span class="material-symbols-outlined">arrow_back</span>
           </button>
-          <button class="w-8 h-8 flex items-center justify-center text-on-surface-variant opacity-40 cursor-default">
+          <button
+            class="w-8 h-8 flex items-center justify-center text-on-surface-variant rounded transition-colors"
+            :class="forwardStack.length === 0 ? 'opacity-40 cursor-default' : 'hover:bg-black/5'"
+            :disabled="forwardStack.length === 0"
+            @click="goForward"
+          >
             <span class="material-symbols-outlined">arrow_forward</span>
           </button>
-          <button class="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:bg-black/5 rounded transition-colors">
+          <button
+            class="w-8 h-8 flex items-center justify-center text-on-surface-variant rounded transition-colors"
+            :class="(!selectedFolderId || breadcrumbs.length <= 1) ? 'opacity-40 cursor-default' : 'hover:bg-black/5'"
+            :disabled="!selectedFolderId || breadcrumbs.length <= 1"
+            @click="goUp"
+          >
             <span class="material-symbols-outlined">arrow_upward</span>
           </button>
-          <button class="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:bg-black/5 rounded transition-colors ml-1">
+          <button
+            class="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:bg-black/5 rounded transition-colors ml-1"
+            :class="!selectedFolderId ? 'opacity-40 cursor-default' : 'hover:bg-black/5'"
+            :disabled="!selectedFolderId"
+            @click="selectedFolderId ? selectFolder(selectedFolderId, false) : null"
+          >
             <span class="material-symbols-outlined">refresh</span>
           </button>
         </div>
@@ -48,36 +68,150 @@
       </div>
 
       <!-- Toolbar Row -->
-      <div class="flex items-center px-4 h-toolbar-height bg-surface-container-lowest border-t border-outline-variant/30 w-full">
+      <div class="flex items-center px-4 h-toolbar-height bg-surface-container-lowest border-t border-outline-variant/30 w-full relative">
         <div class="flex items-center gap-2">
           <!-- Action Buttons -->
-          <button class="flex items-center gap-1.5 px-3 py-1.5 hover:bg-black/5 rounded transition-colors text-on-surface-variant">
-            <span class="material-symbols-outlined text-primary scale-90" :style="{ fontVariationSettings: '\'FILL\' 1' }">add</span>
-            <span class="font-body-sm text-body-sm text-on-surface">New</span>
-            <span class="material-symbols-outlined scale-75">expand_more</span>
-          </button>
+          <!-- New Button & Dropdown -->
+          <div class="relative">
+            <button
+              class="flex items-center gap-1.5 px-3 py-1.5 rounded transition-colors text-on-surface-variant"
+              :class="!selectedFolderId ? 'opacity-40 cursor-default' : 'hover:bg-black/5'"
+              :disabled="!selectedFolderId"
+              @click="isNewMenuOpen = !isNewMenuOpen"
+            >
+              <span class="material-symbols-outlined text-primary scale-90" :style="{ fontVariationSettings: '\'FILL\' 1' }">add</span>
+              <span class="font-body-sm text-body-sm text-on-surface">New</span>
+              <span class="material-symbols-outlined scale-75">expand_more</span>
+            </button>
+            <div
+              v-if="isNewMenuOpen"
+              class="absolute left-0 mt-1 w-40 bg-surface border border-outline-variant rounded shadow-lg z-20 py-1"
+            >
+              <button
+                class="w-full text-left px-4 py-2 text-body-sm hover:bg-black/5 flex items-center gap-2"
+                @click="createNewItem('folder')"
+              >
+                <span class="material-symbols-outlined text-[#ffc107] scale-90" :style="{ fontVariationSettings: '\'FILL\' 1' }">folder</span>
+                Folder Baru
+              </button>
+              <button
+                class="w-full text-left px-4 py-2 text-body-sm hover:bg-black/5 flex items-center gap-2"
+                @click="createNewItem('file')"
+              >
+                <span class="material-symbols-outlined text-secondary scale-90">article</span>
+                Berkas Baru
+              </button>
+            </div>
+          </div>
+
           <div class="h-5 w-px bg-outline-variant/50 mx-1"></div>
-          <button class="p-2 hover:bg-black/5 rounded transition-colors text-on-surface-variant" title="Cut">
+
+          <!-- Cut -->
+          <button
+            class="p-2 rounded transition-colors text-on-surface-variant"
+            :class="!activeItem ? 'opacity-35 cursor-default' : 'hover:bg-black/5'"
+            :disabled="!activeItem"
+            title="Cut"
+            @click="cutItem"
+          >
             <span class="material-symbols-outlined scale-90">content_cut</span>
           </button>
-          <button class="p-2 hover:bg-black/5 rounded transition-colors text-on-surface-variant" title="Copy">
+
+          <!-- Copy -->
+          <button
+            class="p-2 rounded transition-colors text-on-surface-variant"
+            :class="!activeItem ? 'opacity-35 cursor-default' : 'hover:bg-black/5'"
+            :disabled="!activeItem"
+            title="Copy"
+            @click="copyItem"
+          >
             <span class="material-symbols-outlined scale-90">content_copy</span>
           </button>
-          <button class="p-2 hover:bg-black/5 rounded transition-colors text-on-surface-variant" title="Paste">
+
+          <!-- Paste -->
+          <button
+            class="p-2 rounded transition-colors text-on-surface-variant"
+            :class="!clipboard ? 'opacity-35 cursor-default' : 'hover:bg-black/5'"
+            :disabled="!clipboard"
+            title="Paste"
+            @click="pasteItem"
+          >
             <span class="material-symbols-outlined scale-90">content_paste</span>
           </button>
-          <button class="p-2 hover:bg-black/5 rounded transition-colors text-on-surface-variant" title="Rename">
+
+          <!-- Rename -->
+          <button
+            class="p-2 rounded transition-colors text-on-surface-variant"
+            :class="!activeItem ? 'opacity-35 cursor-default' : 'hover:bg-black/5'"
+            :disabled="!activeItem"
+            title="Rename"
+            @click="renameItem"
+          >
             <span class="material-symbols-outlined scale-90">drive_file_rename_outline</span>
           </button>
-          <button class="p-2 hover:bg-black/5 rounded transition-colors text-on-surface-variant" title="Delete">
+
+          <!-- Delete -->
+          <button
+            class="p-2 rounded transition-colors text-on-surface-variant"
+            :class="!activeItem ? 'opacity-35 cursor-default' : 'hover:bg-black/5'"
+            :disabled="!activeItem"
+            title="Delete"
+            @click="deleteItem"
+          >
             <span class="material-symbols-outlined scale-90">delete</span>
           </button>
+
           <div class="h-5 w-px bg-outline-variant/50 mx-1"></div>
-          <button class="flex items-center gap-1.5 px-3 py-1.5 hover:bg-black/5 rounded transition-colors text-on-surface-variant">
-            <span class="material-symbols-outlined scale-90">sort</span>
-            <span class="font-body-sm text-body-sm text-on-surface">Sort</span>
-            <span class="material-symbols-outlined scale-75">expand_more</span>
-          </button>
+
+          <!-- Sort Button & Dropdown -->
+          <div class="relative">
+            <button
+              class="flex items-center gap-1.5 px-3 py-1.5 hover:bg-black/5 rounded transition-colors text-on-surface-variant"
+              @click="isSortMenuOpen = !isSortMenuOpen"
+            >
+              <span class="material-symbols-outlined scale-90">sort</span>
+              <span class="font-body-sm text-body-sm text-on-surface">Sort</span>
+              <span class="material-symbols-outlined scale-75">expand_more</span>
+            </button>
+            <div
+              v-if="isSortMenuOpen"
+              class="absolute left-0 mt-1 w-48 bg-surface border border-outline-variant rounded shadow-lg z-20 py-1"
+            >
+              <button
+                class="w-full text-left px-4 py-2 text-body-sm hover:bg-black/5 flex items-center justify-between"
+                :class="{'text-primary font-medium': sortBy === 'name' && sortOrder === 'asc'}"
+                @click="setSort('name', 'asc')"
+              >
+                Nama (A-Z)
+                <span v-if="sortBy === 'name' && sortOrder === 'asc'" class="material-symbols-outlined scale-75">check</span>
+              </button>
+              <button
+                class="w-full text-left px-4 py-2 text-body-sm hover:bg-black/5 flex items-center justify-between"
+                :class="{'text-primary font-medium': sortBy === 'name' && sortOrder === 'desc'}"
+                @click="setSort('name', 'desc')"
+              >
+                Nama (Z-A)
+                <span v-if="sortBy === 'name' && sortOrder === 'desc'" class="material-symbols-outlined scale-75">check</span>
+              </button>
+              <button
+                class="w-full text-left px-4 py-2 text-body-sm hover:bg-black/5 flex items-center justify-between"
+                :class="{'text-primary font-medium': sortBy === 'type'}"
+                @click="setSort('type', 'asc')"
+              >
+                Tipe
+                <span v-if="sortBy === 'type'" class="material-symbols-outlined scale-75">check</span>
+              </button>
+              <button
+                class="w-full text-left px-4 py-2 text-body-sm hover:bg-black/5 flex items-center justify-between"
+                :class="{'text-primary font-medium': sortBy === 'size'}"
+                @click="setSort('size', 'asc')"
+              >
+                Ukuran
+                <span v-if="sortBy === 'size'" class="material-symbols-outlined scale-75">check</span>
+              </button>
+            </div>
+          </div>
+
           <button class="flex items-center gap-1.5 px-3 py-1.5 hover:bg-black/5 rounded transition-colors text-on-surface-variant">
             <span class="material-symbols-outlined scale-90">view_list</span>
             <span class="font-body-sm text-body-sm text-on-surface">View</span>
@@ -143,7 +277,10 @@
             :is-loading="selectedFolderContentsLoading || searchLoading"
             :is-searching="isSearching"
             :search-query="searchQuery"
+            :sort-by="sortBy"
+            :sort-order="sortOrder"
             @navigate="selectFolder"
+            @select-item="activeItem = $event"
           />
         </div>
       </main>
@@ -158,6 +295,7 @@ import FolderTree from "./components/FolderTree.vue";
 import FolderContents from "./components/FolderContents.vue";
 import Breadcrumbs from "./components/Breadcrumbs.vue";
 import ExplorerSearch from "./components/ExplorerSearch.vue";
+import { explorerApi } from "./services/api";
 
 const {
   rootFolders,
@@ -169,13 +307,145 @@ const {
   searchResults,
   isSearching,
   searchLoading,
+  historyStack,
+  forwardStack,
   loadRootFolders,
   expandFolder,
   selectFolder,
-  performSearch
+  performSearch,
+  goBack,
+  goForward,
+  goUp
 } = useExplorer();
 
 const isTreeLoading = ref(true);
+
+const sortBy = ref<"name" | "type" | "size">("name");
+const sortOrder = ref<"asc" | "desc">("asc");
+const isSortMenuOpen = ref(false);
+
+const isNewMenuOpen = ref(false);
+const activeItem = ref<{ id: string; type: "folder" | "file"; name: string } | null>(null);
+const clipboard = ref<{
+  item: any;
+  type: "folder" | "file";
+  action: "cut" | "copy";
+  sourceFolderId: string;
+} | null>(null);
+
+const setSort = (field: "name" | "type" | "size", order: "asc" | "desc") => {
+  sortBy.value = field;
+  sortOrder.value = order;
+  isSortMenuOpen.value = false;
+};
+
+async function refreshView() {
+  if (selectedFolderId.value) {
+    await selectFolder(selectedFolderId.value, false);
+  }
+  await loadRootFolders();
+}
+
+async function createNewItem(type: "folder" | "file") {
+  if (!selectedFolderId.value) return;
+  const defaultName = type === "folder" ? "New Folder" : "New File.txt";
+  isNewMenuOpen.value = false;
+
+  if (type === "folder") {
+    await explorerApi.createFolder(defaultName, selectedFolderId.value);
+  } else {
+    await explorerApi.createFile(defaultName, selectedFolderId.value, 0);
+  }
+  await refreshView();
+}
+
+async function deleteItem() {
+  if (!activeItem.value || !selectedFolderId.value) return;
+  const confirmDelete = confirm(`Apakah Anda yakin ingin menghapus "${activeItem.value.name}"?`);
+  if (!confirmDelete) return;
+
+  if (activeItem.value.type === "folder") {
+    await explorerApi.deleteFolder(activeItem.value.id);
+  } else {
+    await explorerApi.deleteFile(activeItem.value.id);
+  }
+  activeItem.value = null;
+  await refreshView();
+}
+
+async function renameItem() {
+  if (!activeItem.value || !selectedFolderId.value) return;
+  const newName = prompt(`Ubah nama "${activeItem.value.name}" menjadi:`, activeItem.value.name);
+  if (!newName || newName.trim() === "") return;
+
+  if (activeItem.value.type === "folder") {
+    await explorerApi.renameFolder(activeItem.value.id, newName);
+  } else {
+    await explorerApi.renameFile(activeItem.value.id, newName);
+  }
+  activeItem.value = null;
+  await refreshView();
+}
+
+function cutItem() {
+  if (!activeItem.value || !selectedFolderId.value) return;
+  const target = activeItem.value.type === "folder"
+    ? selectedFolderContents.value.subfolders.find((f) => f.id === activeItem.value!.id)
+    : selectedFolderContents.value.files.find((f) => f.id === activeItem.value!.id);
+  
+  if (target) {
+    clipboard.value = {
+      item: { ...target },
+      type: activeItem.value.type,
+      action: "cut",
+      sourceFolderId: selectedFolderId.value
+    };
+  }
+}
+
+function copyItem() {
+  if (!activeItem.value || !selectedFolderId.value) return;
+  const target = activeItem.value.type === "folder"
+    ? selectedFolderContents.value.subfolders.find((f) => f.id === activeItem.value!.id)
+    : selectedFolderContents.value.files.find((f) => f.id === activeItem.value!.id);
+  
+  if (target) {
+    clipboard.value = {
+      item: { ...target },
+      type: activeItem.value.type,
+      action: "copy",
+      sourceFolderId: selectedFolderId.value
+    };
+  }
+}
+
+async function pasteItem() {
+  if (!clipboard.value || !selectedFolderId.value) return;
+  
+  const { item, type, action, sourceFolderId } = clipboard.value;
+  
+  if (action === "cut") {
+    if (sourceFolderId === selectedFolderId.value) {
+      clipboard.value = null;
+      return;
+    }
+    
+    if (type === "folder") {
+      await explorerApi.moveFolder(item.id, selectedFolderId.value);
+    } else {
+      await explorerApi.moveFile(item.id, selectedFolderId.value);
+    }
+    clipboard.value = null;
+  } else {
+    // action === "copy"
+    if (type === "folder") {
+      await explorerApi.copyFolder(item.id, selectedFolderId.value);
+    } else {
+      await explorerApi.copyFile(item.id, selectedFolderId.value);
+    }
+  }
+  await refreshView();
+}
 
 // Komputasi folder yang akan ditampilkan (menyaring hasil pencarian vs isi folder biasa)
 const displaySubfolders = computed(() => {
