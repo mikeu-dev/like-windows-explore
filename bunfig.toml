@@ -1,2 +1,7 @@
 [test]
-exclude = ["packages/e2e/**"]
+exclude = [
+  "**/explorer.spec.ts",
+  "packages/e2e/**",
+  "packages/e2e/tests/explorer.spec.ts",
+  "packages/e2e/tests/**"
+]
