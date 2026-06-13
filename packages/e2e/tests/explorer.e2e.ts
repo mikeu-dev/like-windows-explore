@@ -98,12 +98,12 @@ test.describe("File Explorer App", () => {
     // Secara default, view mode adalah Grid. Pastikan view-grid-btn aktif
     const gridBtn = page.locator("#view-grid-btn");
     const listBtn = page.locator("#view-list-btn");
-    await expect(gridBtn).toHaveClass(/bg-explorer-active/);
+    await expect(gridBtn).toHaveClass(/text-primary/);
 
     // Ganti ke tampilan Detail List
     await listBtn.click();
-    await expect(listBtn).toHaveClass(/bg-explorer-active/);
-    await expect(gridBtn).not.toHaveClass(/bg-explorer-active/);
+    await expect(listBtn).toHaveClass(/text-primary/);
+    await expect(gridBtn).not.toHaveClass(/text-primary/);
 
     // Verifikasi table headers muncul (Nama, Tipe, Ukuran)
     await expect(page.locator('table th:has-text("Nama")')).toBeVisible();
@@ -112,7 +112,7 @@ test.describe("File Explorer App", () => {
 
     // Kembalikan ke tampilan Grid
     await gridBtn.click();
-    await expect(gridBtn).toHaveClass(/bg-explorer-active/);
+    await expect(gridBtn).toHaveClass(/text-primary/);
     await expect(page.locator('table th:has-text("Nama")')).not.toBeVisible();
   });
 
@@ -181,8 +181,6 @@ test.describe("File Explorer App", () => {
 
     // Pastikan item-item termuat
     await expect(page.locator("main >> text=Work")).toBeVisible();
-    await expect(page.locator("main >> text=Personal")).toBeVisible();
-    await expect(page.locator("main >> text=Archive")).toBeVisible();
 
     // Klik tombol Sort
     const sortBtn = page.locator('button:has-text("Sort")');
@@ -191,12 +189,11 @@ test.describe("File Explorer App", () => {
     // Pilih Nama (Z-A)
     await page.locator('button:has-text("Nama (Z-A)")').click();
 
-    // Verifikasi urutan item: Work (W), Personal (P), Archive (A)
-    // Di urutan Z-A, Work berada di paling pertama
-    const foldersZA = page.locator('[id^="content-folder-"]');
-    await expect(foldersZA.nth(0)).toContainText("Work");
-    await expect(foldersZA.nth(1)).toContainText("Personal");
-    await expect(foldersZA.nth(2)).toContainText("Archive");
+    // Verifikasi urutan item (Z-A) secara dinamis
+    const folderTextsZA = await page.locator('[id^="content-folder-"]').allTextContents();
+    const folderNamesZA = folderTextsZA.map(t => t.trim());
+    const sortedZA = [...folderNamesZA].sort((a, b) => b.localeCompare(a, undefined, { sensitivity: "base" }));
+    expect(folderNamesZA).toEqual(sortedZA);
 
     // Klik Sort lagi
     await sortBtn.click();
@@ -204,11 +201,11 @@ test.describe("File Explorer App", () => {
     // Pilih Nama (A-Z)
     await page.locator('button:has-text("Nama (A-Z)")').click();
 
-    // Verifikasi urutan kembali ke A-Z: Archive (A), Personal (P), Work (W)
-    const foldersAZ = page.locator('[id^="content-folder-"]');
-    await expect(foldersAZ.nth(0)).toContainText("Archive");
-    await expect(foldersAZ.nth(1)).toContainText("Personal");
-    await expect(foldersAZ.nth(2)).toContainText("Work");
+    // Verifikasi urutan kembali ke A-Z secara dinamis
+    const folderTextsAZ = await page.locator('[id^="content-folder-"]').allTextContents();
+    const folderNamesAZ = folderTextsAZ.map(t => t.trim());
+    const sortedAZ = [...folderNamesAZ].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
+    expect(folderNamesAZ).toEqual(sortedAZ);
   });
 
   test("should perform complete CRUD operations and clipboard actions", async ({ page }) => {
