@@ -2,6 +2,7 @@
   "name": "like-windows-explorer",
   "private": true,
   "type": "module",
+  "author": "mikeu-dev",
   "workspaces": [
     "packages/*"
   ],
