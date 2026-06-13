@@ -1,4 +1,4 @@
-/// <reference path="./test-env.d.ts" />
+import "./test-env.d.ts";
 import { describe, expect, it } from "bun:test";
 import App from "./App.vue";
 import { readFileSync } from "fs";

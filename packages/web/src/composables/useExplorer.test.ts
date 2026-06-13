@@ -1,4 +1,4 @@
-/// <reference path="../test-env.d.ts" />
+import "../test-env.d.ts";
 import { describe, expect, it, mock, beforeEach, spyOn } from "bun:test";
 import { useExplorer } from "./useExplorer";
 import { FolderDTO } from "@explorer/common";
