@@ -5,18 +5,13 @@
     <!-- Header / Navbar Utama -->
     <header class="bg-surface-container-lowest flex flex-col shrink-0 border-b border-outline-variant/50">
       <!-- Window Controls & Tab Bar -->
-      <div class="h-10 flex items-center justify-between px-4 border-b border-outline-variant/30 bg-[#f3f3f3]/60">
+      <div class="h-10 flex items-center px-4 border-b border-outline-variant/30 bg-[#f3f3f3]/60">
         <div class="flex items-center space-x-3">
           <span class="text-xl">🖥️</span>
           <div>
             <h1 class="text-xs font-bold text-on-surface">File Explorer</h1>
             <p class="text-[9px] text-explorer-muted">Sistem Manajemen Folder Hirarkis</p>
           </div>
-        </div>
-        <div class="flex items-center gap-4">
-          <span class="material-symbols-outlined text-on-surface-variant hover:bg-black/5 p-1 rounded cursor-default scale-90">minimize</span>
-          <span class="material-symbols-outlined text-on-surface-variant hover:bg-black/5 p-1 rounded cursor-default scale-90">check_box_outline_blank</span>
-          <span class="material-symbols-outlined text-on-surface-variant hover:bg-error/10 hover:text-error p-1 rounded cursor-default scale-90">close</span>
         </div>
       </div>
 
