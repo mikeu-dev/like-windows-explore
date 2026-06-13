@@ -1,4 +1,4 @@
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { FolderDTO, FileDTO, FolderContentsDTO } from "@explorer/common";
 import { explorerApi } from "../services/api";
 
@@ -25,8 +25,56 @@ export function useExplorer() {
   const historyStack = ref<string[]>([]);
   const forwardStack = ref<string[]>([]);
 
+  // Sorting state
+  const sortBy = ref<"name" | "type" | "size">("name");
+  const sortOrder = ref<"asc" | "desc">("asc");
+
+  // Selection state
+  const activeItem = ref<{ id: string; type: "folder" | "file"; name: string } | null>(null);
+
+  // Clipboard state
+  const clipboard = ref<{
+    item: any;
+    type: "folder" | "file";
+    action: "cut" | "copy";
+    sourceFolderId: string;
+  } | null>(null);
+
   // Map untuk akses cepat O(1) ke node mana pun dalam pohon
   const folderMap = new Map<string, ClientFolderNode>();
+
+  // Memperoleh folder yang terurut berdasarkan kriteria
+  const sortedSubfolders = computed(() => {
+    const list = isSearching.value ? searchResults.value.folders : selectedFolderContents.value.subfolders;
+    const folders = [...list];
+    folders.sort((a, b) => {
+      let comparison = 0;
+      if (sortBy.value === "name") {
+        comparison = a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
+      }
+      return sortOrder.value === "asc" ? comparison : -comparison;
+    });
+    return folders;
+  });
+
+  const sortedFiles = computed(() => {
+    const list = isSearching.value ? searchResults.value.files : selectedFolderContents.value.files;
+    const filesList = [...list];
+    filesList.sort((a, b) => {
+      let comparison = 0;
+      if (sortBy.value === "name") {
+        comparison = a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
+      } else if (sortBy.value === "size") {
+        comparison = a.size - b.size;
+      } else if (sortBy.value === "type") {
+        const extA = a.name.split(".").pop()?.toLowerCase() || "";
+        const extB = b.name.split(".").pop()?.toLowerCase() || "";
+        comparison = extA.localeCompare(extB);
+      }
+      return sortOrder.value === "asc" ? comparison : -comparison;
+    });
+    return filesList;
+  });
 
   // Memuat folder tingkat teratas (Root)
   async function loadRootFolders() {
@@ -82,7 +130,9 @@ export function useExplorer() {
 
   // Memilih folder, memuat isinya di panel kanan, serta memuat breadcrumb path
   async function selectFolder(folderId: string, pushToHistory = true) {
-    // Navigasi riwayat: simpan state lama
+    // Bersihkan pilihan item saat berpindah folder
+    activeItem.value = null;
+
     if (pushToHistory && selectedFolderId.value && selectedFolderId.value !== folderId) {
       historyStack.value.push(selectedFolderId.value);
       forwardStack.value = []; // Reset forward stack pada aksi navigasi baru
@@ -141,16 +191,126 @@ export function useExplorer() {
   // Naik satu level ke folder induk (Up)
   function goUp() {
     if (selectedFolderId.value) {
-      // Jika parentId ada di database, gunakan itu
       const currentFolder = folderMap.get(selectedFolderId.value);
       if (currentFolder && currentFolder.parentId) {
         selectFolder(currentFolder.parentId);
       } else if (breadcrumbs.value.length > 1) {
-        // Ambil parent dari breadcrumb path
         const parentFolder = breadcrumbs.value[breadcrumbs.value.length - 2];
         selectFolder(parentFolder.id);
       }
     }
+  }
+
+  // Reload current view
+  async function refreshView() {
+    if (selectedFolderId.value) {
+      await selectFolder(selectedFolderId.value, false);
+    }
+    await loadRootFolders();
+  }
+
+  // Membuat Folder/Berkas Baru
+  async function createNewItem(type: "folder" | "file") {
+    if (!selectedFolderId.value) return;
+    const defaultName = type === "folder" ? "New Folder" : "New File.txt";
+
+    if (type === "folder") {
+      await explorerApi.createFolder(defaultName, selectedFolderId.value);
+    } else {
+      await explorerApi.createFile(defaultName, selectedFolderId.value, 0);
+    }
+    await refreshView();
+  }
+
+  // Menghapus Item terpilih
+  async function deleteItem() {
+    if (!activeItem.value || !selectedFolderId.value) return;
+    const confirmDelete = confirm(`Apakah Anda yakin ingin menghapus "${activeItem.value.name}"?`);
+    if (!confirmDelete) return;
+
+    if (activeItem.value.type === "folder") {
+      await explorerApi.deleteFolder(activeItem.value.id);
+    } else {
+      await explorerApi.deleteFile(activeItem.value.id);
+    }
+    activeItem.value = null;
+    await refreshView();
+  }
+
+  // Mengubah Nama Item terpilih
+  async function renameItem() {
+    if (!activeItem.value || !selectedFolderId.value) return;
+    const newName = prompt(`Ubah nama "${activeItem.value.name}" menjadi:`, activeItem.value.name);
+    if (!newName || newName.trim() === "") return;
+
+    if (activeItem.value.type === "folder") {
+      await explorerApi.renameFolder(activeItem.value.id, newName);
+    } else {
+      await explorerApi.renameFile(activeItem.value.id, newName);
+    }
+    activeItem.value = null;
+    await refreshView();
+  }
+
+  // Cut & Copy Item
+  function cutItem() {
+    if (!activeItem.value || !selectedFolderId.value) return;
+    const target = activeItem.value.type === "folder"
+      ? selectedFolderContents.value.subfolders.find((f) => f.id === activeItem.value!.id)
+      : selectedFolderContents.value.files.find((f) => f.id === activeItem.value!.id);
+
+    if (target) {
+      clipboard.value = {
+        item: { ...target },
+        type: activeItem.value.type,
+        action: "cut",
+        sourceFolderId: selectedFolderId.value
+      };
+    }
+  }
+
+  function copyItem() {
+    if (!activeItem.value || !selectedFolderId.value) return;
+    const target = activeItem.value.type === "folder"
+      ? selectedFolderContents.value.subfolders.find((f) => f.id === activeItem.value!.id)
+      : selectedFolderContents.value.files.find((f) => f.id === activeItem.value!.id);
+
+    if (target) {
+      clipboard.value = {
+        item: { ...target },
+        type: activeItem.value.type,
+        action: "copy",
+        sourceFolderId: selectedFolderId.value
+      };
+    }
+  }
+
+  // Paste Item
+  async function pasteItem() {
+    if (!clipboard.value || !selectedFolderId.value) return;
+
+    const { item, type, action, sourceFolderId } = clipboard.value;
+
+    if (action === "cut") {
+      if (sourceFolderId === selectedFolderId.value) {
+        clipboard.value = null;
+        return;
+      }
+
+      if (type === "folder") {
+        await explorerApi.moveFolder(item.id, selectedFolderId.value);
+      } else {
+        await explorerApi.moveFile(item.id, selectedFolderId.value);
+      }
+      clipboard.value = null;
+    } else {
+      if (type === "folder") {
+        await explorerApi.copyFolder(item.id, selectedFolderId.value);
+      } else {
+        await explorerApi.copyFile(item.id, selectedFolderId.value);
+      }
+    }
+    await refreshView();
   }
 
   // Melakukan ekspansi semua folder induk secara rekursif
@@ -166,6 +326,7 @@ export function useExplorer() {
 
   // Menangani pencarian
   async function performSearch(query: string) {
+    activeItem.value = null; // Bersihkan selection saat pencarian dipicu
     searchQuery.value = query;
     if (query.trim().length < 2) {
       isSearching.value = false;
@@ -197,12 +358,25 @@ export function useExplorer() {
     searchLoading,
     historyStack,
     forwardStack,
+    sortBy,
+    sortOrder,
+    activeItem,
+    clipboard,
+    sortedSubfolders,
+    sortedFiles,
     loadRootFolders,
     expandFolder,
     selectFolder,
     performSearch,
     goBack,
     goForward,
-    goUp
+    goUp,
+    refreshView,
+    createNewItem,
+    deleteItem,
+    renameItem,
+    cutItem,
+    copyItem,
+    pasteItem
   };
 }

@@ -1,9 +1,7 @@
 <template>
   <div class="h-full flex flex-col">
     <!-- Toolbar Panel Kanan -->
-    <div
-      class="flex items-center justify-between pb-4 border-b border-outline-variant/30 mb-4 shrink-0"
-    >
+    <div class="flex items-center justify-between pb-4 border-b border-outline-variant/30 mb-4 shrink-0">
       <div class="text-body-sm text-on-surface-variant">
         <span v-if="isSearching"
           >Hasil Pencarian untuk:
@@ -72,12 +70,12 @@
       >
         <!-- Loop Subfolders -->
         <div
-          v-for="subfolder in sortedSubfolders"
+          v-for="subfolder in subfolders"
           :id="'content-folder-' + subfolder.id"
           :key="subfolder.id"
           class="flex flex-col items-center p-3 rounded border border-transparent transition-all duration-150 hover:bg-black/5 cursor-pointer select-none text-center"
           :class="[
-            selectedItem?.id === subfolder.id
+            activeItem?.id === subfolder.id
               ? 'bg-primary/10 border-primary/20 shadow-sm font-medium'
               : ''
           ]"
@@ -97,12 +95,12 @@
 
         <!-- Loop Files -->
         <div
-          v-for="file in sortedFiles"
+          v-for="file in files"
           :id="'content-file-' + file.id"
           :key="file.id"
           class="flex flex-col items-center p-3 rounded border border-transparent transition-all duration-150 hover:bg-black/5 cursor-pointer select-none text-center"
           :class="[
-            selectedItem?.id === file.id
+            activeItem?.id === file.id
               ? 'bg-primary/10 border-primary/20 shadow-sm font-medium'
               : ''
           ]"
@@ -139,12 +137,12 @@
           <tbody class="text-body-sm divide-y divide-outline-variant/20">
             <!-- Subfolders -->
             <tr
-              v-for="subfolder in sortedSubfolders"
+              v-for="subfolder in subfolders"
               :id="'content-folder-' + subfolder.id"
               :key="subfolder.id"
               class="hover:bg-black/5 transition-colors duration-100 cursor-pointer select-none"
               :class="[
-                selectedItem?.id === subfolder.id ? 'bg-primary/10 text-primary' : 'text-on-surface'
+                activeItem?.id === subfolder.id ? 'bg-primary/10 text-primary' : 'text-on-surface'
               ]"
               @click="selectItem(subfolder, 'folder')"
               @dblclick="openFolder(subfolder.id)"
@@ -164,12 +162,12 @@
 
             <!-- Files -->
             <tr
-              v-for="file in sortedFiles"
+              v-for="file in files"
               :id="'content-file-' + file.id"
               :key="file.id"
               class="hover:bg-black/5 transition-colors duration-100 cursor-pointer select-none"
               :class="[
-                selectedItem?.id === file.id ? 'bg-primary/10 text-primary' : 'text-on-surface'
+                activeItem?.id === file.id ? 'bg-primary/10 text-primary' : 'text-on-surface'
               ]"
               @click="selectItem(file, 'file')"
               @dblclick="openFile(file)"
@@ -265,8 +263,7 @@ const props = defineProps<{
   isLoading: boolean;
   isSearching: boolean;
   searchQuery: string;
-  sortBy?: "name" | "type" | "size";
-  sortOrder?: "asc" | "desc";
+  activeItem: { id: string; type: "folder" | "file"; name: string } | null;
 }>();
 
 const emit = defineEmits<{
@@ -275,53 +272,17 @@ const emit = defineEmits<{
 }>();
 
 const viewMode = ref<"grid" | "list">("grid");
-const selectedItem = ref<{ id: string; type: "folder" | "file" } | null>(null);
 const modalFile = ref<FileDTO | null>(null);
 
 const itemsCount = computed(() => props.subfolders.length + props.files.length);
 const isEmpty = computed(() => props.subfolders.length === 0 && props.files.length === 0);
 
-const activeSortBy = computed(() => props.sortBy || "name");
-const activeSortOrder = computed(() => props.sortOrder || "asc");
-
-const sortedSubfolders = computed(() => {
-  const folders = [...props.subfolders];
-  folders.sort((a, b) => {
-    let comparison = 0;
-    if (activeSortBy.value === "name") {
-      comparison = a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
-    }
-    return activeSortOrder.value === "asc" ? comparison : -comparison;
-  });
-  return folders;
-});
-
-const sortedFiles = computed(() => {
-  const filesList = [...props.files];
-  filesList.sort((a, b) => {
-    let comparison = 0;
-    if (activeSortBy.value === "name") {
-      comparison = a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
-    } else if (activeSortBy.value === "size") {
-      comparison = a.size - b.size;
-    } else if (activeSortBy.value === "type") {
-      const extA = a.name.split(".").pop()?.toLowerCase() || "";
-      const extB = b.name.split(".").pop()?.toLowerCase() || "";
-      comparison = extA.localeCompare(extB);
-    }
-    return activeSortOrder.value === "asc" ? comparison : -comparison;
-  });
-  return filesList;
-});
-
 const selectItem = (item: any, type: "folder" | "file") => {
-  selectedItem.value = { id: item.id, type };
   emit("select-item", { id: item.id, type, name: item.name });
 };
 
 const openFolder = (folderId: string) => {
   emit("navigate", folderId);
-  selectedItem.value = null;
   emit("select-item", null);
 };
 
@@ -345,17 +306,13 @@ const getFileIconDetails = (fileName: string) => {
       return { icon: "table_view", color: "text-[#107c41]" };
     case "jpg":
     case "jpeg":
-      return { icon: "image", color: "text-[#0078d4]" };
     case "png":
     case "gif":
     case "svg":
       return { icon: "image", color: "text-[#0078d4]" };
     case "zip":
-      return { icon: "folder_zip", color: "text-[#f39c12]" };
     case "rar":
-      return { icon: "folder_zip", color: "text-[#f39c12]" };
     case "tar":
-      return { icon: "folder_zip", color: "text-[#f39c12]" };
     case "gz":
       return { icon: "folder_zip", color: "text-[#f39c12]" };
     default:
