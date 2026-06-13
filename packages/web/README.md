@@ -1,32 +1,32 @@
 # Explorer Client Web - @explorer/web
 
-Aplikasi frontend penjelajah berkas (File Explorer) ini dibangun menggunakan Vue 3, Vite, dan Tailwind CSS. Aplikasi ini mensimulasikan antarmuka Windows Explorer dengan navigasi interaktif.
+This frontend client is a web-based file explorer dashboard built using Vue 3, Vite, and Tailwind CSS. It simulates the interactive experience of Windows Explorer.
 
-## Fitur Antarmuka
-- Folder Tree Sidebar: Pohon folder interaktif di panel kiri dengan pemuatan tertunda (lazy loading) dan dukungan penelusuran rekursif tanpa batas.
-- Split Pane Layout: Tata letak panel ganda (sidebar navigasi di kiri dan tampilan isi folder di kanan) yang bersih dan responsif.
-- Breadcrumbs Nav: Area navigasi alamat yang memperlihatkan alur path aktif dan mendukung lompatan navigasi balik.
-- Dual View Mode: Mengubah tampilan isi folder secara instan antara mode "Grid" (ikon besar) dan mode "Detail List" (tabel baris berisi nama, tipe, dan ukuran).
-- File Detail Modal: Menampilkan informasi detail berkas (ukuran, tipe, lokasi induk) saat file di-double click.
-- Global Search: Kolom pencarian di bagian atas dengan optimasi debounce (300ms) untuk mencari berkas dan folder secara global.
+## Features
+- Folder Tree Sidebar: Responsive nested directory sidebar at the left panel, supporting lazy loading and unlimited recursive tree expansion.
+- Split Pane Layout: Dual-panel layout dividing the navigation sidebar (left) and folder contents panel (right) cleanly.
+- Breadcrumbs Nav: Address path navigation bar rendering active paths and supporting backward navigation clicks.
+- Dual View Mode: Instantly toggle folder content render between "Grid" mode (large file icons) and "Detail List" mode (a structured data table showing name, type, and size).
+- File Detail Modal: Double-clicking any file opens a modal overlay displaying size, type, and parent folder path.
+- Global Search: Search bar with debounced input (300ms) to search files and folders globally without overloading backend.
 
-## Struktur Kode Sumber
+## Source Code Structure
 
-- src/main.ts: Berkas entri JavaScript utama yang memuat Vue 3.
-- src/App.vue: Komponen layout utama yang merapikan seluruh tata letak dan panel navigasi.
-- src/assets/main.css: Konfigurasi Tailwind CSS dan variabel tema global.
-- src/services/api.ts: Lapisan integrasi klien HTTP untuk melakukan panggilan API ke server backend.
-- src/composables/useExplorer.ts: Komponen logic (composable) yang mengelola status aplikasi secara terpusat (state management, event handler, kueri data).
-- src/components/: Direktori komponen Vue yang modular:
-  - Breadcrumbs.vue: Navigasi alamat berantai.
-  - ExplorerSearch.vue: Bilah pencarian global dengan debounced input.
-  - FolderTree.vue: Wadah pembungkus pohon folder di sidebar.
-  - FolderTreeNode.vue: Komponen rekursif untuk merender node folder individual beserta anak-anaknya.
-  - FolderContents.vue: Area tampilan utama untuk merender file dan subfolder (mendukung double click untuk membuka/membuka modal).
+- src/main.ts: Application entry point booting Vue 3 context.
+- src/App.vue: Parent component structuring the layout grid.
+- src/assets/main.css: Tailwind directives and global CSS theme variables.
+- src/services/api.ts: HTTP integration layer making API calls to backend.
+- src/composables/useExplorer.ts: State management composable containing client logic, active state, and API bindings.
+- src/components/: Modular Vue component directory:
+  - Breadcrumbs.vue: Path navigation links.
+  - ExplorerSearch.vue: Bilah pencarian global (global search input).
+  - FolderTree.vue: Sidebar directory container.
+  - FolderTreeNode.vue: Recursive tree item handling expansion and clicks.
+  - FolderContents.vue: Main content grid showing files and subdirectories.
 
-## Konfigurasi Gaya (Styling)
+## Theme and Styling
 
-Aplikasi ini menggunakan tema gelap (*dark mode*) premium dan konsisten yang diatur di berkas CSS utama. Beberapa variabel CSS kustom didefinisikan untuk interaksi efek hover dan status aktif:
+The project features a sleek dark mode theme using custom variables for active state highlighting and hover transitions:
 ```css
 :root {
   --hover-color: rgba(51, 65, 85, 0.4);
@@ -36,9 +36,9 @@ Aplikasi ini menggunakan tema gelap (*dark mode*) premium dan konsisten yang dia
 }
 ```
 
-## Perintah Pengembangan
+## Development Reference
 
-Perintah ini dijalankan di dalam direktori `packages/web/`:
-- bun dev: Menjalankan dev server Vite (http://localhost:5173).
-- bun build: Melakukan kompilasi tipe data TypeScript dan membuat bundel produksi siap dideploy ke direktori `dist/`.
-- bun preview: Menjalankan server lokal untuk melihat hasil build produksi.
+Run these commands inside the `packages/web/` directory:
+- bun dev: Spin up Vite local server (http://localhost:5173).
+- bun build: Run TypeScript check and compile production-ready assets to `dist/`.
+- bun preview: Serve production-build assets locally.

@@ -1,82 +1,80 @@
-# Dokumen Arsitektur Proyek - Like Windows Explorer
+# Project Architecture - Like Windows Explorer
 
-Dokumen ini merinci keputusan desain, arsitektur perangkat lunak, pola rancangan (design patterns), dan strategi skalabilitas yang diterapkan pada aplikasi penjelajah berkas hirarkis ini.
-
----
-
-## 1. Arsitektur Monorepo (Bun Workspaces)
-
-Proyek ini dibangun menggunakan arsitektur monorepo dengan Bun Workspaces. Keuntungan utama dari pendekatan ini adalah:
-- Pembagian Tanggung Jawab yang Bersih (Separation of Concerns): Kode dibagi menjadi paket frontend, backend, pengujian, dan kontrak data yang terisolasi.
-- Kontrak Tipe Bersama (Shared Types): Paket web dan api mengimpor definisi tipe data langsung dari paket common. Hal ini menjamin konsistensi kontrak data pada waktu kompilasi (compile-time type safety). Jika ada perubahan struktur data pada model backend, TypeScript akan mendeteksi kesalahan pada frontend secara instan sebelum aplikasi dideploy.
-
-Struktur repositori adalah sebagai berikut:
-- packages/common: Library berisi DTO (Data Transfer Object) dan tipe data domain.
-- packages/api: Aplikasi backend (Elysia.js, Drizzle ORM).
-- packages/web: Klien frontend (Vue 3, Vite, Tailwind).
-- packages/e2e: Pengujian otomatis Playwright.
+This document outlines the design decisions, software architecture, design patterns, and scalability strategies implemented in this hierarchical file explorer web application.
 
 ---
 
-## 2. Arsitektur Backend (Clean Architecture / Hexagonal)
+## 1. Monorepo Architecture (Bun Workspaces)
 
-Paket API dibangun menggunakan prinsip Clean Architecture dengan memisahkan kode menjadi lapisan-lapisan logis yang independen:
+The project is structured as a monorepo using Bun Workspaces. The main benefits of this layout are:
+- Clean Separation of Concerns: The frontend, backend, test suite, and type definitions are kept in isolated packages.
+- Shared Type Contracts: Both the web client and API service import types directly from the common package. This ensures compile-time type safety. Any modification to data models in the backend is instantly flagged as a compilation error in the frontend, preventing runtime errors in production.
+
+The repository structure is as follows:
+- packages/common: Shared library containing DTOs (Data Transfer Objects) and domain entities.
+- packages/api: Backend API application (Elysia.js, Drizzle ORM).
+- packages/web: Frontend client application (Vue 3, Vite, Tailwind CSS).
+- packages/e2e: Playwright automated test suite.
+
+---
+
+## 2. Backend Architecture (Clean / Hexagonal Architecture)
+
+The API package is designed using Clean Architecture principles, decoupling core business logic from transport protocols and database technologies:
 
 ### Domain Entities
-Terletak di `src/domain/entities/`. Merupakan model data murni (Folder dan File) tanpa dependensi ke framework luar atau pustaka database. Hal ini membuat aturan bisnis inti aman dari perubahan teknologi database atau framework web.
+Located in `src/domain/entities/`. Contains plain, dependency-free models (Folder and File). This preserves core business logic from database or framework changes.
 
 ### Repository Interfaces (Ports)
-Terletak di `src/repositories/*.interface.ts`. Mendefinisikan kontrak akses data (IFolderRepository dan IFileRepository). Lapisan bisnis (Services) hanya berinteraksi dengan antarmuka ini, tidak peduli database apa yang digunakan di bawahnya.
+Located in `src/repositories/*.interface.ts`. Defines interfaces (IFolderRepository, IFileRepository) for data access. The service layer interacts only with these interfaces, remaining agnostic of the underlying database engine.
 
 ### Drizzle Repositories (Adapters)
-Terletak di `src/repositories/drizzle-*.repository.ts`. Merupakan implementasi konkret dari antarmuka repositori menggunakan Drizzle ORM untuk melakukan kueri ke PostgreSQL. Jika di masa depan database diubah (misalnya ke MongoDB atau Prisma ORM), kita hanya perlu membuat adapter repositori baru tanpa menyentuh kode bisnis di Services.
+Located in `src/repositories/drizzle-*.repository.ts`. Implements concrete repository interfaces utilizing Drizzle ORM to interface with PostgreSQL. Swapping out the database (e.g. to MongoDB or Prisma ORM) would only require writing new repository adapters without touching business logic services.
 
-### Service Layer (Application Logic)
-Terletak di `src/services/explorer.service.ts`. Lapisan ini menampung aturan bisnis inti (seperti menyusun path breadcrumbs dan mengelompokkan subfolder/file). Komponen ini menggunakan teknik Dependency Injection (DI) untuk menerima repositori melalui konstruktornya, sehingga sangat mudah untuk diuji menggunakan Mocking.
+### Service Layer (Application Core)
+Located in `src/services/explorer.service.ts`. Implements application workflows and use-cases (e.g. building breadcrumb paths, grouping files and subfolders). The service utilizes dependency injection (DI) to accept repository adapters, making it easily testable via mocking.
 
-### Controller Layer (HTTP/Web)
-Terletak di `src/controllers/`. Menggunakan Elysia.js untuk memetakan permintaan HTTP ke metode layanan Service. Pengontrol bertugas melakukan validasi skema input (menggunakan validasi bawaan Elysia TypeBox) dan merespons dengan kode HTTP yang sesuai.
+### Controller Layer (Transport)
+Located in `src/controllers/`. Uses Elysia.js to expose HTTP endpoints, validating payload parameters using Elysia's schema validator (TypeBox) and mapping HTTP status codes.
 
 ---
 
-## 3. Desain Skalabilitas & Optimasi Performa
+## 3. Scalability and Performance Engineering
 
-Salah satu poin penilaian krusial adalah kemampuan sistem dalam menangani jutaan data folder dan file serta ribuan pengguna bersamaan. Optimasi berikut telah diterapkan:
+A core design goal is the ability to scale to millions of folders and files while maintaining high concurrency:
 
-### Pemuatan Tertunda (Lazy Loading) pada Antarmuka
-Alih-alih memuat seluruh pohon folder (yang bisa berisi jutaan folder) saat pertama kali aplikasi dibuka, frontend hanya memuat folder tingkat root. Ketika pengguna melakukan ekspansi (klik caret) pada suatu folder di panel kiri, barulah frontend mengirimkan permintaan ke API untuk mengambil subfolder di bawah ID folder tersebut. Hal ini menghemat bandwidth, konsumsi memori browser, dan beban kompilasi DOM secara signifikan.
+### Lazy Loading directory trees
+Instead of loading the entire folder tree (which would choke the DOM on huge datasets), the frontend client only fetches root-level directories initially. When the user expands a folder (clicks caret), the client sends an API request to load direct children for that folder ID. This minimizes network payloads, browser memory usage, and DOM rendering overhead.
 
-### Pengecekan Keberadaan Anak (Child Check) Efisien dalam O(1)
-Untuk menampilkan indikator caret (panah ekspansi) di sebelah nama folder, aplikasi perlu mengetahui apakah folder tersebut memiliki subfolder di dalamnya.
-- Pendekatan Buruk: Melakukan kueri hitung (COUNT) pada database. Perintah `SELECT COUNT(*)` akan memindai seluruh baris data di database yang lambat jika jumlah data jutaan.
-- Pendekatan Optimasi: Repositori Drizzle menggunakan kueri subquery `EXISTS`:
+### Efficient Child Checking in O(1) Complexity
+To display caret expansion indicators, the client needs to know if a folder contains subfolders.
+- Suboptimal Approach: Running `SELECT COUNT(*)` on subfolders. This scales poorly as it scans all records.
+- Optimized Approach: The Drizzle repository adapter uses a SQL `EXISTS` subquery:
   ```sql
   EXISTS(SELECT 1 FROM folders WHERE parent_id = parent.id)
   ```
-  Mesin database PostgreSQL akan langsung berhenti memindai setelah menemukan baris pertama yang cocok. Kompleksitas kueri diturunkan menjadi O(1).
+  The database engine halts scanning immediately upon finding the first match. This lowers complexity to O(1).
 
-### Strategi Pengindeksan (Database Indexing)
-Indeks database telah ditambahkan pada kolom pencarian dan relasi induk-anak di berkas skema Drizzle (`folders.ts` & `files.ts`):
-- folders_parent_id_idx: Mengoptimalkan kueri pencarian subfolder berdasarkan `parentId` (sangat krusial untuk fitur Lazy Loading).
-- folders_parent_name_idx: Indeks komposit pada `parentId` dan `name` untuk mempercepat pengurutan folder berdasarkan abjad di dalam direktori induk tertentu.
-- files_folder_id_idx: Mengoptimalkan kueri pengambilan file yang berada di dalam folder tertentu.
+### Database Indexing Strategy
+Indices are created on search targets and parent-child relations in Drizzle schema definitions (`folders.ts` and `files.ts`):
+- folders_parent_id_idx: Optimizes directory traversal queries based on parent ID (critical for lazy loading).
+- folders_parent_name_idx: Composite index of `parentId` and `name` to speed up alphabetical ordering of subfolders.
+- files_folder_id_idx: Speeds up file retrieval within directories.
 
-### Pencegahan Beban Lebih Melalui Debouncing Klien
-Pada input pencarian global frontend, teknik Debounce (300ms) diterapkan. Backend tidak akan dihujani oleh kueri pencarian pada setiap ketukan keyboard pengguna. Backend hanya akan menerima permintaan setelah pengguna selesai mengetik (berhenti menekan tombol selama minimal 300ms).
+### Search Debouncing
+The search input on the web client uses a 300ms debounce buffer. The client waits for the user to pause typing for at least 300ms before sending search requests to the backend, preventing database search overload.
 
 ---
 
-## 4. Strategi Pengujian (Testing Strategy)
+## 4. Testing Strategy
 
-Keandalan aplikasi dijamin melalui tiga jenis pengujian otomatis:
+Stability and reliability are validated through three test layers:
 
-### Unit Testing (Backend Service)
-Menguji logika bisnis di `ExplorerService` secara terisolasi tanpa koneksi database asli, menggunakan repositori tiruan (mock repositories) untuk memvalidasi kasus seperti penyusunan path breadcrumbs secara rekursif dan pengelompokkan item.
+### Unit Testing (Services)
+Validates backend business logic in `ExplorerService` using mocks to simulate repository databases, testing recursive breadcrumb construction and folder grouping logic in isolation.
 
-### UI Testing (Component SFC Verification)
-Menguji integritas komponen Vue (SFC) secara statis untuk memastikan properti (props), rendering rekursif, dan elemen template terdefinisi dengan benar sesuai desain.
+### UI Testing (Component Verification)
+Validates Vue Single File Components (SFCs) statics to assure props binding, template integrity, and recursive rendering structure.
 
 ### End-to-End (E2E) Testing (Playwright)
-Simulasi otomatis yang menguji seluruh fungsionalitas dari mata pengguna asli:
-- Orkestrasi otomatis: Playwright menyalakan API server dan Web server secara mandiri sebelum menjalankan tes.
-- Skenario nyata: Mengklik folder di sidebar, melakukan navigasi mendalam dengan double-click pada grid panel kanan, mengetik di bilah pencarian, beralih tampilan tabel, hingga memverifikasi detail modal berkas.
+Validates full system integration by orchestrating local server environments automatically and simulating user behavior (folder navigation, tree traversal, searching, toggling views, and metadata overlays).

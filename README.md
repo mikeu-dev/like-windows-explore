@@ -1,73 +1,73 @@
 # Like Windows Explorer - Monorepo Workspace
 
-Repositori ini berisi implementasi aplikasi manajemen berkas hirarkis berbasis web yang menyerupai Windows Explorer. Proyek ini dikembangkan dengan arsitektur monorepo menggunakan Bun Workspaces untuk pemisahan fungsionalitas yang bersih dan modular.
+This repository contains the implementation of a hierarchical web-based file management application resembling Windows Explorer. The project is developed using a monorepo architecture with Bun Workspaces for clean and modular separation of concerns.
 
-## Struktur Workspace
+## Workspace Structure
 
-Proyek ini terbagi menjadi empat paket utama di dalam direktori packages:
+The project is divided into four main packages within the packages directory:
 
-1. packages/common: Paket pustaka bersama yang berisi kontrak tipe data, DTO (Data Transfer Object), dan definisi antarmuka domain yang digunakan oleh frontend dan backend.
-2. packages/api: Layanan backend API yang dibangun menggunakan Elysia.js, Bun, dan Drizzle ORM untuk mengelola struktur data folder dan file di database PostgreSQL.
-3. packages/web: Antarmuka pengguna (frontend) yang dibangun menggunakan Vue 3, Vite, dan Tailwind CSS.
-4. packages/e2e: Kerangka pengujian End-to-End menggunakan Playwright untuk memvalidasi alur aplikasi secara menyeluruh dari frontend hingga ke database.
+1. packages/common: A shared library containing typescript type contracts, DTOs (Data Transfer Objects), and domain interface definitions shared between the frontend and backend.
+2. packages/api: The backend API service built with Elysia.js, Bun, and Drizzle ORM to manage folder and file data structures in a PostgreSQL database.
+3. packages/web: The client frontend dashboard built with Vue 3, Vite, and Tailwind CSS.
+4. packages/e2e: End-to-End testing suite built with Playwright to validate the application flow from the frontend to the database.
 
-## Prasyarat Teknologi
+## Technical Requirements
 
-Untuk menjalankan proyek ini secara lokal, Anda memerlukan:
-- Bun (versi 1.0.0 atau yang lebih baru)
-- PostgreSQL (server database berjalan secara lokal)
+To run this project locally, you will need:
+- Bun (version 1.0.0 or later)
+- PostgreSQL (database server running locally)
 
 ---
 
-## Panduan Instalasi dan Memulai Cepat
+## Installation and Quick Start Guide
 
-### Langkah 1: Instalasi Dependensi
-Jalankan perintah berikut di direktori root untuk menginstal semua dependensi di seluruh paket workspace secara otomatis:
+### Step 1: Install Dependencies
+Run the following command in the root directory to install dependencies across all workspace packages:
 ```bash
 bun install
 ```
 
-### Langkah 2: Konfigurasi Variabel Lingkungan
-Buat berkas `.env` di dalam direktori `packages/api/` dan konfigurasikan koneksi database Anda:
+### Step 2: Configure Environment Variables
+Create a `.env` file inside the `packages/api/` directory and configure your database connection:
 ```env
-DATABASE_URL="postgres://username:password@127.0.0.1:5432/nama_database"
+DATABASE_URL="postgres://username:password@127.0.0.1:5432/database_name"
 ```
 
-### Langkah 3: Setup Database dan Migrasi
-Jalankan migrasi database dan masukkan data awal (seeding) melalui perintah di paket API:
+### Step 3: Database Migration and Seeding
+Synchronize the database schema and insert initial structured mock data by running:
 ```bash
-# Lakukan sinkronisasi skema ke database
-bun --cwd packages/api db:push
-
-# Jalankan proses seeding data awal
-bun --cwd packages/api db:seed
+bun db:setup
 ```
+*Note: This runs Drizzle schema push and database seed scripts sequentially.*
 
-### Langkah 4: Jalankan Aplikasi dalam Mode Pengembangan
-Untuk menjalankan backend server dan frontend client secara bersamaan dalam mode development, jalankan perintah berikut di direktori root:
+### Step 4: Run the Application in Development Mode
+To start both backend and frontend servers concurrently, run the following command in the root directory:
 ```bash
 bun dev
 ```
-- Frontend akan berjalan di: http://localhost:5173
-- Backend API akan berjalan di: http://127.0.0.1:3001
+- Frontend client will be running on: http://localhost:5173
+- Backend API server will be running on: http://127.0.0.1:3001
 
 ---
 
-## Daftar Perintah Manajemen Proyek
+## Script Command References
 
-Seluruh perintah manajemen proyek dapat dijalankan secara terpusat dari direktori root:
+All project management tasks can be run centrally from the root directory:
 
-### Pengembangan dan Pembuatan
-- bun dev: Menjalankan backend server dan frontend client secara paralel.
-- bun dev:api: Menjalankan backend server (Elysia.js) saja.
-- bun dev:web: Menjalankan frontend client (Vue 3/Vite) saja.
-- bun build: Membuat bundel produksi untuk seluruh paket.
+### Development and Build
+- bun dev: Run both backend and frontend servers in development mode.
+- bun dev:api: Run the backend API server only.
+- bun dev:web: Run the frontend client only.
+- bun build: Build production assets for all packages.
 
-### Pengujian dan Kualitas Kode
-- bun test: Menjalankan pengujian unit (unit testing) lokal.
-- bun test:e2e: Menjalankan seluruh pengujian End-to-End menggunakan Playwright.
-- bun check: Memeriksa integritas tipe data TypeScript di seluruh proyek (api, web, e2e, common).
-- bun lint: Memeriksa kepatuhan aturan gaya kode menggunakan ESLint.
-- bun lint:fix: Memperbaiki kesalahan gaya kode yang dapat diselesaikan otomatis oleh ESLint.
-- bun format: Memformat seluruh kode menggunakan Prettier.
-- bun format:check: Memeriksa apakah semua berkas telah mengikuti format kode Prettier.
+### Database Administration
+- bun db:setup: Perform database schema synchronization and database seeding sequentially.
+
+### Testing and Quality Assurance
+- bun test: Run unit tests.
+- bun test:e2e: Run Playwright End-to-End tests.
+- bun check: Run TypeScript compiler diagnostics across all packages (api, web, e2e, common).
+- bun lint: Audit codebase linting compliance using ESLint.
+- bun lint:fix: Attempt to auto-fix eslint layout and styling warnings.
+- bun format: Format codebase source files using Prettier.
+- bun format:check: Verify formatting compliance using Prettier check.

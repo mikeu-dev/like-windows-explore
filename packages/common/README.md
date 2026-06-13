@@ -1,26 +1,26 @@
 # Shared Common Library - @explorer/common
 
-Paket ini merupakan pustaka bersama yang mendefinisikan tipe data TypeScript, DTO (Data Transfer Object), dan antarmuka domain yang digunakan secara konsisten oleh layanan API (backend) dan aplikasi Web (frontend).
+This package is a shared library that defines typescript types, DTOs (Data Transfer Objects), and domain interfaces used consistently by both the API service (backend) and the Web client (frontend).
 
-## Pola Industri dan Desain
+## Industry Pattern and Design Choice
 
-Dalam arsitektur monorepo standar industri, paket sharing type/common ini berfungsi sebagai satu-satunya sumber kebenaran (Single Source of Truth) untuk kontrak komunikasi antara klien dan server. Menjaga paket ini tetap murni berisi definisi tipe data (tanpa logika bisnis atau dependensi eksternal yang besar) memastikan:
-- Waktu kompilasi yang sangat cepat.
-- Tidak adanya ketergantungan melingkar (circular dependencies).
-- Kemudahan pemeliharaan ketika skema data berubah.
+In standard industry monorepo architectures, this common/shared package serves as the Single Source of Truth for communications contract between client and server. Keeping this package strictly limited to type definitions (without business logic or heavy external dependencies) ensures:
+- Extremely fast compiler resolution times.
+- Prevention of circular dependencies between workspace packages.
+- Ease of maintenance when backend schemas or API contracts change.
 
-## Struktur Berkas
+## File Structure
 
-Pustaka ini sangat sederhana dan modular:
-- src/types.ts: Mendefinisikan tipe data DTO seperti FolderDTO, FileDTO, FolderContentsDTO, dan SearchResultsDTO.
-- src/index.ts: Entry point utama yang mengekspor seluruh modul dari pustaka agar dapat diimpor oleh paket lain.
+The package is simple and modular:
+- src/types.ts: Defines DTO types like FolderDTO, FileDTO, FolderContentsDTO, and SearchResultsDTO.
+- src/index.ts: Main entry point that exports the types to be consumed by other packages.
 
-## Integrasi Monorepo
+## Monorepo Integration
 
-Paket ini diimpor oleh paket lain menggunakan sistem link lokal workspace Bun pada berkas `package.json` masing-masing:
+This package is imported by other workspace packages using Bun's local workspace linking inside their respective `package.json` files:
 ```json
 "dependencies": {
   "@explorer/common": "workspace:*"
 }
 ```
-Hal ini memungkinkan perubahan tipe data di paket ini langsung ter-refleksi secara realtime di aplikasi frontend maupun backend tanpa perlu melakukan proses pemublikasian ke registry NPM eksternal.
+This enables real-time propagation of type changes in this package to both frontend and backend without requiring npm registry publishing.

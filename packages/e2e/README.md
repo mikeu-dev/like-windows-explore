@@ -1,49 +1,49 @@
 # Explorer E2E Testing - @explorer/e2e
 
-Paket ini berisi modul pengujian End-to-End (E2E) menggunakan Playwright untuk memvalidasi alur kerja aplikasi secara menyeluruh (dari antarmuka pengguna hingga respons API dan database).
+This package contains the End-to-End (E2E) testing module using Playwright to validate the application flows from frontend interaction down to API responses and database state.
 
-## Orkestrasi Otomatis
+## Automatic Orchestration
 
-Untuk memastikan pengujian berjalan realistis, berkas `playwright.config.ts` dikonfigurasi untuk menjalankan server pengembangan lokal secara otomatis sebelum pengujian dimulai:
-- Backend API Server: Dijalankan di port 3001 (`http://127.0.0.1:3001/api/v1/folders`).
-- Frontend Client: Dijalankan di port 5173 (`http://localhost:5173`).
+To run tests reliably in a single command, the `playwright.config.ts` configuration includes a `webServer` block that launches the development servers automatically:
+- Backend API Server: Launched on port 3001 (`http://127.0.0.1:3001/api/v1/folders`).
+- Frontend Client: Launched on port 5173 (`http://localhost:5173`).
 
-Playwright akan menunggu kedua server tersebut siap, mengeksekusi skenario tes, dan kemudian mematikan proses server tersebut secara otomatis setelah tes selesai.
+Playwright will wait for both services to become healthy, execute the E2E test suite, and terminate the server child processes automatically upon completion.
 
-## Skenario Pengujian
+## Test Scenarios
 
-Kasus pengujian di berkas `tests/explorer.spec.ts` meliputi:
+The test suite in `tests/explorer.spec.ts` covers the following workflows:
 
-1. Verifikasi Halaman Utama: Memastikan judul navbar, sidebar navigasi, dan pesan awal "Belum ada folder terpilih" dirender dengan benar.
-2. Pengujian Navigasi Folder: Mensimulasikan klik folder di sidebar, memverifikasi pembaruan panel kanan, dan menguji navigasi mendalam (double-click) serta interaksi breadcrumbs untuk kembali ke folder sebelumnya.
-3. Pengujian Pencarian Global: Memastikan fitur pencarian dengan filter kata kunci dapat menyaring file/folder secara dinamis dan tombol hapus pencarian berfungsi mengembalikan tampilan semula.
-4. Pengujian Mode Tampilan: Memverifikasi perubahan tata letak ketika berpindah dari mode "Grid" ke "Detail List" dan sebaliknya.
-5. Pengujian Modal Detail File: Memastikan modal detail file dapat dibuka dengan double-click pada file dan ditutup menggunakan tombol Tutup.
+1. Initial Load: Verifies headers, sidebar folders rendering, and the initial placeholder message.
+2. Directory Navigation: Simulates clicking folders in the sidebar, traversing directories in the grid using double clicks, and verifies breadcrumbs address bar path updating and navigation.
+3. Global Search: Assures search queries filter files and folders correctly, and verifying that search clearing works.
+4. Layout Toggle: Verifies switching display mode from Grid (icons) to Detail List (table layout) and back.
+5. File Detail Modal: Confirms that double-clicking a file opens the metadata overlay modal, and clicking the close button dismisses it.
 
-## Instruksi Menjalankan Tes
+## Execution Reference
 
-Pastikan Anda berada di direktori root monorepo saat menjalankan perintah berikut:
+Make sure you are at the root directory of the monorepo workspace when executing these commands:
 
-### Langkah 1: Pemasangan Browser Playwright
-Playwright membutuhkan browser khusus (Chromium, Firefox, Webkit) untuk berjalan. Jalankan perintah berikut satu kali setelah instalasi dependensi monorepo:
+### Step 1: Install Playwright Browser Binaries
+Playwright runs tests on dedicated browser binaries (Chromium, Firefox, Webkit). Run this command once after installing npm dependencies:
 ```bash
-bun --cwd packages/e2e playwright install
+bun --cwd packages/e2e playwright install --with-deps
 ```
 
-### Langkah 2: Jalankan Tes (Headless Mode)
-Jalankan pengujian secara otomatis tanpa menampilkan jendela browser di latar belakang:
+### Step 2: Run Tests (Headless Mode)
+Run the E2E tests automatically in the background:
 ```bash
 bun test:e2e
 ```
 
-### Langkah 3: Jalankan Tes dengan UI Interaktif
-Jika Anda ingin melihat jalannya simulasi browser secara visual dan mendebug langkah pengujian satu per satu, jalankan:
+### Step 3: Run Tests in Playwright UI Mode
+To run tests with a visual UI inspector to debug test steps interactively:
 ```bash
 bun --cwd packages/e2e playwright test --ui
 ```
 
-### Langkah 4: Tampilkan Laporan Pengujian
-Jika tes selesai dan Anda ingin melihat laporan visual HTML dari performa tes:
+### Step 4: Show Test Reports
+Open the generated HTML test report in your browser:
 ```bash
 bun --cwd packages/e2e playwright show-report
 ```

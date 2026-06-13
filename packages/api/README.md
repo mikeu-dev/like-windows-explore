@@ -1,57 +1,57 @@
 # Explorer API Backend - @explorer/api
 
-Layanan backend API ini dibangun menggunakan Elysia.js, Bun, dan Drizzle ORM untuk mengelola struktur data folder dan file di database PostgreSQL.
+This backend API service is built with Elysia.js, Bun, and Drizzle ORM to manage folder and file data structures in a PostgreSQL database.
 
-## Fitur Backend
-- REST API yang cepat dengan framework Elysia.js yang berjalan di atas runtime Bun.
-- Interaksi database PostgreSQL yang aman tipe menggunakan Drizzle ORM.
-- Pencarian global folder dan file dengan kueri teroptimasi.
-- Hubungan hirarki folder tak terbatas (self-referencing parent-child).
+## Features
+- Extremely fast HTTP endpoints using Elysia.js running on top of Bun runtime.
+- Type-safe database queries via Drizzle ORM to PostgreSQL.
+- Optimized database query structures supporting global case-insensitive search.
+- Recursive self-referential parent-child folder relationship.
 
-## Struktur Kode Sumber
+## Source Code Structure
 
-Backend ini dirancang dengan arsitektur bersih yang memisahkan logika data, entitas domain, dan pengontrol API:
-- src/db/: Konfigurasi database, skema tabel (folders, files), serta skrip pengisian data awal (seeding).
-- src/domain/entities/: Entitas data murni untuk Folder dan File.
-- src/repositories/: Lapisan akses data (Data Access Layer) yang mengabstraksikan kueri database (menggunakan implementasi Drizzle ORM).
-- src/services/: Logika bisnis inti aplikasi (ExplorerService) untuk mengelola data penjelajah berkas.
-- src/controllers/: Pengontrol HTTP (Elysia.js) untuk memetakan rute API.
-- src/index.ts: Entry point utama server backend.
+The backend project is designed using clean architecture patterns to separate HTTP transport, business logic, data models, and database access:
+- src/db/: Database configuration, schema definitions (folders, files), and structured seed scripts.
+- src/domain/entities/: Plain domain entity models (Folder, File).
+- src/repositories/: Data access layer (DAL) containing concrete repository adapters querying PostgreSQL via Drizzle ORM.
+- src/services/: Application service layer (ExplorerService) implementing core business rules.
+- src/controllers/: HTTP controller mappings (Elysia.js) defining the router group.
+- src/index.ts: Application entry point launching the HTTP listener.
 
-## Variabel Lingkungan
+## Environment Variables
 
-Layanan ini membutuhkan berkas `.env` di direktori `packages/api/` untuk terhubung ke basis data:
+The API service requires a `.env` file inside `packages/api/` folder to resolve database credentials:
 ```env
-DATABASE_URL="postgres://username:password@127.0.0.1:5432/nama_database"
+DATABASE_URL="postgres://username:password@127.0.0.1:5432/database_name"
 PORT=3001
 ```
 
-## Perintah Database (Drizzle)
+## Database Operations (Drizzle Commands)
 
-- bun db:generate: Membuat berkas migrasi SQL berdasarkan skema Drizzle saat ini.
-- bun db:push: Sinkronisasi langsung skema Drizzle ke basis data (sangat berguna untuk tahap pengembangan).
-- bun db:seed: Menghapus data lama dan memasukkan data sampel awal terstruktur ke dalam database.
+- bun db:generate: Generate migration files based on schema changes.
+- bun db:push: Sync schema changes immediately to PostgreSQL database (ideal for development).
+- bun db:seed: Clean database tables and insert initial structured mock directory trees.
 
-## Dokumentasi Endpoint API
+## API Endpoint References
 
-Semua rute API terdaftar di bawah prefiks `/api/v1`:
+All HTTP endpoints are mapped under the `/api/v1` router prefix:
 
-### 1. Ambil Subfolder Tingkat Tertentu
-- Rute: GET `/api/v1/folders`
-- Parameter Query: `parentId` (string, opsional). Jika null atau diabaikan, akan mengambil folder root.
-- Deskripsi: Mengembalikan daftar folder yang berada langsung di bawah parentId.
+### 1. Get Subfolders
+- Route: GET `/api/v1/folders`
+- Query Parameters: `parentId` (string, optional) - The UUID parent folder to fetch children of. If omitted or null, returns root-level folders.
+- Description: Returns a list of direct subfolders belonging to the parent folder.
 
-### 2. Ambil Isi Folder Lengkap (Panel Kanan)
-- Rute: GET `/api/v1/folders/:id/contents`
-- Parameter Rute: `id` (string, wajib) - ID dari folder yang ditargetkan.
-- Deskripsi: Mengembalikan objek berisi array `subfolders` dan `files` di dalam folder tersebut.
+### 2. Get Folder Contents
+- Route: GET `/api/v1/folders/:id/contents`
+- Path Parameters: `id` (string, required) - The UUID target folder.
+- Description: Returns an object containing both `subfolders` and `files` directly under the folder ID.
 
-### 3. Dapatkan Path Lengkap Folder (Breadcrumbs)
-- Rute: GET `/api/v1/folders/:id/path`
-- Parameter Rute: `id` (string, wajib) - ID dari folder.
-- Deskripsi: Mengembalikan urutan folder induk dari tingkat root hingga folder yang ditentukan untuk merender breadcrumbs.
+### 3. Get Folder Path (Breadcrumbs)
+- Route: GET `/api/v1/folders/:id/path`
+- Path Parameters: `id` (string, required) - The UUID target folder.
+- Description: Traverses parent hierarchy recursively up to root level to build the folder breadcrumb path list.
 
-### 4. Pencarian Global
-- Rute: GET `/api/v1/search`
-- Parameter Query: `q` (string, wajib) - Teks pencarian (minimal 2 karakter).
-- Deskripsi: Mencari folder dan berkas yang memiliki nama yang cocok dengan teks kueri secara case-insensitive.
+### 4. Global Search
+- Route: GET `/api/v1/search`
+- Query Parameters: `q` (string, required) - The case-insensitive search string (minimum 2 characters).
+- Description: Performs global search matching folder or file names against the query.
