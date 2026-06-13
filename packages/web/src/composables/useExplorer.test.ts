@@ -1,8 +1,7 @@
-// @ts-nocheck
-/// <reference types="bun" />
+/// <reference path="../test-env.d.ts" />
 import { describe, expect, it, mock, beforeEach, spyOn } from "bun:test";
 import { useExplorer } from "./useExplorer";
-import { FolderDTO, FileDTO } from "@explorer/common";
+import { FolderDTO } from "@explorer/common";
 
 // Mock data
 const mockRootFolders: FolderDTO[] = [

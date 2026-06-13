@@ -1,4 +1,4 @@
-// @ts-nocheck
+/// <reference path="../test-env.d.ts" />
 import { describe, expect, it } from "bun:test";
 import FolderContents from "./FolderContents.vue";
 import { readFileSync } from "fs";
