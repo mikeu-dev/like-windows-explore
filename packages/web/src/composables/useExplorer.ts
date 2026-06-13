@@ -1,4 +1,4 @@
-import { ref, reactive } from "vue";
+import { ref } from "vue";
 import { FolderDTO, FileDTO, FolderContentsDTO } from "@explorer/common";
 import { explorerApi } from "../services/api";
 
