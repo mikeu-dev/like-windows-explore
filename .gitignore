@@ -24,6 +24,3 @@ packages/*/dist/
 *.sln
 *.sw?
 .DS_Store
-
-# Custom assessment ignore
-tasks.md
