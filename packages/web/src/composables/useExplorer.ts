@@ -45,7 +45,9 @@ export function useExplorer() {
 
   // Memperoleh folder yang terurut berdasarkan kriteria
   const sortedSubfolders = computed(() => {
-    const list = isSearching.value ? searchResults.value.folders : selectedFolderContents.value.subfolders;
+    const list = isSearching.value
+      ? searchResults.value.folders
+      : selectedFolderContents.value.subfolders;
     const folders = [...list];
     folders.sort((a, b) => {
       let comparison = 0;
@@ -255,9 +257,10 @@ export function useExplorer() {
   // Cut & Copy Item
   function cutItem() {
     if (!activeItem.value || !selectedFolderId.value) return;
-    const target = activeItem.value.type === "folder"
-      ? selectedFolderContents.value.subfolders.find((f) => f.id === activeItem.value!.id)
-      : selectedFolderContents.value.files.find((f) => f.id === activeItem.value!.id);
+    const target =
+      activeItem.value.type === "folder"
+        ? selectedFolderContents.value.subfolders.find((f) => f.id === activeItem.value!.id)
+        : selectedFolderContents.value.files.find((f) => f.id === activeItem.value!.id);
 
     if (target) {
       clipboard.value = {
@@ -271,9 +274,10 @@ export function useExplorer() {
 
   function copyItem() {
     if (!activeItem.value || !selectedFolderId.value) return;
-    const target = activeItem.value.type === "folder"
-      ? selectedFolderContents.value.subfolders.find((f) => f.id === activeItem.value!.id)
-      : selectedFolderContents.value.files.find((f) => f.id === activeItem.value!.id);
+    const target =
+      activeItem.value.type === "folder"
+        ? selectedFolderContents.value.subfolders.find((f) => f.id === activeItem.value!.id)
+        : selectedFolderContents.value.files.find((f) => f.id === activeItem.value!.id);
 
     if (target) {
       clipboard.value = {

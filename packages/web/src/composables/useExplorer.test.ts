@@ -21,9 +21,7 @@ const mockContents = {
   ]
 };
 
-const mockPath: FolderDTO[] = [
-  { id: "1", name: "Documents", parentId: null }
-];
+const mockPath: FolderDTO[] = [{ id: "1", name: "Documents", parentId: null }];
 
 // Mock API module
 const getSubfoldersMock = mock((parentId: string | null = null) => {
@@ -124,7 +122,7 @@ describe("useExplorer Composable Tests", () => {
 
   it("should handle history stack navigation (goBack, goForward, goUp)", async () => {
     const explorer = useExplorer();
-    
+
     // Inisiasi folder root map
     await explorer.loadRootFolders();
 

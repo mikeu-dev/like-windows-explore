@@ -174,7 +174,7 @@ test.describe("File Explorer App", () => {
   test("should sort items by name correctly", async ({ page }) => {
     // Masuk ke Documents
     await page.locator("aside >> text=Documents").click();
-    
+
     // Pastikan view mode diatur ke Grid agar item terlihat
     const gridBtn = page.locator("#view-grid-btn");
     await gridBtn.click();
@@ -191,8 +191,10 @@ test.describe("File Explorer App", () => {
 
     // Verifikasi urutan item (Z-A) secara dinamis
     const folderTextsZA = await page.locator('[id^="content-folder-"]').allTextContents();
-    const folderNamesZA = folderTextsZA.map(t => t.trim());
-    const sortedZA = [...folderNamesZA].sort((a, b) => b.localeCompare(a, undefined, { sensitivity: "base" }));
+    const folderNamesZA = folderTextsZA.map((t) => t.trim());
+    const sortedZA = [...folderNamesZA].sort((a, b) =>
+      b.localeCompare(a, undefined, { sensitivity: "base" })
+    );
     expect(folderNamesZA).toEqual(sortedZA);
 
     // Klik Sort lagi
@@ -203,8 +205,10 @@ test.describe("File Explorer App", () => {
 
     // Verifikasi urutan kembali ke A-Z secara dinamis
     const folderTextsAZ = await page.locator('[id^="content-folder-"]').allTextContents();
-    const folderNamesAZ = folderTextsAZ.map(t => t.trim());
-    const sortedAZ = [...folderNamesAZ].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
+    const folderNamesAZ = folderTextsAZ.map((t) => t.trim());
+    const sortedAZ = [...folderNamesAZ].sort((a, b) =>
+      a.localeCompare(b, undefined, { sensitivity: "base" })
+    );
     expect(folderNamesAZ).toEqual(sortedAZ);
   });
 
@@ -222,9 +226,9 @@ test.describe("File Explorer App", () => {
 
     // 2. Ubah nama folder menjadi TestCrudFolder
     await page.locator('[id^="content-folder-"]:has-text("New Folder")').click();
-    
+
     // Set handler dialog prompt sebelum klik Rename
-    page.once("dialog", async dialog => {
+    page.once("dialog", async (dialog) => {
       expect(dialog.type()).toBe("prompt");
       await dialog.accept("TestCrudFolder");
     });
@@ -261,7 +265,7 @@ test.describe("File Explorer App", () => {
 
     // 9. Hapus berkas di dalam TestCrudFolder
     await page.locator('[id^="content-file-"]:has-text("New File.txt")').click();
-    page.once("dialog", async dialog => {
+    page.once("dialog", async (dialog) => {
       expect(dialog.type()).toBe("confirm");
       await dialog.accept();
     });
@@ -273,7 +277,7 @@ test.describe("File Explorer App", () => {
 
     // 11. Hapus berkas kopian New File.txt di Documents
     await page.locator('[id^="content-file-"]:has-text("New File.txt")').click();
-    page.once("dialog", async dialog => {
+    page.once("dialog", async (dialog) => {
       await dialog.accept();
     });
     await page.locator('button[title="Delete"]').click();
@@ -281,7 +285,7 @@ test.describe("File Explorer App", () => {
 
     // 12. Hapus TestCrudFolder di Documents
     await page.locator('[id^="content-folder-"]:has-text("TestCrudFolder")').click();
-    page.once("dialog", async dialog => {
+    page.once("dialog", async (dialog) => {
       await dialog.accept();
     });
     await page.locator('button[title="Delete"]').click();

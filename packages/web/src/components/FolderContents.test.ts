@@ -26,18 +26,22 @@ describe("FolderContents Component SFC Verification", () => {
     expect(fileContent).toContain("isLoading: boolean;");
     expect(fileContent).toContain("isSearching: boolean;");
     expect(fileContent).toContain("searchQuery: string;");
-    expect(fileContent).toContain("activeItem: { id: string; type: \"folder\" | \"file\"; name: string } | null;");
+    expect(fileContent).toContain(
+      'activeItem: { id: string; type: "folder" | "file"; name: string } | null;'
+    );
   });
 
   it("should define emits for events", () => {
     expect(fileContent).toContain("defineEmits<{");
     expect(fileContent).toContain('(e: "navigate", folderId: string): void;');
-    expect(fileContent).toContain('(e: "select-item", item: { id: string; type: "folder" | "file"; name: string } | null): void;');
+    expect(fileContent).toContain(
+      '(e: "select-item", item: { id: string; type: "folder" | "file"; name: string } | null): void;'
+    );
   });
 
   it("should render Grid View and Detail List View blocks", () => {
     expect(fileContent).toContain("v-else-if=\"viewMode === 'grid'\"");
-    expect(fileContent).toContain("v-else class=\"w-full overflow-x-auto\"");
+    expect(fileContent).toContain('v-else class="w-full overflow-x-auto"');
   });
 
   it("should have unique test IDs for list and grid view buttons", () => {

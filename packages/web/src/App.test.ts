@@ -26,23 +26,23 @@ describe("App Component SFC Verification", () => {
 
   it("should bind useExplorer variables and methods to template elements", () => {
     // Toolbar Actions
-    expect(fileContent).toContain("@click=\"cutItem\"");
-    expect(fileContent).toContain("@click=\"copyItem\"");
-    expect(fileContent).toContain("@click=\"pasteItem\"");
-    expect(fileContent).toContain("@click=\"renameItem\"");
-    expect(fileContent).toContain("@click=\"deleteItem\"");
-    
+    expect(fileContent).toContain('@click="cutItem"');
+    expect(fileContent).toContain('@click="copyItem"');
+    expect(fileContent).toContain('@click="pasteItem"');
+    expect(fileContent).toContain('@click="renameItem"');
+    expect(fileContent).toContain('@click="deleteItem"');
+
     // History Navigation Controls
-    expect(fileContent).toContain("@click=\"goBack\"");
-    expect(fileContent).toContain("@click=\"goForward\"");
-    expect(fileContent).toContain("@click=\"goUp\"");
-    expect(fileContent).toContain("@click=\"refreshCurrent\"");
+    expect(fileContent).toContain('@click="goBack"');
+    expect(fileContent).toContain('@click="goForward"');
+    expect(fileContent).toContain('@click="goUp"');
+    expect(fileContent).toContain('@click="refreshCurrent"');
   });
 
   it("should pass props and listen to events of FolderContents", () => {
-    expect(fileContent).toContain(":subfolders=\"sortedSubfolders\"");
-    expect(fileContent).toContain(":files=\"sortedFiles\"");
-    expect(fileContent).toContain("@navigate=\"selectFolder\"");
-    expect(fileContent).toContain("@select-item=\"activeItem = $event\"");
+    expect(fileContent).toContain(':subfolders="sortedSubfolders"');
+    expect(fileContent).toContain(':files="sortedFiles"');
+    expect(fileContent).toContain('@navigate="selectFolder"');
+    expect(fileContent).toContain('@select-item="activeItem = $event"');
   });
 });

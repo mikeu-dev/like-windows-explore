@@ -1,7 +1,9 @@
 <template>
   <div class="h-full flex flex-col">
     <!-- Toolbar Panel Kanan -->
-    <div class="flex items-center justify-between pb-4 border-b border-outline-variant/30 mb-4 shrink-0">
+    <div
+      class="flex items-center justify-between pb-4 border-b border-outline-variant/30 mb-4 shrink-0"
+    >
       <div class="text-body-sm text-on-surface-variant">
         <span v-if="isSearching"
           >Hasil Pencarian untuk:
