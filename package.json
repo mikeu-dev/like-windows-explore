@@ -15,6 +15,7 @@
     "format": "prettier --write \"**/*.{ts,vue,json,md,html,css,js}\"",
     "format:check": "prettier --check \"**/*.{ts,vue,json,md,html,css,js}\"",
     "lint": "eslint \"packages/**/*.{ts,vue}\"",
+    "lint:fix": "eslint \"packages/**/*.{ts,vue}\" --fix",
     "check": "tsc -p packages/api/tsconfig.json --noEmit && vue-tsc -p packages/web/tsconfig.json --noEmit && tsc -p packages/e2e/tsconfig.json --noEmit"
   },
   "devDependencies": {
