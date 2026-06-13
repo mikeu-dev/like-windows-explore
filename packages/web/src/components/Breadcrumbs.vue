@@ -2,26 +2,26 @@
   <nav
     id="breadcrumbs-nav"
     aria-label="Breadcrumb"
-    class="flex items-center space-x-1.5 text-xs select-none overflow-x-auto py-1"
+    class="flex items-center text-body-sm font-body-sm text-on-surface overflow-hidden whitespace-nowrap gap-1 w-full select-none"
   >
     <!-- Home / Root Node -->
-    <span class="flex items-center">
-      <span class="mr-1">💻</span>
-      <span class="text-explorer-muted font-medium">Ini PC</span>
+    <span class="flex items-center text-primary">
+      <span class="material-symbols-outlined scale-90 mr-1.5">computer</span>
+      <span class="hover:bg-secondary-container/50 px-1 rounded cursor-default font-medium">Ini PC</span>
     </span>
 
     <!-- Separator -->
-    <span class="text-explorer-muted/50">/</span>
+    <span class="material-symbols-outlined text-on-surface-variant scale-75">chevron_right</span>
 
     <!-- Iterasi Rantai Path Folder -->
     <template v-for="(folder, index) in path" :key="folder.id">
       <button
         :id="'breadcrumb-item-' + folder.id"
-        class="hover:text-explorer-active hover:underline transition-colors focus:outline-none font-medium whitespace-nowrap"
+        class="hover:bg-secondary-container/50 px-1 rounded transition-colors focus:outline-none whitespace-nowrap"
         :class="[
           index === path.length - 1
-            ? 'text-explorer-text cursor-default font-semibold'
-            : 'text-explorer-muted'
+            ? 'text-on-surface font-semibold cursor-default'
+            : 'text-on-surface-variant font-medium'
         ]"
         :disabled="index === path.length - 1"
         @click="emit('navigate', folder.id)"
@@ -30,7 +30,7 @@
       </button>
 
       <!-- Separator di antara items -->
-      <span v-if="index < path.length - 1" class="text-explorer-muted/50">/</span>
+      <span v-if="index < path.length - 1" class="material-symbols-outlined text-on-surface-variant scale-75">chevron_right</span>
     </template>
   </nav>
 </template>

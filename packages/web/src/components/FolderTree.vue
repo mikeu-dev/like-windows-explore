@@ -1,9 +1,9 @@
 <template>
-  <div class="h-full overflow-y-auto pr-2">
-    <div v-if="folders.length === 0" class="text-explorer-muted text-sm p-4 text-center">
+  <div class="h-full overflow-y-auto no-scrollbar">
+    <div v-if="folders.length === 0" class="text-on-surface-variant/70 text-body-sm p-4 text-center">
       Tidak ada folder root.
     </div>
-    <div v-else class="space-y-1">
+    <div v-else class="space-y-0.5">
       <FolderTreeNode
         v-for="folder in folders"
         :key="folder.id"
