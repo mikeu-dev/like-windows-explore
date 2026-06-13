@@ -12,7 +12,7 @@
     "dev:web": "bun --cwd packages/web dev",
     "dev": "bun run --filter '*' dev",
     "build": "bun run --filter '*' build",
-    "test": "bun test",
+    "test": "bun test packages/api packages/web",
     "test:e2e": "bun --cwd packages/e2e test",
     "format": "prettier --write \"**/*.{ts,vue,json,md,html,css,js}\"",
     "format:check": "prettier --check \"**/*.{ts,vue,json,md,html,css,js}\"",
