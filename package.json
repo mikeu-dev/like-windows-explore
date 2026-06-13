@@ -1,6 +1,7 @@
 {
   "name": "like-windows-explorer",
   "private": true,
+  "type": "module",
   "workspaces": [
     "packages/*"
   ],
@@ -17,6 +18,7 @@
     "check": "tsc -p packages/api/tsconfig.json --noEmit && vue-tsc -p packages/web/tsconfig.json --noEmit && tsc -p packages/e2e/tsconfig.json --noEmit"
   },
   "devDependencies": {
+    "@eslint/js": "^9.4.0",
     "@playwright/test": "^1.44.1",
     "eslint": "^9.4.0",
     "eslint-plugin-vue": "^9.26.0",
