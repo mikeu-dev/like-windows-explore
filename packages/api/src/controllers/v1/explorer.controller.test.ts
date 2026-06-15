@@ -37,8 +37,12 @@ mock.module("../../services/explorer.service", () => {
   };
 });
 
-// Import the controller to test
-import { explorerController } from "./explorer.controller";
+// Import the controller dynamically to ensure mock.module runs first
+const { explorerController } = require("./explorer.controller");
+
+explorerController.onError(({ error }: { error: any }) => {
+  console.error("ELYSIA_ERROR:", error);
+});
 
 describe("ExplorerController Unit Tests", () => {
   it("GET /shortcuts should return shortcut folder IDs", async () => {

@@ -1,3 +1,4 @@
+import "../test-env.d.ts";
 import { describe, expect, it } from "bun:test";
 import FolderTree from "./FolderTree.vue";
 import { readFileSync } from "fs";

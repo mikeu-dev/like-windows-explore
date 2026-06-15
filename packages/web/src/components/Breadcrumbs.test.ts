@@ -1,3 +1,4 @@
+import "../test-env.d.ts";
 import { describe, expect, it } from "bun:test";
 import Breadcrumbs from "./Breadcrumbs.vue";
 import { readFileSync } from "fs";
