@@ -4,18 +4,17 @@
     aria-label="Breadcrumb"
     class="flex items-center text-body-sm font-body-sm text-on-surface overflow-hidden whitespace-nowrap gap-1 w-full select-none"
   >
-    <!-- Home / Root Node -->
     <span class="flex items-center text-primary">
       <span class="material-symbols-outlined scale-90 mr-1.5">computer</span>
       <span class="hover:bg-secondary-container/50 px-1 rounded cursor-default font-medium"
-        >Ini PC</span
+        >This PC</span
       >
     </span>
 
     <!-- Separator -->
     <span class="material-symbols-outlined text-on-surface-variant scale-75">chevron_right</span>
 
-    <!-- Iterasi Rantai Path Folder -->
+    <!-- Folder Path Chain Iteration -->
     <template v-for="(folder, index) in path" :key="folder.id">
       <button
         :id="'breadcrumb-item-' + folder.id"
@@ -31,7 +30,7 @@
         {{ folder.name }}
       </button>
 
-      <!-- Separator di antara items -->
+      <!-- Separator between items -->
       <span
         v-if="index < path.length - 1"
         class="material-symbols-outlined text-on-surface-variant scale-75"

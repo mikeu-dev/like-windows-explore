@@ -91,7 +91,7 @@ mock.module("../services/api", () => {
 
 describe("useExplorer Composable Tests", () => {
   beforeEach(() => {
-    // Reset global mocks jika diperlukan
+    // Reset global mocks if necessary
     getSubfoldersMock.mockClear();
     getFolderContentsMock.mockClear();
     getFolderPathMock.mockClear();
@@ -141,10 +141,10 @@ describe("useExplorer Composable Tests", () => {
   it("should handle history stack navigation (goBack, goForward, goUp)", async () => {
     const explorer = useExplorer();
 
-    // Inisiasi folder root map
+    // Initialize root folder map
     await explorer.loadRootFolders();
 
-    // Navigasi: root -> folder "1" -> folder "2"
+    // Navigation: root -> folder "1" -> folder "2"
     await explorer.selectFolder("1");
     await explorer.selectFolder("2");
 
@@ -196,7 +196,7 @@ describe("useExplorer Composable Tests", () => {
     const explorer = useExplorer();
     await explorer.selectFolder("1");
 
-    // Pilih item
+    // Select item
     explorer.activeItem.value = { id: "101", type: "file", name: "resume.pdf" };
 
     // Copy
@@ -217,7 +217,7 @@ describe("useExplorer Composable Tests", () => {
     explorer.activeItem.value = { id: "101", type: "file", name: "resume.pdf" };
     explorer.copyItem();
 
-    // Ubah folder tujuan
+    // Change destination folder
     explorer.selectedFolderId.value = "2";
 
     await explorer.pasteItem();

@@ -2,18 +2,18 @@ import { test, expect } from "@playwright/test";
 
 test.describe("File Explorer App", () => {
   test.beforeEach(async ({ page }) => {
-    // Membuka halaman utama aplikasi frontend
+    // Open the main page of the frontend application
     await page.goto("/");
   });
 
   test("should display initial load state with root folders in sidebar", async ({ page }) => {
-    // Verifikasi judul utama
+    // Verify main title
     await expect(page.locator("h1")).toHaveText("File Explorer");
     await expect(page.locator("p.text-explorer-muted")).toHaveText(
-      "Sistem Manajemen Folder Hirarkis"
+      "Hierarchical Folder Management System"
     );
 
-    // Verifikasi sidebar dimuat dan berisi folder utama
+    // Verify sidebar is loaded and contains main folders
     const sidebar = page.locator("aside");
     await expect(sidebar).toBeVisible();
     await expect(sidebar.locator("text=Documents")).toBeVisible();
@@ -21,45 +21,45 @@ test.describe("File Explorer App", () => {
     await expect(sidebar.locator("text=Music")).toBeVisible();
     await expect(sidebar.locator("text=Downloads")).toBeVisible();
 
-    // Verifikasi pesan "Belum ada folder terpilih" di panel kanan saat awal dimuat
-    await expect(page.locator("text=Belum ada folder terpilih")).toBeVisible();
+    // Verify "No folder selected" message in the right panel on initial load
+    await expect(page.locator("text=No folder selected")).toBeVisible();
     await expect(
       page.locator(
-        "text=Silakan klik salah satu folder di panel navigasi kiri untuk melihat isinya."
+        "text=Please click a folder in the left navigation panel to view its contents."
       )
     ).toBeVisible();
   });
 
   test("should navigate to folders and update breadcrumbs & contents", async ({ page }) => {
-    // 1. Klik folder "Documents" di sidebar
+    // 1. Click "Documents" folder in the sidebar
     await page.locator("aside >> text=Documents").click();
 
-    // Verifikasi breadcrumbs berisi "Ini PC" dan "Documents"
-    await expect(page.locator("#breadcrumbs-nav")).toContainText("Ini PC");
+    // Verify breadcrumbs contain "This PC" and "Documents"
+    await expect(page.locator("#breadcrumbs-nav")).toContainText("This PC");
     await expect(page.locator("#breadcrumbs-nav")).toContainText("Documents");
 
-    // Verifikasi isi folder "Documents" (Work, Personal, Archive) muncul di panel utama
+    // Verify "Documents" folder contents (Work, Personal, Archive) appear in the main panel
     const contentPanel = page.locator("main");
     await expect(contentPanel.locator("text=Work")).toBeVisible();
     await expect(contentPanel.locator("text=Personal")).toBeVisible();
     await expect(contentPanel.locator("text=Archive")).toBeVisible();
 
-    // 2. Double-click subfolder "Work" di panel konten utama
+    // 2. Double-click "Work" subfolder in the main content panel
     const workFolder = contentPanel.locator('[id^="content-folder-"]:has-text("Work")');
     await workFolder.dblclick();
 
-    // Verifikasi breadcrumbs ter-update dengan "Work"
+    // Verify breadcrumbs are updated with "Work"
     await expect(page.locator("#breadcrumbs-nav")).toContainText("Work");
 
-    // Verifikasi isi folder "Work" (file pdf, docx, xlsx) muncul
+    // Verify "Work" folder contents (pdf, docx, xlsx files) appear
     await expect(contentPanel.locator("text=curriculum_vitae.pdf")).toBeVisible();
     await expect(contentPanel.locator("text=project_requirements.docx")).toBeVisible();
     await expect(contentPanel.locator("text=monthly_budget.xlsx")).toBeVisible();
 
-    // 3. Klik "Documents" pada breadcrumb untuk kembali
+    // 3. Click "Documents" on breadcrumb to go back
     await page.locator("#breadcrumbs-nav >> text=Documents").click();
 
-    // Verifikasi konten kembali menampilkan Work, Personal, Archive
+    // Verify content displays Work, Personal, Archive again
     await expect(contentPanel.locator("text=Work")).toBeVisible();
     await expect(contentPanel.locator("text=Personal")).toBeVisible();
     await expect(contentPanel.locator("text=Archive")).toBeVisible();
@@ -69,127 +69,124 @@ test.describe("File Explorer App", () => {
     const searchInput = page.locator("#search-input");
     await expect(searchInput).toBeVisible();
 
-    // Ketik "budget" ke dalam kolom pencarian
+    // Type "budget" into the search box
     await searchInput.fill("budget");
 
-    // Tunggu debounce dan pastikan header pencarian muncul
-    await expect(page.locator('text=Hasil Pencarian untuk: "budget"')).toBeVisible();
-
-    // Pastikan file "monthly_budget.xlsx" muncul di hasil pencarian
+    // Ensure "monthly_budget.xlsx" file appears in the search results
     await expect(page.locator("text=monthly_budget.xlsx")).toBeVisible();
 
-    // Pastikan item lain yang tidak cocok tidak muncul
+    // Ensure other non-matching items do not appear
     await expect(page.locator("text=fitness_plan.txt")).not.toBeVisible();
 
-    // Klik tombol hapus/clear pencarian
+    // Click the search clear button
     const clearBtn = page.locator("#search-clear-btn");
     await expect(clearBtn).toBeVisible();
     await clearBtn.click();
 
-    // Pastikan pencarian kembali bersih
+    // Ensure search input is cleared
     await expect(searchInput).toHaveValue("");
-    await expect(page.locator("text=Belum ada folder terpilih")).toBeVisible();
+    await expect(page.locator("text=No folder selected")).toBeVisible();
   });
 
   test("should toggle view modes between grid and list", async ({ page }) => {
-    // Masuk ke folder Documents
+    // Enter Documents folder
     await page.locator("aside >> text=Documents").click();
 
-    // Secara default, view mode adalah Grid. Pastikan view-grid-btn aktif
+    // By default, view mode is Grid. Ensure view-grid-btn is active
     const gridBtn = page.locator("#view-grid-btn");
     const listBtn = page.locator("#view-list-btn");
     await expect(gridBtn).toHaveClass(/text-primary/);
 
-    // Ganti ke tampilan Detail List
+    // Switch to Detail List view
     await listBtn.click();
     await expect(listBtn).toHaveClass(/text-primary/);
     await expect(gridBtn).not.toHaveClass(/text-primary/);
 
-    // Verifikasi table headers muncul (Nama, Tipe, Ukuran)
-    await expect(page.locator('table th:has-text("Nama")')).toBeVisible();
-    await expect(page.locator('table th:has-text("Tipe")')).toBeVisible();
-    await expect(page.locator('table th:has-text("Ukuran")')).toBeVisible();
+    // Verify table headers appear (Name, Type, Size)
+    await expect(page.locator('table th:has-text("Name")')).toBeVisible();
+    await expect(page.locator('table th:has-text("Type")')).toBeVisible();
+    await expect(page.locator('table th:has-text("Size")')).toBeVisible();
 
-    // Kembalikan ke tampilan Grid
+    // Switch back to Grid view
     await gridBtn.click();
     await expect(gridBtn).toHaveClass(/text-primary/);
-    await expect(page.locator('table th:has-text("Nama")')).not.toBeVisible();
+    await expect(page.locator('table th:has-text("Name")')).not.toBeVisible();
   });
 
   test("should open and close file detail modal", async ({ page }) => {
-    // Masuk ke Documents >> Work
+    // Enter Documents >> Work
     await page.locator("aside >> text=Documents").click();
     await page.locator('[id^="content-folder-"]:has-text("Work")').dblclick();
 
-    // Double click file "curriculum_vitae.pdf"
+    // Double click "curriculum_vitae.pdf" file
     const fileItem = page.locator('[id^="content-file-"]:has-text("curriculum_vitae.pdf")');
     await fileItem.dblclick();
 
-    // Verifikasi modal detail file muncul
+    // Verify file detail modal appears
     const modal = page.locator(".fixed.inset-0");
     await expect(modal).toBeVisible();
     await expect(modal.locator("h2")).toHaveText("curriculum_vitae.pdf");
-    await expect(modal.locator("text=Berkas PDF")).toBeVisible();
-    await expect(modal.locator("text=Ukuran File:")).toBeVisible();
+    await expect(modal.locator("text=PDF Document")).toBeVisible();
+    await expect(modal.locator("text=File Size:")).toBeVisible();
 
-    // Klik tombol Tutup untuk menutup modal
-    await modal.locator('button:has-text("Tutup")').click();
+    // Click Close button to close the modal
+    await modal.locator('button:has-text("Close")').click();
 
-    // Verifikasi modal tertutup
+    // Verify modal is closed
     await expect(modal).not.toBeVisible();
   });
 
   test("should navigate using history controls (Back, Forward, Up, Refresh)", async ({ page }) => {
-    // 1. Masuk ke Documents
+    // 1. Go into Documents
     await page.locator("aside >> text=Documents").click();
     await expect(page.locator("#breadcrumbs-nav")).toContainText("Documents");
 
-    // 2. Masuk ke Work
+    // 2. Go into Work
     await page.locator('[id^="content-folder-"]:has-text("Work")').dblclick();
     await expect(page.locator("#breadcrumbs-nav")).toContainText("Work");
 
-    // 3. Uji Tombol Back
+    // 3. Test Back Button
     const backBtn = page.locator('button:has-text("arrow_back")');
     await backBtn.click();
     await expect(page.locator("#breadcrumbs-nav")).toContainText("Documents");
     await expect(page.locator("#breadcrumbs-nav")).not.toContainText("Work");
 
-    // 4. Uji Tombol Forward
+    // 4. Test Forward Button
     const forwardBtn = page.locator('button:has-text("arrow_forward")');
     await forwardBtn.click();
     await expect(page.locator("#breadcrumbs-nav")).toContainText("Work");
 
-    // 5. Uji Tombol Up
+    // 5. Test Up Button
     const upBtn = page.locator('button:has-text("arrow_upward")');
     await upBtn.click();
     await expect(page.locator("#breadcrumbs-nav")).toContainText("Documents");
 
-    // 6. Uji Tombol Refresh
+    // 6. Test Refresh Button
     const refreshBtn = page.locator('button:has-text("refresh")');
     await refreshBtn.click();
-    // Memastikan konten Documents (Work, Personal, Archive) tetap ada setelah refresh
+    // Ensure Documents contents (Work, Personal, Archive) remain after refresh
     await expect(page.locator("main >> text=Work")).toBeVisible();
   });
 
   test("should sort items by name correctly", async ({ page }) => {
-    // Masuk ke Documents
+    // Go into Documents
     await page.locator("aside >> text=Documents").click();
 
-    // Pastikan view mode diatur ke Grid agar item terlihat
+    // Ensure view mode is set to Grid so items are visible
     const gridBtn = page.locator("#view-grid-btn");
     await gridBtn.click();
 
-    // Pastikan item-item termuat
+    // Ensure items are loaded
     await expect(page.locator("main >> text=Work")).toBeVisible();
 
-    // Klik tombol Sort
+    // Click Sort button
     const sortBtn = page.locator('button:has-text("Sort")');
     await sortBtn.click();
 
-    // Pilih Nama (Z-A)
-    await page.locator('button:has-text("Nama (Z-A)")').click();
+    // Select Name (Z-A)
+    await page.locator('button:has-text("Name (Z-A)")').click();
 
-    // Verifikasi urutan item (Z-A) secara dinamis
+    // Verify item order (Z-A) dynamically
     const folderTextsZA = await page.locator('[id^="content-folder-"]').allTextContents();
     const folderNamesZA = folderTextsZA.map((t) => t.trim());
     const sortedZA = [...folderNamesZA].sort((a, b) =>
@@ -197,13 +194,13 @@ test.describe("File Explorer App", () => {
     );
     expect(folderNamesZA).toEqual(sortedZA);
 
-    // Klik Sort lagi
+    // Click Sort again
     await sortBtn.click();
 
-    // Pilih Nama (A-Z)
-    await page.locator('button:has-text("Nama (A-Z)")').click();
+    // Select Name (A-Z)
+    await page.locator('button:has-text("Name (A-Z)")').click();
 
-    // Verifikasi urutan kembali ke A-Z secara dinamis
+    // Verify order returns to A-Z dynamically
     const folderTextsAZ = await page.locator('[id^="content-folder-"]').allTextContents();
     const folderNamesAZ = folderTextsAZ.map((t) => t.trim());
     const sortedAZ = [...folderNamesAZ].sort((a, b) =>
@@ -213,57 +210,57 @@ test.describe("File Explorer App", () => {
   });
 
   test("should perform complete CRUD operations and clipboard actions", async ({ page }) => {
-    // Masuk ke Documents
+    // Go into Documents
     await page.locator("aside >> text=Documents").click();
 
-    // 1. Buat folder baru
+    // 1. Create a new folder
     const newBtn = page.locator('button:has-text("New")');
     await newBtn.click();
-    await page.locator('button:has-text("Folder Baru")').click();
+    await page.locator('button:has-text("New Folder")').click();
 
-    // Pastikan folder default dibuat
+    // Ensure default folder is created
     await expect(page.locator("main >> text=New Folder")).toBeVisible();
 
-    // 2. Ubah nama folder menjadi TestCrudFolder
+    // 2. Rename folder to TestCrudFolder
     await page.locator('[id^="content-folder-"]:has-text("New Folder")').click();
 
-    // Set handler dialog prompt sebelum klik Rename
+    // Set prompt dialog handler before clicking Rename
     page.once("dialog", async (dialog) => {
       expect(dialog.type()).toBe("prompt");
       await dialog.accept("TestCrudFolder");
     });
     await page.locator('button[title="Rename"]').click();
 
-    // Pastikan nama folder berubah
+    // Ensure folder name is changed
     await expect(page.locator("main >> text=TestCrudFolder")).toBeVisible();
     await expect(page.locator("main >> text=New Folder")).not.toBeVisible();
 
-    // 3. Masuk ke TestCrudFolder
+    // 3. Go into TestCrudFolder
     await page.locator('[id^="content-folder-"]:has-text("TestCrudFolder")').dblclick();
     await expect(page.locator("#breadcrumbs-nav")).toContainText("TestCrudFolder");
 
-    // 4. Buat berkas baru
+    // 4. Create a new file
     await newBtn.click();
-    await page.locator('button:has-text("Berkas Baru")').click();
+    await page.locator('button:has-text("New File")').click();
     await expect(page.locator("main >> text=New File.txt")).toBeVisible();
 
-    // 5. Salin berkas (Copy)
+    // 5. Copy file
     await page.locator('[id^="content-file-"]:has-text("New File.txt")').click();
     await page.locator('button[title="Copy"]').click();
 
-    // 6. Navigasi Up kembali ke Documents
+    // 6. Navigate Up back to Documents
     await page.locator('button:has-text("arrow_upward")').click();
     await expect(page.locator("#breadcrumbs-nav")).toContainText("Documents");
 
-    // 7. Tempel berkas (Paste)
+    // 7. Paste file
     await page.locator('button[title="Paste"]').click();
     await expect(page.locator("main >> text=New File.txt")).toBeVisible();
 
-    // 8. Masuk kembali ke TestCrudFolder untuk memverifikasi file asli masih ada (karena Copy)
+    // 8. Go back into TestCrudFolder to verify original file still exists (due to Copy)
     await page.locator('[id^="content-folder-"]:has-text("TestCrudFolder")').dblclick();
     await expect(page.locator("main >> text=New File.txt")).toBeVisible();
 
-    // 9. Hapus berkas di dalam TestCrudFolder
+    // 9. Delete file inside TestCrudFolder
     await page.locator('[id^="content-file-"]:has-text("New File.txt")').click();
     page.once("dialog", async (dialog) => {
       expect(dialog.type()).toBe("confirm");
@@ -272,10 +269,10 @@ test.describe("File Explorer App", () => {
     await page.locator('button[title="Delete"]').click();
     await expect(page.locator("main >> text=New File.txt")).not.toBeVisible();
 
-    // 10. Kembali ke Documents
+    // 10. Return to Documents
     await page.locator('button:has-text("arrow_upward")').click();
 
-    // 11. Hapus berkas kopian New File.txt di Documents
+    // 11. Delete the copied New File.txt file in Documents
     await page.locator('[id^="content-file-"]:has-text("New File.txt")').click();
     page.once("dialog", async (dialog) => {
       await dialog.accept();
@@ -283,7 +280,7 @@ test.describe("File Explorer App", () => {
     await page.locator('button[title="Delete"]').click();
     await expect(page.locator("main >> text=New File.txt")).not.toBeVisible();
 
-    // 12. Hapus TestCrudFolder di Documents
+    // 12. Delete TestCrudFolder in Documents
     await page.locator('[id^="content-folder-"]:has-text("TestCrudFolder")').click();
     page.once("dialog", async (dialog) => {
       await dialog.accept();

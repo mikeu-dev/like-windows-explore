@@ -11,6 +11,6 @@ export default defineConfig({
   },
   server: {
     port: 5173,
-    host: "127.0.0.1" // Keamanan: Hanya mendengarkan di localhost (127.0.0.1) untuk development
+    host: "127.0.0.1" // Security: Only listen on localhost (127.0.0.1) for development
   }
 });

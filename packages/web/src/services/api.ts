@@ -98,7 +98,7 @@ export const explorerApi = {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name })
       });
-      if (!response.ok) throw new Error("Gagal mengubah nama folder");
+      if (!response.ok) throw new Error("Failed to rename folder");
       return await response.json();
     } catch (error) {
       console.error("API Error (renameFolder):", error);
@@ -114,7 +114,7 @@ export const explorerApi = {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name })
       });
-      if (!response.ok) throw new Error("Gagal mengubah nama berkas");
+      if (!response.ok) throw new Error("Failed to rename file");
       return await response.json();
     } catch (error) {
       console.error("API Error (renameFile):", error);

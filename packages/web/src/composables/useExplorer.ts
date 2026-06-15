@@ -8,7 +8,7 @@ export interface ClientFolderNode extends FolderDTO {
   isOpen?: boolean;
   isLoading?: boolean;
   isLoaded?: boolean;
-  dbFolderId?: string; // Menyimpan ID DB asli jika dibutuhkan untuk rujukan
+  dbFolderId?: string; // Stores original DB ID if needed for reference
 }
 
 export function useExplorer() {
@@ -495,7 +495,7 @@ export function useExplorer() {
   // Rename selected item
   async function renameItem() {
     if (!activeItem.value || !selectedFolderId.value) return;
-    const newName = prompt(`Ubah nama "${activeItem.value.name}" menjadi:`, activeItem.value.name);
+    const newName = prompt(`Rename "${activeItem.value.name}" to:`, activeItem.value.name);
     if (!newName || newName.trim() === "") return;
 
     if (activeItem.value.type === "folder") {

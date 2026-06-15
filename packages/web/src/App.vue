@@ -8,7 +8,7 @@
     >
       <!-- Hidden tags to satisfy E2E tests -->
       <h1 class="hidden">File Explorer</h1>
-      <p class="text-explorer-muted hidden">Sistem Manajemen Folder Hirarkis</p>
+      <p class="text-explorer-muted hidden">Hierarchical Folder Management System</p>
 
       <div class="flex items-center gap-4 w-full">
         <!-- Back/Forward/Up Navigation Cluster -->
@@ -210,7 +210,7 @@
               :class="{ 'text-primary font-medium': sortBy === 'name' && sortOrder === 'asc' }"
               @click="setSort('name', 'asc')"
             >
-              Nama (A-Z)
+              Name (A-Z)
               <span
                 v-if="sortBy === 'name' && sortOrder === 'asc'"
                 class="material-symbols-outlined text-xs"
@@ -222,7 +222,7 @@
               :class="{ 'text-primary font-medium': sortBy === 'name' && sortOrder === 'desc' }"
               @click="setSort('name', 'desc')"
             >
-              Nama (Z-A)
+              Name (Z-A)
               <span
                 v-if="sortBy === 'name' && sortOrder === 'desc'"
                 class="material-symbols-outlined text-xs"
@@ -234,7 +234,7 @@
               :class="{ 'text-primary font-medium': sortBy === 'type' }"
               @click="setSort('type', 'asc')"
             >
-              Tipe
+              Type
               <span v-if="sortBy === 'type'" class="material-symbols-outlined text-xs"
                 >check</span
               >
@@ -244,7 +244,7 @@
               :class="{ 'text-primary font-medium': sortBy === 'size' }"
               @click="setSort('size', 'asc')"
             >
-              Ukuran
+              Size
               <span v-if="sortBy === 'size'" class="material-symbols-outlined text-xs"
                 >check</span
               >
@@ -690,13 +690,13 @@ const previewItem = computed(() => {
     }
   }
 
-  // Jika tidak ada item yang aktif dipilih, tampilkan folder aktif saat ini
+  // If no active item is selected, display the current active folder
   if (breadcrumbs.value.length > 0) {
     const activeFolder = breadcrumbs.value[breadcrumbs.value.length - 1];
     return { ...activeFolder, type: "folder" };
   }
 
-  // Tangani kasus "This PC" atau folder virtual lain di mana breadcrumbs kosong
+  // Handle "This PC" or other virtual folders where breadcrumbs are empty
   if (selectedFolderId.value) {
     let name = "This PC";
     if (selectedFolderId.value === "recycle-bin") name = "Recycle Bin";
@@ -732,7 +732,7 @@ const selectedItemsSize = computed(() => {
   return fileObj ? formatBytes(fileObj.size) : "";
 });
 
-// Helper-helper untuk visualisasi berkas & folder
+// Helper functions for file & folder visualization
 const getFolderIcon = (name: string) => {
   const n = name.toLowerCase();
   if (n === "documents") return "description";

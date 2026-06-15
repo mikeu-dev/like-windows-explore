@@ -3,7 +3,7 @@ import FolderTreeNode from "./FolderTreeNode.vue";
 import { readFileSync } from "fs";
 
 describe("FolderTreeNode Component SFC Verification", () => {
-  // Karena Bun mengimpor berkas .vue sebagai path aset string, kita baca isi file-nya secara manual menggunakan fs
+  // Since Bun imports .vue files as asset string paths, we read the file contents manually using fs
   const fileContent = readFileSync(FolderTreeNode, "utf-8");
 
   it("should resolve the SFC component path", () => {
@@ -12,7 +12,7 @@ describe("FolderTreeNode Component SFC Verification", () => {
   });
 
   it("should contain the Vue SFC template structure", () => {
-    // Memverifikasi elemen-elemen SFC Vue
+    // Verify Vue SFC elements
     expect(fileContent).toContain("<template>");
     expect(fileContent).toContain("</template>");
     expect(fileContent).toContain('<script setup lang="ts">');
@@ -20,14 +20,14 @@ describe("FolderTreeNode Component SFC Verification", () => {
   });
 
   it("should define props for folder and selectedId in script", () => {
-    // Memverifikasi tipe data properti yang didukung
+    // Verify supported property data types
     expect(fileContent).toContain("defineProps<{");
     expect(fileContent).toContain("folder: ClientFolderNode");
     expect(fileContent).toContain("selectedId: string | null");
   });
 
   it("should define custom recursive rendering tag", () => {
-    // Memverifikasi penulisan komponen rekursif
+    // Verify recursive component syntax
     expect(fileContent).toContain("<FolderTreeNode");
   });
 });
