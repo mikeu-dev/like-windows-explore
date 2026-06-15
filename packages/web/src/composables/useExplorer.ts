@@ -225,6 +225,7 @@ export function useExplorer() {
 
   // Melakukan ekspansi folder dan memuat subfolder di dalamnya secara bertahap (lazy loading)
   async function expandFolder(folder: ClientFolderNode) {
+    if (!folder) return;
     if (folder.id === "onedrive-root" || folder.id === shortcutFolderIds.value.onedrive) {
       openFolderIds.value["onedrive-root"] = !openFolderIds.value["onedrive-root"];
       const id = shortcutFolderIds.value.onedrive;

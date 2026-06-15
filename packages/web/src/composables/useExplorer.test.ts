@@ -5,14 +5,14 @@ import { FolderDTO } from "@explorer/common";
 
 // Mock data
 const mockRootFolders: FolderDTO[] = [
-  { id: "1", name: "Documents", parentId: null },
-  { id: "2", name: "Pictures", parentId: null }
+  { id: "1", name: "Documents", parentId: null, hasChildren: true },
+  { id: "2", name: "Pictures", parentId: null, hasChildren: false }
 ];
 
 const mockContents = {
   subfolders: [
-    { id: "3", name: "Work", parentId: "1" },
-    { id: "4", name: "Personal", parentId: "1" }
+    { id: "3", name: "Work", parentId: "1", hasChildren: false },
+    { id: "4", name: "Personal", parentId: "1", hasChildren: false }
   ],
   files: [
     { id: "101", name: "resume.pdf", size: 500000, folderId: "1" },
@@ -20,11 +20,12 @@ const mockContents = {
   ]
 };
 
-const mockPath: FolderDTO[] = [{ id: "1", name: "Documents", parentId: null }];
+const mockPath: FolderDTO[] = [{ id: "1", name: "Documents", parentId: null, hasChildren: true }];
 
 // Mock API module
 const getSubfoldersMock = mock((parentId: string | null = null) => {
   if (parentId === null) return Promise.resolve(mockRootFolders);
+  if (parentId === "1") return Promise.resolve(mockContents.subfolders);
   return Promise.resolve([]);
 });
 
@@ -37,6 +38,18 @@ const getFolderPathMock = mock((folderId: string) => {
   if (folderId === "1") return Promise.resolve(mockPath);
   return Promise.resolve([]);
 });
+
+const getShortcutsMock = mock(() => Promise.resolve({
+  desktop: "",
+  downloads: "",
+  documents: "1",
+  pictures: "2",
+  music: "",
+  videos: "",
+  onedrive: "onedrive-id",
+  localC: "1",
+  localD: "2"
+}));
 
 const createFolderMock = mock(() => Promise.resolve({} as any));
 const createFileMock = mock(() => Promise.resolve({} as any));
@@ -56,6 +69,7 @@ mock.module("../services/api", () => {
       getSubfolders: getSubfoldersMock,
       getFolderContents: getFolderContentsMock,
       getFolderPath: getFolderPathMock,
+      getShortcuts: getShortcutsMock,
       createFolder: createFolderMock,
       createFile: createFileMock,
       renameFolder: renameFolderMock,
@@ -71,12 +85,14 @@ mock.module("../services/api", () => {
   };
 });
 
+
 describe("useExplorer Composable Tests", () => {
   beforeEach(() => {
     // Reset global mocks jika diperlukan
     getSubfoldersMock.mockClear();
     getFolderContentsMock.mockClear();
     getFolderPathMock.mockClear();
+    getShortcutsMock.mockClear();
     createFolderMock.mockClear();
     createFileMock.mockClear();
     renameFolderMock.mockClear();
