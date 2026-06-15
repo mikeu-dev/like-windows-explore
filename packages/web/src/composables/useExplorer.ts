@@ -8,6 +8,7 @@ export interface ClientFolderNode extends FolderDTO {
   isOpen?: boolean;
   isLoading?: boolean;
   isLoaded?: boolean;
+  dbFolderId?: string; // Menyimpan ID DB asli jika dibutuhkan untuk rujukan
 }
 
 export function useExplorer() {
@@ -43,20 +44,177 @@ export function useExplorer() {
   // Map untuk akses cepat O(1) ke node mana pun dalam pohon
   const folderMap = new Map<string, ClientFolderNode>();
 
+  // Daftar folder virtual
+  const virtualFolders = [
+    "this-pc",
+    "desktop",
+    "videos",
+    "local-c",
+    "local-d",
+    "home",
+    "gallery",
+    "onedrive-root",
+    "network",
+    "linux"
+  ];
+
+  // Menyimpan status terbuka/tertutup folder virtual
+  const openFolderIds = ref<Record<string, boolean>>({
+    "this-pc": true, // Terbuka secara default
+    "network": false,
+    "linux": false,
+    "onedrive-root": false
+  });
+
+  // Folder root OneDrive di DB
+  const dbOneDriveFolder = computed(() =>
+    rootFolders.value.find((f) => f.name.toLowerCase() === "onedrive")
+  );
+
+  // Node OneDrive Virtual di Section 1
+  const oneDriveNode = computed<ClientFolderNode>(() => {
+    const dbFolder = dbOneDriveFolder.value;
+    return {
+      id: "onedrive-root",
+      name: "OneDrive - Personal",
+      parentId: null,
+      hasChildren: dbFolder ? dbFolder.hasChildren : false,
+      isOpen: !!openFolderIds.value["onedrive-root"],
+      isLoaded: dbFolder ? dbFolder.isLoaded : true,
+      isLoading: dbFolder ? dbFolder.isLoading : false,
+      children: dbFolder ? dbFolder.children : [],
+      dbFolderId: dbFolder ? dbFolder.id : undefined
+    };
+  });
+
+  // Section 1: Home, Gallery, OneDrive - Personal
+  const sidebarSection1 = computed<ClientFolderNode[]>(() => {
+    return [
+      { id: "home", name: "Home", parentId: null, hasChildren: false, children: [] },
+      { id: "gallery", name: "Gallery", parentId: null, hasChildren: false, children: [] },
+      oneDriveNode.value
+    ];
+  });
+
+  // Section 2: Pinned Shortcuts (Desktop, Downloads, Documents, Pictures, Music, Videos)
+  const sidebarSection2 = computed<ClientFolderNode[]>(() => {
+    const findDbFolder = (name: string) =>
+      rootFolders.value.find((f) => f.name.toLowerCase() === name.toLowerCase());
+    const docs = findDbFolder("documents");
+    const pics = findDbFolder("pictures");
+    const music = findDbFolder("music");
+    const downloads = findDbFolder("downloads");
+
+    return [
+      { id: "desktop", name: "Desktop", parentId: null, hasChildren: false, children: [] },
+      {
+        id: downloads ? downloads.id : "downloads-virtual",
+        name: "Downloads",
+        parentId: null,
+        hasChildren: false,
+        children: []
+      },
+      {
+        id: docs ? docs.id : "documents-virtual",
+        name: "Documents",
+        parentId: null,
+        hasChildren: false,
+        children: []
+      },
+      {
+        id: pics ? pics.id : "pictures-virtual",
+        name: "Pictures",
+        parentId: null,
+        hasChildren: false,
+        children: []
+      },
+      {
+        id: music ? music.id : "music-virtual",
+        name: "Music",
+        parentId: null,
+        hasChildren: false,
+        children: []
+      },
+      { id: "videos", name: "Videos", parentId: null, hasChildren: false, children: [] }
+    ];
+  });
+
+  // Section 3: Collapsible Menu (This PC, Network, Linux)
+  const thisPCNode = computed<ClientFolderNode>(() => {
+    const dbRootsMapped = rootFolders.value
+      .filter((f) => f.name.toLowerCase() !== "onedrive")
+      .map((f) => ({
+        ...f,
+        parentId: "this-pc"
+      }));
+
+    return {
+      id: "this-pc",
+      name: "This PC",
+      parentId: null,
+      hasChildren: true,
+      isOpen: !!openFolderIds.value["this-pc"],
+      isLoaded: true,
+      children: [
+        { id: "desktop", name: "Desktop", parentId: "this-pc", hasChildren: false, children: [] },
+        ...dbRootsMapped,
+        { id: "videos", name: "Videos", parentId: "this-pc", hasChildren: false, children: [] },
+        {
+          id: "local-c",
+          name: "Local Disk (C:)",
+          parentId: "this-pc",
+          hasChildren: false,
+          children: []
+        },
+        {
+          id: "local-d",
+          name: "Local Disk (D:)",
+          parentId: "this-pc",
+          hasChildren: false,
+          children: []
+        }
+      ]
+    };
+  });
+
+  const sidebarSection3 = computed<ClientFolderNode[]>(() => {
+    return [
+      thisPCNode.value,
+      {
+        id: "network",
+        name: "Network",
+        parentId: null,
+        hasChildren: true,
+        isOpen: !!openFolderIds.value["network"],
+        isLoaded: true,
+        children: []
+      },
+      {
+        id: "linux",
+        name: "Linux",
+        parentId: null,
+        hasChildren: true,
+        isOpen: !!openFolderIds.value["linux"],
+        isLoaded: true,
+        children: []
+      }
+    ];
+  });
+
   // Memperoleh folder yang terurut berdasarkan kriteria
   const sortedSubfolders = computed(() => {
     const list = isSearching.value
       ? searchResults.value.folders
       : selectedFolderContents.value.subfolders;
-    const folders = [...list];
-    folders.sort((a, b) => {
+    const foldersList = [...list];
+    foldersList.sort((a, b) => {
       let comparison = 0;
       if (sortBy.value === "name") {
         comparison = a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
       }
       return sortOrder.value === "asc" ? comparison : -comparison;
     });
-    return folders;
+    return foldersList;
   });
 
   const sortedFiles = computed(() => {
@@ -96,6 +254,20 @@ export function useExplorer() {
 
   // Melakukan ekspansi folder dan memuat subfolder di dalamnya secara bertahap (lazy loading)
   async function expandFolder(folder: ClientFolderNode) {
+    if (folder.id === "onedrive-root") {
+      openFolderIds.value["onedrive-root"] = !openFolderIds.value["onedrive-root"];
+      const dbFolder = dbOneDriveFolder.value;
+      if (dbFolder && !dbFolder.isLoaded) {
+        await expandFolder(dbFolder);
+      }
+      return;
+    }
+
+    if (folder.id === "this-pc" || folder.id === "network" || folder.id === "linux") {
+      openFolderIds.value[folder.id] = !openFolderIds.value[folder.id];
+      return;
+    }
+
     if (folder.isLoaded) {
       folder.isOpen = !folder.isOpen;
       return;
@@ -145,6 +317,61 @@ export function useExplorer() {
     isSearching.value = false; // Keluar dari mode pencarian jika memilih folder
     searchQuery.value = "";
 
+    // Tangani Redirection OneDrive
+    if (folderId === "onedrive-root") {
+      const dbFolder = dbOneDriveFolder.value;
+      if (dbFolder) {
+        await selectFolder(dbFolder.id, false);
+      } else {
+        selectedFolderContents.value = { subfolders: [], files: [] };
+        breadcrumbs.value = [{ id: "onedrive-root", name: "OneDrive - Personal", parentId: null }];
+        selectedFolderContentsLoading.value = false;
+      }
+      return;
+    }
+
+    // Tangani Folder Virtual
+    if (virtualFolders.includes(folderId)) {
+      try {
+        if (folderId === "this-pc") {
+          const dbRootsMapped = rootFolders.value
+            .filter((f) => f.name.toLowerCase() !== "onedrive")
+            .map((f) => ({ ...f, parentId: "this-pc" }));
+
+          selectedFolderContents.value = {
+            subfolders: [
+              { id: "desktop", name: "Desktop", parentId: "this-pc" },
+              ...dbRootsMapped,
+              { id: "videos", name: "Videos", parentId: "this-pc" },
+              { id: "local-c", name: "Local Disk (C:)", parentId: "this-pc" },
+              { id: "local-d", name: "Local Disk (D:)", parentId: "this-pc" }
+            ],
+            files: []
+          };
+          breadcrumbs.value = []; // Root / Ini PC
+        } else {
+          selectedFolderContents.value = { subfolders: [], files: [] };
+          let name = "";
+          if (folderId === "desktop") name = "Desktop";
+          else if (folderId === "videos") name = "Videos";
+          else if (folderId === "local-c") name = "Local Disk (C:)";
+          else if (folderId === "local-d") name = "Local Disk (D:)";
+          else if (folderId === "home") name = "Home";
+          else if (folderId === "gallery") name = "Gallery";
+          else if (folderId === "network") name = "Network";
+          else if (folderId === "linux") name = "Linux";
+
+          breadcrumbs.value = [{ id: folderId, name, parentId: "this-pc" }];
+        }
+      } catch (e) {
+        console.error("Gagal memuat folder virtual", e);
+      } finally {
+        selectedFolderContentsLoading.value = false;
+      }
+      return;
+    }
+
+    // Tangani Folder DB Asli
     try {
       // Jalankan paralel untuk efisiensi
       const [contents, path] = await Promise.all([
@@ -199,6 +426,9 @@ export function useExplorer() {
       } else if (breadcrumbs.value.length > 1) {
         const parentFolder = breadcrumbs.value[breadcrumbs.value.length - 2];
         selectFolder(parentFolder.id);
+      } else if (selectedFolderId.value !== "this-pc") {
+        // Jika berada di root DB folder, Up akan mengarahkan ke This PC
+        selectFolder("this-pc");
       }
     }
   }
@@ -320,6 +550,10 @@ export function useExplorer() {
   // Melakukan ekspansi semua folder induk secara rekursif
   function expandParentHierarchy(node: ClientFolderNode) {
     if (node.parentId) {
+      if (node.parentId === "this-pc") {
+        openFolderIds.value["this-pc"] = true;
+        return;
+      }
       const parent = folderMap.get(node.parentId);
       if (parent) {
         parent.isOpen = true;
@@ -368,6 +602,9 @@ export function useExplorer() {
     clipboard,
     sortedSubfolders,
     sortedFiles,
+    sidebarSection1,
+    sidebarSection2,
+    sidebarSection3,
     loadRootFolders,
     expandFolder,
     selectFolder,

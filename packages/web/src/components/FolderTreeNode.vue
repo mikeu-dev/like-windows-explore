@@ -17,7 +17,7 @@
         class="w-5 h-5 flex items-center justify-center mr-1 text-on-surface-variant transition-transform duration-200"
         :class="[
           folder.isOpen ? 'rotate-90' : '',
-          !folder.hasChildren ? 'opacity-20 cursor-default' : 'hover:bg-black/5 rounded'
+          !folder.hasChildren ? 'opacity-0 cursor-default' : 'hover:bg-black/5 rounded'
         ]"
         @click.stop="toggleExpand"
       >
@@ -25,7 +25,6 @@
         <span v-else-if="folder.hasChildren" class="material-symbols-outlined scale-75"
           >chevron_right</span
         >
-        <span v-else class="text-[8px]">•</span>
       </span>
 
       <!-- Folder Icon -->
@@ -85,6 +84,13 @@ const getFolderIcon = (name: string) => {
   if (n === "downloads") return "download";
   if (n === "desktop") return "desktop_windows";
   if (n === "videos") return "movie";
+  if (n === "this pc") return "desktop_windows";
+  if (n === "home") return "home";
+  if (n === "gallery") return "photo_library";
+  if (n === "onedrive" || n === "onedrive - personal") return "cloud";
+  if (n === "network") return "language";
+  if (n === "linux") return "terminal";
+  if (n.startsWith("local disk")) return "database";
   return "folder";
 };
 
@@ -95,6 +101,13 @@ const getFolderIconColor = (name: string, isSelected: boolean) => {
   if (n === "pictures") return "text-primary-container";
   if (n === "music") return "text-tertiary";
   if (n === "downloads") return "text-primary-container";
+  if (n === "this pc" || n === "desktop") return "text-primary-container";
+  if (n === "home") return "text-primary-container";
+  if (n === "gallery") return "text-tertiary-container";
+  if (n === "onedrive" || n === "onedrive - personal") return "text-primary";
+  if (n === "network") return "text-secondary";
+  if (n === "linux") return "text-primary-container";
+  if (n.startsWith("local disk")) return "text-secondary";
   return "text-[#ffc107]";
 };
 </script>

@@ -290,84 +290,57 @@
       <aside
         class="w-sidebar-width flex-none bg-surface-container-low border-r border-outline-variant/50 custom-scrollbar overflow-y-auto pt-4 flex flex-col justify-between shrink-0 min-w-[220px]"
       >
-        <div class="px-2 space-y-1">
-          <!-- Group 1: General Navigation -->
-          <div class="mb-4">
-            <button class="w-full flex items-center gap-3 px-3 py-1.5 text-on-surface-variant hover:bg-black/5 rounded-md text-body-sm font-body-sm transition-colors">
-              <span class="material-symbols-outlined">home</span>
-              <span>Home</span>
-            </button>
-            <button class="w-full flex items-center gap-3 px-3 py-1.5 text-on-surface-variant hover:bg-black/5 rounded-md text-body-sm font-body-sm transition-colors">
-              <span class="material-symbols-outlined">photo_library</span>
-              <span>Gallery</span>
-            </button>
+        <div class="px-2 space-y-1 flex-grow">
+          <div
+            v-if="isTreeLoading"
+            class="flex items-center justify-center py-4 text-on-surface-variant text-body-sm space-x-2"
+          >
+            <div
+              class="w-3.5 h-3.5 border-2 border-primary border-t-transparent rounded-full animate-spin"
+            />
+            <span class="text-xs">Memuat...</span>
           </div>
-
-          <!-- Group 2: Cloud Storage -->
-          <div class="mb-4">
-            <div class="px-3 mb-1 text-[10px] font-bold text-outline uppercase tracking-wider">Cloud Storage</div>
-            <button class="w-full flex items-center gap-3 px-3 py-1.5 text-on-surface-variant hover:bg-black/5 rounded-md text-body-sm font-body-sm transition-colors">
-              <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">cloud</span>
-              <span>OneDrive</span>
-            </button>
-          </div>
-
-          <!-- Group 3: This PC (dynamic folder tree) -->
-          <div class="mb-4">
-            <div class="px-3 mb-1 text-[10px] font-bold text-outline uppercase tracking-wider">This PC</div>
-            <button class="w-full flex items-center gap-3 px-3 py-1.5 text-on-surface-variant hover:bg-black/5 rounded-md text-body-sm font-body-sm transition-colors">
-              <span class="material-symbols-outlined">desktop_windows</span>
-              <span>Desktop</span>
-            </button>
-
-            <!-- Dynamic Folder Tree insertion -->
-            <div class="mt-1">
-              <div
-                v-if="isTreeLoading"
-                class="flex items-center justify-center py-4 text-on-surface-variant text-body-sm space-x-2"
-              >
-                <div
-                  class="w-3.5 h-3.5 border-2 border-primary border-t-transparent rounded-full animate-spin"
-                />
-                <span class="text-xs">Memuat...</span>
-              </div>
+          <div v-else class="space-y-4">
+            <!-- Bagian 1: OneDrive & Umum -->
+            <div>
               <FolderTree
-                v-else
-                :folders="rootFolders"
+                :folders="sidebarSection1"
                 :selected-id="selectedFolderId"
                 @select="selectFolder"
                 @expand="expandFolder"
               />
             </div>
 
-            <button class="w-full flex items-center gap-3 px-3 py-1.5 text-on-surface-variant hover:bg-black/5 rounded-md text-body-sm font-body-sm transition-colors mt-1">
-              <span class="material-symbols-outlined">movie</span>
-              <span>Videos</span>
-            </button>
-          </div>
+            <!-- Bagian 2: Pin Shortcuts (Flat / Leaf) -->
+            <div>
+              <div class="px-3 mb-1 text-[10px] font-bold text-outline uppercase tracking-wider">Quick Access</div>
+              <FolderTree
+                :folders="sidebarSection2"
+                :selected-id="selectedFolderId"
+                @select="selectFolder"
+                @expand="expandFolder"
+              />
+            </div>
 
-          <!-- Group 4: Devices & Drives -->
-          <div class="mb-4">
-            <div class="px-3 mb-1 text-[10px] font-bold text-outline uppercase tracking-wider">Devices &amp; Drives</div>
-            <button class="w-full flex items-center gap-3 px-3 py-1.5 text-on-surface-variant hover:bg-black/5 rounded-md text-body-sm font-body-sm transition-colors">
-              <span class="material-symbols-outlined text-outline">database</span>
-              <span>Local Disk (C:)</span>
-            </button>
-            <button class="w-full flex items-center gap-3 px-3 py-1.5 text-on-surface-variant hover:bg-black/5 rounded-md text-body-sm font-body-sm transition-colors">
-              <span class="material-symbols-outlined text-outline">storage</span>
-              <span>Local Disk (D:)</span>
-            </button>
+            <!-- Bagian 3: Devices Tree (This PC, Network, Linux) -->
+            <div>
+              <FolderTree
+                :folders="sidebarSection3"
+                :selected-id="selectedFolderId"
+                @select="selectFolder"
+                @expand="expandFolder"
+              />
+            </div>
           </div>
         </div>
 
-        <!-- Bottom Actions inside sidebar -->
+        <!-- Recycle Bin / Network Fallbacks di Bagian Paling Bawah Sidebar -->
         <div class="p-2 border-t border-outline-variant/30 mt-auto">
-          <button class="w-full flex items-center gap-3 px-3 py-1.5 text-on-surface-variant hover:bg-black/5 rounded-md text-body-sm font-body-sm transition-colors">
-            <span class="material-symbols-outlined">language</span>
-            <span>Network</span>
-          </button>
-          <button class="w-full flex items-center gap-3 px-3 py-1.5 text-on-surface-variant hover:bg-black/5 rounded-md text-body-sm font-body-sm transition-colors">
-            <span class="material-symbols-outlined">delete</span>
+          <button 
+            class="w-full flex items-center gap-3 px-3 py-1.5 text-on-surface-variant hover:bg-black/5 rounded-md text-body-sm font-body-sm transition-colors"
+            @click="selectFolder('recycle-bin')"
+          >
+            <span class="material-symbols-outlined text-[#e01515]">delete</span>
             <span>Recycle Bin</span>
           </button>
         </div>
@@ -408,7 +381,7 @@
       <!-- Right Preview Pane -->
       <aside class="w-[320px] flex-none bg-surface-container-lowest border-l border-outline-variant/50 flex flex-col overflow-y-auto select-none p-6 shadow-sm">
         <div v-if="previewItem" class="flex flex-col items-center text-center">
-          <div class="w-48 h-64 bg-surface-container rounded-lg shadow-sm mb-6 flex items-center justify-center overflow-hidden border border-outline-variant/60 relative group">
+          <div class="w-48 h-64 bg-surface-container rounded-lg shadow-sm mb-6 flex items-center justify-center overflow-hidden border border-outline-variant/60 relative group mx-auto">
             <!-- Menampilkan preview gambar atau cover ikon yang kaya -->
             <img
               v-if="previewItem.type === 'file' && isImageFile(previewItem.name)"
@@ -614,6 +587,9 @@ const {
   clipboard,
   sortedSubfolders,
   sortedFiles,
+  sidebarSection1,
+  sidebarSection2,
+  sidebarSection3,
   loadRootFolders,
   expandFolder,
   selectFolder,
@@ -755,9 +731,11 @@ const getFileType = (fileName: string): string => {
     case "jpg":
     case "jpeg":
     case "png":
-    case "gif":
-    case "svg":
       return "Gambar";
+    case "gif":
+      return "GIF";
+    case "svg":
+      return "Vektor SVG";
     case "zip":
       return "Berkas ZIP";
     default:
