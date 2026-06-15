@@ -1,107 +1,181 @@
-# Like Windows Explorer - Monorepo Workspace
+# Like Windows Explorer
 
-This repository contains the implementation of a hierarchical web-based file management application resembling Windows Explorer. The project is developed using a monorepo architecture with Bun Workspaces for clean and modular separation of concerns.
+A full-stack, web-based hierarchical file management application inspired by Windows Explorer. Built as a monorepo with Bun Workspaces, featuring a Vue 3 frontend, Elysia.js REST API backend, PostgreSQL database, and comprehensive test coverage spanning unit, component, and E2E layers.
 
-## Key Features Implemented
+## Tech Stack
 
-- **Windows-inspired Light Mode UI**: A clean visual experience inspired by Windows Explorer with light mode styling, yellow folder icons, and custom file type icons.
-- **History Navigation**: Fully functional Back, Forward, Up, and Refresh controls driven by history stacks.
-- **Toolbar Actions & Clipboard**: Support for creating new files/folders, deleting, renaming, and copy/cut/paste actions.
-- **Local Sorting**: Interactive sorting by Name (A-Z/Z-A), File Type, and File Size.
-- **State Synchronization & Mutating Backend API**: All modifications (creation, deletion, rename, copy, recursive folder copy, move) are sent to PostgreSQL via Elysia API routes and saved permanently.
+| Layer | Technology |
+| --- | --- |
+| Runtime | Bun |
+| Frontend | Vue 3 (Composition API), Vite, Tailwind CSS 3 |
+| Backend | Elysia.js |
+| Database | PostgreSQL 15 |
+| ORM | Drizzle ORM |
+| Shared Types | `@explorer/common` workspace package |
+| Unit Testing | Bun Test, `@vue/test-utils`, `happy-dom` |
+| E2E Testing | Playwright (Chromium, Firefox, WebKit) |
+| Linting | ESLint (flat config), Prettier |
+| CI/CD | GitHub Actions |
+
+## Key Features
+
+- **Windows-Inspired Light Mode UI**: Clean visual layout featuring a resizable sidebar, dual-panel split view, breadcrumb address bar, and Material Design 3 color tokens.
+- **Lazy-Loading Directory Tree**: Only root-level folders are fetched on initial load. Subfolders are loaded on-demand when a user expands a tree node, enabling support for millions of records.
+- **Dual View Modes**: Toggle between Grid (icon tiles) and Detail List (table with Name, Type, Size columns).
+- **Full CRUD Operations**: Create, rename, delete, copy, cut, and paste folders and files. Recursive folder copying is fully supported.
+- **History Navigation**: Back, Forward, Up, and Refresh controls driven by dual history stacks.
+- **Global Search**: Debounced (300ms) case-insensitive search across all folders and files.
+- **File Detail Modal**: Double-click any file to view metadata (name, type, size, location).
+- **Sorting**: Interactive client-side sorting by Name (A-Z / Z-A), File Type, and File Size.
 
 ## Workspace Structure
 
-The project is divided into four main packages within the packages directory:
+```
+like-windows-explore/
+├── packages/
+│   ├── common/      # Shared TypeScript DTO type contracts
+│   ├── api/         # Elysia.js REST API + Drizzle ORM (PostgreSQL)
+│   ├── web/         # Vue 3 + Vite + Tailwind CSS frontend client
+│   └── e2e/         # Playwright E2E test suite
+├── .github/
+│   └── workflows/
+│       └── ci.yml   # GitHub Actions CI pipeline
+├── docker-compose.yml
+├── eslint.config.js
+├── bunfig.toml
+└── package.json     # Bun Workspaces root
+```
 
-1. packages/common: A shared library containing typescript type contracts, DTOs (Data Transfer Objects), and domain interface definitions shared between the frontend and backend.
-2. packages/api: The backend API service built with Elysia.js, Bun, and Drizzle ORM to manage folder and file data structures in a PostgreSQL database.
-3. packages/web: The client frontend dashboard built with Vue 3, Vite, and Tailwind CSS.
-4. packages/e2e: End-to-End testing suite built with Playwright to validate the application flow from the frontend to the database.
+## Prerequisites
 
-## Technical Requirements
-
-To run this project locally, you will need:
-
-- Bun (version 1.0.0 or later)
-- PostgreSQL (database server running locally)
+- [Bun](https://bun.sh/) v1.0.0 or later
+- [PostgreSQL](https://www.postgresql.org/) 15+ (either running natively or via Docker)
+- [Docker](https://www.docker.com/) (optional, for database container)
 
 ---
 
-## Installation and Quick Start Guide
+## Quick Start
 
-### Step 1: Install Dependencies
-
-Run the following command in the root directory to install dependencies across all workspace packages:
+### 1. Clone and Install Dependencies
 
 ```bash
+git clone https://github.com/mikeu-dev/like-windows-explore.git
+cd like-windows-explore
 bun install
 ```
 
-### Step 2: Configure Environment Variables
+### 2. Start PostgreSQL Database
 
-1. Create a `.env` file inside the `packages/api/` directory to configure your database connection and port:
+**Option A — Using Docker Compose (recommended):**
 
-   ```env
-   PORT=3001
-   DATABASE_URL="postgres://username:password@127.0.0.1:5432/database_name"
-   ```
+```bash
+docker compose up -d
+```
 
-2. Create a `.env` file inside the `packages/web/` directory to configure the API endpoint URL:
-   ```env
-   VITE_API_URL="http://127.0.0.1:3001/api/v1"
-   ```
+This starts a PostgreSQL 15 container on port `5432` with credentials `postgres:password` and database `db-like-windows-explore`.
 
-### Step 3: Database Migration and Seeding
+**Option B — Using an existing PostgreSQL instance:**
 
-Synchronize the database schema and insert initial structured mock data by running:
+Create a `.env` file inside `packages/api/`:
+
+```env
+PORT=3001
+DATABASE_URL="postgres://username:password@127.0.0.1:5432/database_name"
+```
+
+### 3. Configure Frontend Environment
+
+Create a `.env` file inside `packages/web/`:
+
+```env
+VITE_API_URL="http://127.0.0.1:3001/api/v1"
+```
+
+### 4. Migrate Database Schema and Seed Data
 
 ```bash
 bun db:setup
 ```
 
-_Note: This runs Drizzle schema push and database seed scripts sequentially._
+This runs Drizzle schema push followed by the seed script to populate a structured Windows-style directory tree with folders and files.
 
-### Step 4: Run the Application in Development Mode
-
-To start both backend and frontend servers concurrently, run the following command in the root directory:
+### 5. Start Development Servers
 
 ```bash
 bun dev
 ```
 
-- Frontend client will be running on: http://localhost:5173
-- Backend API server will be running on: http://127.0.0.1:3001
+| Service | URL |
+| --- | --- |
+| Frontend | http://localhost:5173 |
+| Backend API | http://127.0.0.1:3001 |
 
 ---
 
-## Script Command References
+## Script Reference
 
-All project management tasks can be run centrally from the root directory:
+All commands are run from the monorepo root directory.
 
-### Development and Build
+### Development
 
-- bun dev: Run both backend and frontend servers in development mode.
-- bun dev:api: Run the backend API server only.
-- bun dev:web: Run the frontend client only.
-- bun build: Build production assets for all packages.
+| Command | Description |
+| --- | --- |
+| `bun dev` | Start both API and web servers concurrently |
+| `bun dev:api` | Start the backend API server only |
+| `bun dev:web` | Start the frontend client only |
+| `bun build` | Build production assets for all packages |
 
-### Database Administration
+### Database
 
-- bun db:setup: Perform database schema synchronization and database seeding sequentially.
+| Command | Description |
+| --- | --- |
+| `bun db:setup` | Sync schema + seed database (runs `db:push` then `db:seed`) |
 
-### Testing and Quality Assurance
+### Testing
 
-- bun test: Run unit tests.
-- bun test:e2e: Run Playwright End-to-End tests.
-- bun check: Run TypeScript compiler diagnostics across all packages (api, web, e2e, common).
-- bun lint: Audit codebase linting compliance using ESLint.
-- bun lint:fix: Attempt to auto-fix eslint layout and styling warnings.
-- bun format: Format codebase source files using Prettier.
-- bun format:check: Verify formatting compliance using Prettier check.
+| Command | Description |
+| --- | --- |
+| `bun test` | Run unit tests (API + Web) |
+| `bun test:e2e` | Run Playwright E2E tests (Chromium, Firefox, WebKit) |
+
+### Code Quality
+
+| Command | Description |
+| --- | --- |
+| `bun lint` | Lint all TypeScript and Vue files with ESLint |
+| `bun lint:fix` | Auto-fix linting issues |
+| `bun format` | Format source files with Prettier |
+| `bun format:check` | Check formatting compliance |
+| `bun check` | Run TypeScript type-checking across all packages |
+
+---
+
+## CI/CD Pipeline
+
+The project uses GitHub Actions (`.github/workflows/ci.yml`) to run on every push and pull request to `main`:
+
+1. **Install** — `bun install`
+2. **Format Check** — `bun format:check`
+3. **Lint** — `bun lint`
+4. **Type Check** — `bun check`
+5. **Database Setup** — Drizzle push + seed against a PostgreSQL 15 service container
+6. **Unit Tests** — `bun test`
+7. **E2E Tests** — Playwright test with auto-uploaded HTML report on failure
+
+---
+
+## Architecture Overview
+
+See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed design documentation covering:
+
+- Monorepo structure and shared type contracts
+- Clean / Hexagonal Architecture in the backend
+- Scalability strategies (lazy loading, EXISTS subquery, database indexing)
+- State management patterns in the frontend
+- Testing strategy (unit, component, controller, E2E)
 
 ---
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.

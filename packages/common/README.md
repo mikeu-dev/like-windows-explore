@@ -1,30 +1,90 @@
-# Shared Common Library - @explorer/common
+# @explorer/common — Shared Type Library
 
-This package is a shared library that defines typescript types, DTOs (Data Transfer Objects), and domain interfaces used consistently by both the API service (backend) and the Web client (frontend).
+Shared TypeScript library defining **DTO (Data Transfer Object)** type contracts consumed by both the API backend (`@explorer/api`) and the web frontend (`@explorer/web`).
 
-## Industry Pattern and Design Choice
+## Design Rationale
 
-In standard industry monorepo architectures, this common/shared package serves as the Single Source of Truth for communications contract between client and server. Keeping this package strictly limited to type definitions (without business logic or heavy external dependencies) ensures:
+In monorepo architectures, a shared type package serves as the **single source of truth** for the API communication contract between client and server. By keeping this package limited to pure type definitions (no business logic, no runtime dependencies), we achieve:
 
-- Extremely fast compiler resolution times.
-- Prevention of circular dependencies between workspace packages.
-- Ease of maintenance when backend schemas or API contracts change.
+- **Compile-time contract enforcement**: If the backend modifies a DTO shape, the frontend immediately reports a type error — preventing silent runtime failures in production.
+- **Zero-cost abstractions**: Since all exports are TypeScript interfaces, they are erased at compile time and contribute zero bytes to the runtime bundle.
+- **Fast compiler resolution**: No transitive dependency tree to resolve.
+- **No circular dependency risk**: The package has no imports from `@explorer/api` or `@explorer/web`.
+
+---
 
 ## File Structure
 
-The package is simple and modular:
+```
+src/
+├── types.ts    # DTO type definitions
+└── index.ts    # Barrel re-export
+```
 
-- src/types.ts: Defines DTO types like FolderDTO, FileDTO, FolderContentsDTO, and SearchResultsDTO.
-- src/index.ts: Main entry point that exports the types to be consumed by other packages.
+---
 
-## Monorepo Integration
+## Exported Types
 
-This package is imported by other workspace packages using Bun's local workspace linking inside their respective `package.json` files:
+### `FolderDTO`
 
-```json
-"dependencies": {
-  "@explorer/common": "workspace:*"
+Represents a folder entity in API responses.
+
+```typescript
+interface FolderDTO {
+  id: string;
+  name: string;
+  parentId: string | null;
+  hasChildren?: boolean; // Used by frontend to render expansion chevrons
 }
 ```
 
-This enables real-time propagation of type changes in this package to both frontend and backend without requiring npm registry publishing.
+### `FileDTO`
+
+Represents a file entity in API responses.
+
+```typescript
+interface FileDTO {
+  id: string;
+  name: string;
+  size: number;
+  folderId: string;
+}
+```
+
+### `FolderContentsDTO`
+
+Aggregated response for the right panel content display.
+
+```typescript
+interface FolderContentsDTO {
+  subfolders: FolderDTO[];
+  files: FileDTO[];
+}
+```
+
+### `SearchResultsDTO`
+
+Aggregated response for global search results.
+
+```typescript
+interface SearchResultsDTO {
+  folders: FolderDTO[];
+  files: FileDTO[];
+}
+```
+
+---
+
+## Monorepo Integration
+
+Other workspace packages import this library via Bun's local workspace linking:
+
+```json
+{
+  "dependencies": {
+    "@explorer/common": "workspace:*"
+  }
+}
+```
+
+This enables real-time type propagation without npm registry publishing. Changes to DTO definitions are instantly available to all consuming packages after a simple `bun install`.
