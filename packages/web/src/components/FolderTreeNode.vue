@@ -31,10 +31,10 @@
       <!-- Folder Icon -->
       <span
         class="material-symbols-outlined mr-2 scale-90 transition-colors"
-        :class="[selectedId === folder.id ? 'text-primary' : 'text-[#ffc107]']"
+        :class="[getFolderIconColor(folder.name, selectedId === folder.id)]"
         :style="{ fontVariationSettings: '\'FILL\' 1' }"
       >
-        folder
+        {{ getFolderIcon(folder.name) }}
       </span>
 
       <!-- Folder Name -->
@@ -76,6 +76,27 @@ const toggleExpand = () => {
     emit("expand", props.folder);
   }
 };
+
+const getFolderIcon = (name: string) => {
+  const n = name.toLowerCase();
+  if (n === "documents") return "description";
+  if (n === "pictures") return "image";
+  if (n === "music") return "music_note";
+  if (n === "downloads") return "download";
+  if (n === "desktop") return "desktop_windows";
+  if (n === "videos") return "movie";
+  return "folder";
+};
+
+const getFolderIconColor = (name: string, isSelected: boolean) => {
+  if (isSelected) return "text-primary";
+  const n = name.toLowerCase();
+  if (n === "documents") return "text-primary-container";
+  if (n === "pictures") return "text-primary-container";
+  if (n === "music") return "text-tertiary";
+  if (n === "downloads") return "text-primary-container";
+  return "text-[#ffc107]";
+};
 </script>
 
 <style scoped>
@@ -83,10 +104,10 @@ const toggleExpand = () => {
   content: "";
   position: absolute;
   left: 0;
-  top: 6px;
-  bottom: 6px;
+  top: 4px;
+  bottom: 4px;
   width: 3px;
-  background-color: #004f96;
+  background-color: #0078d4;
   border-radius: 0 4px 4px 0;
 }
 </style>

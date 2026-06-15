@@ -1,57 +1,41 @@
 <template>
   <div
-    class="h-screen w-screen flex flex-col bg-explorer-bg text-on-surface overflow-hidden select-none font-sans"
+    class="h-screen w-screen flex flex-col bg-surface-container-lowest text-on-surface overflow-hidden select-none font-sans"
   >
-    <!-- Header / Navbar Utama -->
+    <!-- Top Navigation Area (Combined TopAppBar Logic) -->
     <header
-      class="bg-surface-container-lowest flex flex-col shrink-0 border-b border-outline-variant/50"
+      class="h-[48px] flex items-center px-4 bg-surface-container-low dark:bg-surface-dim shadow-sm flex-none z-50 border-b border-outline-variant/30"
     >
-      <!-- Window Controls & Tab Bar -->
-      <div class="h-10 flex items-center px-4 border-b border-outline-variant/30 bg-[#f3f3f3]/60">
-        <div class="flex items-center space-x-3">
-          <span class="text-xl">🖥️</span>
-          <div>
-            <h1 class="text-xs font-bold text-on-surface">File Explorer</h1>
-            <p class="text-[9px] text-explorer-muted">Sistem Manajemen Folder Hirarkis</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Address Bar Row -->
-      <div class="h-12 flex items-center px-4 gap-3 bg-surface-container-lowest">
-        <!-- Navigation Controls -->
-        <div class="flex items-center gap-1 shrink-0">
+      <div class="flex items-center gap-4 w-full">
+        <!-- Back/Forward/Up Navigation Cluster -->
+        <div class="flex items-center gap-1 text-on-surface-variant">
           <button
-            class="w-8 h-8 flex items-center justify-center text-on-surface-variant rounded transition-colors"
-            :class="historyStack.length === 0 ? 'opacity-40 cursor-default' : 'hover:bg-black/5'"
+            class="p-1 hover:bg-surface-variant rounded-md transition-colors"
+            :class="historyStack.length === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-black/5'"
             :disabled="historyStack.length === 0"
             @click="goBack"
           >
             <span class="material-symbols-outlined">arrow_back</span>
           </button>
           <button
-            class="w-8 h-8 flex items-center justify-center text-on-surface-variant rounded transition-colors"
-            :class="forwardStack.length === 0 ? 'opacity-40 cursor-default' : 'hover:bg-black/5'"
+            class="p-1 hover:bg-surface-variant rounded-md transition-colors"
+            :class="forwardStack.length === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-black/5'"
             :disabled="forwardStack.length === 0"
             @click="goForward"
           >
             <span class="material-symbols-outlined">arrow_forward</span>
           </button>
           <button
-            class="w-8 h-8 flex items-center justify-center text-on-surface-variant rounded transition-colors"
-            :class="
-              !selectedFolderId || breadcrumbs.length <= 1
-                ? 'opacity-40 cursor-default'
-                : 'hover:bg-black/5'
-            "
+            class="p-1 hover:bg-surface-variant rounded-md transition-colors"
+            :class="!selectedFolderId || breadcrumbs.length <= 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-black/5'"
             :disabled="!selectedFolderId || breadcrumbs.length <= 1"
             @click="goUp"
           >
-            <span class="material-symbols-outlined">arrow_upward</span>
+            <span class="material-symbols-outlined">expand_less</span>
           </button>
           <button
-            class="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:bg-black/5 rounded transition-colors ml-1"
-            :class="!selectedFolderId ? 'opacity-40 cursor-default' : 'hover:bg-black/5'"
+            class="p-1 hover:bg-surface-variant rounded-md transition-colors"
+            :class="!selectedFolderId ? 'opacity-50 cursor-not-allowed' : 'hover:bg-black/5'"
             :disabled="!selectedFolderId"
             @click="refreshCurrent"
           >
@@ -59,236 +43,338 @@
           </button>
         </div>
 
-        <!-- Breadcrumb Address Bar -->
+        <!-- Address Bar / Breadcrumbs -->
         <div
-          class="flex-1 flex items-center h-8 bg-surface-container border border-outline-variant rounded-sm px-2 gap-1 overflow-hidden"
+          class="flex-grow flex items-center bg-surface-container-lowest border border-outline-variant rounded px-2 h-8 address-bar-focus transition-all overflow-hidden"
         >
+          <span class="material-symbols-outlined text-primary-container mr-2" style="font-variation-settings: 'FILL' 1;">folder</span>
           <Breadcrumbs :path="breadcrumbs" @navigate="selectFolder" />
         </div>
 
-        <!-- Komponen Pencarian Global -->
+        <!-- Search Bar -->
         <ExplorerSearch v-model="searchQuery" @search="performSearch" />
-      </div>
 
-      <!-- Toolbar Row -->
-      <div
-        class="flex items-center px-4 h-toolbar-height bg-surface-container-lowest border-t border-outline-variant/30 w-full relative"
-      >
-        <div class="flex items-center gap-2">
-          <!-- Action Buttons -->
-          <!-- New Button & Dropdown -->
-          <div class="relative">
-            <button
-              class="flex items-center gap-1.5 px-3 py-1.5 rounded transition-colors text-on-surface-variant"
-              :class="!selectedFolderId ? 'opacity-40 cursor-default' : 'hover:bg-black/5'"
-              :disabled="!selectedFolderId"
-              @click="isNewMenuOpen = !isNewMenuOpen"
-            >
-              <span
-                class="material-symbols-outlined text-primary scale-90"
-                :style="{ fontVariationSettings: '\'FILL\' 1' }"
-                >add</span
-              >
-              <span class="font-body-sm text-body-sm text-on-surface">New</span>
-              <span class="material-symbols-outlined scale-75">expand_more</span>
-            </button>
-            <div
-              v-if="isNewMenuOpen"
-              class="absolute left-0 mt-1 w-40 bg-surface border border-outline-variant rounded shadow-lg z-20 py-1"
-            >
-              <button
-                class="w-full text-left px-4 py-2 text-body-sm hover:bg-black/5 flex items-center gap-2"
-                @click="handleNewItem('folder')"
-              >
-                <span
-                  class="material-symbols-outlined text-[#ffc107] scale-90"
-                  :style="{ fontVariationSettings: '\'FILL\' 1' }"
-                  >folder</span
-                >
-                Folder Baru
-              </button>
-              <button
-                class="w-full text-left px-4 py-2 text-body-sm hover:bg-black/5 flex items-center gap-2"
-                @click="handleNewItem('file')"
-              >
-                <span class="material-symbols-outlined text-secondary scale-90">article</span>
-                Berkas Baru
-              </button>
-            </div>
-          </div>
-
-          <div class="h-5 w-px bg-outline-variant/50 mx-1"></div>
-
-          <!-- Cut -->
-          <button
-            class="p-2 rounded transition-colors text-on-surface-variant"
-            :class="!activeItem ? 'opacity-35 cursor-default' : 'hover:bg-black/5'"
-            :disabled="!activeItem"
-            title="Cut"
-            @click="cutItem"
-          >
-            <span class="material-symbols-outlined scale-90">content_cut</span>
+        <!-- Global Actions -->
+        <div class="flex items-center gap-1 text-on-surface-variant shrink-0">
+          <button class="p-1 hover:bg-surface-variant rounded-md">
+            <span class="material-symbols-outlined">settings</span>
           </button>
-
-          <!-- Copy -->
-          <button
-            class="p-2 rounded transition-colors text-on-surface-variant"
-            :class="!activeItem ? 'opacity-35 cursor-default' : 'hover:bg-black/5'"
-            :disabled="!activeItem"
-            title="Copy"
-            @click="copyItem"
-          >
-            <span class="material-symbols-outlined scale-90">content_copy</span>
+          <button class="p-1 hover:bg-surface-variant rounded-md">
+            <span class="material-symbols-outlined">info</span>
           </button>
-
-          <!-- Paste -->
-          <button
-            class="p-2 rounded transition-colors text-on-surface-variant"
-            :class="!clipboard ? 'opacity-35 cursor-default' : 'hover:bg-black/5'"
-            :disabled="!clipboard"
-            title="Paste"
-            @click="pasteItem"
-          >
-            <span class="material-symbols-outlined scale-90">content_paste</span>
-          </button>
-
-          <!-- Rename -->
-          <button
-            class="p-2 rounded transition-colors text-on-surface-variant"
-            :class="!activeItem ? 'opacity-35 cursor-default' : 'hover:bg-black/5'"
-            :disabled="!activeItem"
-            title="Rename"
-            @click="renameItem"
-          >
-            <span class="material-symbols-outlined scale-90">drive_file_rename_outline</span>
-          </button>
-
-          <!-- Delete -->
-          <button
-            class="p-2 rounded transition-colors text-on-surface-variant"
-            :class="!activeItem ? 'opacity-35 cursor-default' : 'hover:bg-black/5'"
-            :disabled="!activeItem"
-            title="Delete"
-            @click="deleteItem"
-          >
-            <span class="material-symbols-outlined scale-90">delete</span>
-          </button>
-
-          <div class="h-5 w-px bg-outline-variant/50 mx-1"></div>
-
-          <!-- Sort Button & Dropdown -->
-          <div class="relative">
-            <button
-              class="flex items-center gap-1.5 px-3 py-1.5 hover:bg-black/5 rounded transition-colors text-on-surface-variant"
-              @click="isSortMenuOpen = !isSortMenuOpen"
-            >
-              <span class="material-symbols-outlined scale-90">sort</span>
-              <span class="font-body-sm text-body-sm text-on-surface">Sort</span>
-              <span class="material-symbols-outlined scale-75">expand_more</span>
-            </button>
-            <div
-              v-if="isSortMenuOpen"
-              class="absolute left-0 mt-1 w-48 bg-surface border border-outline-variant rounded shadow-lg z-20 py-1"
-            >
-              <button
-                class="w-full text-left px-4 py-2 text-body-sm hover:bg-black/5 flex items-center justify-between"
-                :class="{ 'text-primary font-medium': sortBy === 'name' && sortOrder === 'asc' }"
-                @click="setSort('name', 'asc')"
-              >
-                Nama (A-Z)
-                <span
-                  v-if="sortBy === 'name' && sortOrder === 'asc'"
-                  class="material-symbols-outlined scale-75"
-                  >check</span
-                >
-              </button>
-              <button
-                class="w-full text-left px-4 py-2 text-body-sm hover:bg-black/5 flex items-center justify-between"
-                :class="{ 'text-primary font-medium': sortBy === 'name' && sortOrder === 'desc' }"
-                @click="setSort('name', 'desc')"
-              >
-                Nama (Z-A)
-                <span
-                  v-if="sortBy === 'name' && sortOrder === 'desc'"
-                  class="material-symbols-outlined scale-75"
-                  >check</span
-                >
-              </button>
-              <button
-                class="w-full text-left px-4 py-2 text-body-sm hover:bg-black/5 flex items-center justify-between"
-                :class="{ 'text-primary font-medium': sortBy === 'type' }"
-                @click="setSort('type', 'asc')"
-              >
-                Tipe
-                <span v-if="sortBy === 'type'" class="material-symbols-outlined scale-75"
-                  >check</span
-                >
-              </button>
-              <button
-                class="w-full text-left px-4 py-2 text-body-sm hover:bg-black/5 flex items-center justify-between"
-                :class="{ 'text-primary font-medium': sortBy === 'size' }"
-                @click="setSort('size', 'asc')"
-              >
-                Ukuran
-                <span v-if="sortBy === 'size'" class="material-symbols-outlined scale-75"
-                  >check</span
-                >
-              </button>
-            </div>
-          </div>
-
-          <button
-            class="flex items-center gap-1.5 px-3 py-1.5 hover:bg-black/5 rounded transition-colors text-on-surface-variant"
-          >
-            <span class="material-symbols-outlined scale-90">view_list</span>
-            <span class="font-body-sm text-body-sm text-on-surface">View</span>
-            <span class="material-symbols-outlined scale-75">expand_more</span>
+          <button class="p-1 hover:bg-surface-variant rounded-md">
+            <span class="material-symbols-outlined">account_circle</span>
           </button>
         </div>
       </div>
     </header>
 
-    <!-- Area Kerja Utama (Split Panel) -->
-    <div class="flex-1 flex min-h-0">
-      <!-- Panel Kiri: Folder Tree Sidebar (30% lebar atau w-72) -->
-      <aside
-        class="w-sidebar-width border-r border-outline-variant/50 bg-[#f3f3f3] flex flex-col p-3 shrink-0 min-w-[200px]"
-      >
-        <!-- Quick access and systems structure -->
-        <div class="flex items-center px-2 py-1 mb-2 text-primary">
-          <span
-            class="material-symbols-outlined scale-90 mr-2"
-            :style="{ fontVariationSettings: '\'FILL\' 1' }"
-            >star</span
+    <!-- Command Bar (Toolbar) -->
+    <section class="h-11 flex items-center px-4 bg-surface-bright border-b border-outline-variant flex-none">
+      <div class="flex items-center gap-1 w-full text-body-sm font-body-sm">
+        <!-- New Button & Dropdown -->
+        <div class="relative">
+          <button
+            class="flex items-center gap-2 px-3 py-1.5 hover:bg-surface-variant rounded transition-colors"
+            :class="!selectedFolderId ? 'opacity-50 cursor-default' : 'hover:bg-black/5'"
+            :disabled="!selectedFolderId"
+            @click="isNewMenuOpen = !isNewMenuOpen"
           >
-          <span class="font-title-sm text-title-sm text-on-surface font-semibold"
-            >Quick access</span
+            <span
+              class="material-symbols-outlined text-primary"
+              :style="{ fontVariationSettings: '\'FILL\' 1' }"
+              >add</span
+            >
+            <span>New</span>
+            <span class="material-symbols-outlined text-xs">expand_more</span>
+          </button>
+          <div
+            v-if="isNewMenuOpen"
+            class="absolute left-0 mt-1 w-40 bg-surface border border-outline-variant rounded shadow-lg z-20 py-1"
           >
+            <button
+              class="w-full text-left px-4 py-2 text-body-sm hover:bg-black/5 flex items-center gap-2"
+              @click="handleNewItem('folder')"
+            >
+              <span
+                class="material-symbols-outlined text-[#ffc107]"
+                :style="{ fontVariationSettings: '\'FILL\' 1' }"
+                >folder</span
+              >
+              Folder Baru
+            </button>
+            <button
+              class="w-full text-left px-4 py-2 text-body-sm hover:bg-black/5 flex items-center gap-2"
+              @click="handleNewItem('file')"
+            >
+              <span class="material-symbols-outlined text-secondary">article</span>
+              Berkas Baru
+            </button>
+          </div>
         </div>
 
-        <div class="flex-1 overflow-y-auto no-scrollbar">
-          <div
-            v-if="isTreeLoading"
-            class="flex items-center justify-center py-8 text-on-surface-variant text-body-sm space-x-2"
+        <div class="w-px h-6 bg-outline-variant mx-1"></div>
+
+        <!-- Cut -->
+        <button
+          class="p-2 hover:bg-surface-variant rounded transition-colors text-on-surface-variant"
+          :class="!activeItem ? 'opacity-35 cursor-default' : 'hover:bg-black/5'"
+          :disabled="!activeItem"
+          title="Cut"
+          @click="cutItem"
+        >
+          <span class="material-symbols-outlined">content_cut</span>
+        </button>
+
+        <!-- Copy -->
+        <button
+          class="p-2 hover:bg-surface-variant rounded transition-colors text-on-surface-variant"
+          :class="!activeItem ? 'opacity-35 cursor-default' : 'hover:bg-black/5'"
+          :disabled="!activeItem"
+          title="Copy"
+          @click="copyItem"
+        >
+          <span class="material-symbols-outlined">content_copy</span>
+        </button>
+
+        <!-- Paste -->
+        <button
+          class="p-2 hover:bg-surface-variant rounded transition-colors text-on-surface-variant"
+          :class="!clipboard ? 'opacity-35 cursor-default' : 'hover:bg-black/5'"
+          :disabled="!clipboard"
+          title="Paste"
+          @click="pasteItem"
+        >
+          <span class="material-symbols-outlined">content_paste</span>
+        </button>
+
+        <!-- Rename -->
+        <button
+          class="p-2 hover:bg-surface-variant rounded transition-colors text-on-surface-variant"
+          :class="!activeItem ? 'opacity-35 cursor-default' : 'hover:bg-black/5'"
+          :disabled="!activeItem"
+          title="Rename"
+          @click="renameItem"
+        >
+          <span class="material-symbols-outlined">drive_file_rename_outline</span>
+        </button>
+
+        <!-- Share -->
+        <button
+          class="p-2 hover:bg-surface-variant rounded transition-colors text-on-surface-variant"
+          :class="!activeItem ? 'opacity-35 cursor-default' : 'hover:bg-black/5'"
+          :disabled="!activeItem"
+          title="Share"
+        >
+          <span class="material-symbols-outlined">share</span>
+        </button>
+
+        <!-- Delete -->
+        <button
+          class="p-2 hover:bg-surface-variant rounded transition-colors text-on-surface-variant"
+          :class="!activeItem ? 'opacity-35 cursor-default' : 'hover:bg-black/5'"
+          :disabled="!activeItem"
+          title="Delete"
+          @click="deleteItem"
+        >
+          <span class="material-symbols-outlined text-error">delete</span>
+        </button>
+
+        <div class="w-px h-6 bg-outline-variant mx-1"></div>
+
+        <!-- Sort Button & Dropdown -->
+        <div class="relative">
+          <button
+            class="flex items-center gap-2 px-3 py-1.5 hover:bg-surface-variant rounded transition-colors text-on-surface-variant"
+            @click="isSortMenuOpen = !isSortMenuOpen"
           >
-            <div
-              class="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"
-            />
-            <span>Memuat pohon folder...</span>
+            <span class="material-symbols-outlined">sort</span>
+            <span>Sort</span>
+            <span class="material-symbols-outlined text-xs">expand_more</span>
+          </button>
+          <div
+            v-if="isSortMenuOpen"
+            class="absolute left-0 mt-1 w-48 bg-surface border border-outline-variant rounded shadow-lg z-20 py-1"
+          >
+            <button
+              class="w-full text-left px-4 py-2 text-body-sm hover:bg-black/5 flex items-center justify-between"
+              :class="{ 'text-primary font-medium': sortBy === 'name' && sortOrder === 'asc' }"
+              @click="setSort('name', 'asc')"
+            >
+              Nama (A-Z)
+              <span
+                v-if="sortBy === 'name' && sortOrder === 'asc'"
+                class="material-symbols-outlined text-xs"
+                >check</span
+              >
+            </button>
+            <button
+              class="w-full text-left px-4 py-2 text-body-sm hover:bg-black/5 flex items-center justify-between"
+              :class="{ 'text-primary font-medium': sortBy === 'name' && sortOrder === 'desc' }"
+              @click="setSort('name', 'desc')"
+            >
+              Nama (Z-A)
+              <span
+                v-if="sortBy === 'name' && sortOrder === 'desc'"
+                class="material-symbols-outlined text-xs"
+                >check</span
+              >
+            </button>
+            <button
+              class="w-full text-left px-4 py-2 text-body-sm hover:bg-black/5 flex items-center justify-between"
+              :class="{ 'text-primary font-medium': sortBy === 'type' }"
+              @click="setSort('type', 'asc')"
+            >
+              Tipe
+              <span v-if="sortBy === 'type'" class="material-symbols-outlined text-xs"
+                >check</span
+              >
+            </button>
+            <button
+              class="w-full text-left px-4 py-2 text-body-sm hover:bg-black/5 flex items-center justify-between"
+              :class="{ 'text-primary font-medium': sortBy === 'size' }"
+              @click="setSort('size', 'asc')"
+            >
+              Ukuran
+              <span v-if="sortBy === 'size'" class="material-symbols-outlined text-xs"
+                >check</span
+              >
+            </button>
           </div>
-          <FolderTree
-            v-else
-            :folders="rootFolders"
-            :selected-id="selectedFolderId"
-            @select="selectFolder"
-            @expand="expandFolder"
-          />
+        </div>
+
+        <!-- View Menu & Dropdown -->
+        <div class="relative">
+          <button
+            class="flex items-center gap-2 px-3 py-1.5 hover:bg-surface-variant rounded transition-colors text-on-surface-variant"
+            @click="isViewMenuOpen = !isViewMenuOpen"
+          >
+            <span class="material-symbols-outlined">{{ viewMode === 'grid' ? 'grid_view' : 'view_list' }}</span>
+            <span>View</span>
+            <span class="material-symbols-outlined text-xs">expand_more</span>
+          </button>
+          <div
+            v-if="isViewMenuOpen"
+            class="absolute left-0 mt-1 w-40 bg-surface border border-outline-variant rounded shadow-lg z-20 py-1"
+          >
+            <button
+              class="w-full text-left px-4 py-2 text-body-sm hover:bg-black/5 flex items-center gap-2"
+              :class="{ 'text-primary font-medium': viewMode === 'grid' }"
+              @click="viewMode = 'grid'; isViewMenuOpen = false"
+            >
+              <span class="material-symbols-outlined text-xs">grid_view</span>
+              Grid
+            </button>
+            <button
+              class="w-full text-left px-4 py-2 text-body-sm hover:bg-black/5 flex items-center gap-2"
+              :class="{ 'text-primary font-medium': viewMode === 'list' }"
+              @click="viewMode = 'list'; isViewMenuOpen = false"
+            >
+              <span class="material-symbols-outlined text-xs">view_list</span>
+              Detail List
+            </button>
+          </div>
+        </div>
+
+        <div class="w-px h-6 bg-outline-variant mx-1"></div>
+
+        <button class="p-2 hover:bg-surface-variant rounded transition-colors text-on-surface-variant">
+          <span class="material-symbols-outlined">more_horiz</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Main Application Shell -->
+    <div class="flex-grow flex overflow-hidden">
+      <!-- Side Navigation (SideNavBar Logic) -->
+      <aside
+        class="w-sidebar-width flex-none bg-surface-container-low border-r border-outline-variant/50 custom-scrollbar overflow-y-auto pt-4 flex flex-col justify-between shrink-0 min-w-[220px]"
+      >
+        <div class="px-2 space-y-1">
+          <!-- Group 1: General Navigation -->
+          <div class="mb-4">
+            <button class="w-full flex items-center gap-3 px-3 py-1.5 text-on-surface-variant hover:bg-black/5 rounded-md text-body-sm font-body-sm transition-colors">
+              <span class="material-symbols-outlined">home</span>
+              <span>Home</span>
+            </button>
+            <button class="w-full flex items-center gap-3 px-3 py-1.5 text-on-surface-variant hover:bg-black/5 rounded-md text-body-sm font-body-sm transition-colors">
+              <span class="material-symbols-outlined">photo_library</span>
+              <span>Gallery</span>
+            </button>
+          </div>
+
+          <!-- Group 2: Cloud Storage -->
+          <div class="mb-4">
+            <div class="px-3 mb-1 text-[10px] font-bold text-outline uppercase tracking-wider">Cloud Storage</div>
+            <button class="w-full flex items-center gap-3 px-3 py-1.5 text-on-surface-variant hover:bg-black/5 rounded-md text-body-sm font-body-sm transition-colors">
+              <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">cloud</span>
+              <span>OneDrive</span>
+            </button>
+          </div>
+
+          <!-- Group 3: This PC (dynamic folder tree) -->
+          <div class="mb-4">
+            <div class="px-3 mb-1 text-[10px] font-bold text-outline uppercase tracking-wider">This PC</div>
+            <button class="w-full flex items-center gap-3 px-3 py-1.5 text-on-surface-variant hover:bg-black/5 rounded-md text-body-sm font-body-sm transition-colors">
+              <span class="material-symbols-outlined">desktop_windows</span>
+              <span>Desktop</span>
+            </button>
+
+            <!-- Dynamic Folder Tree insertion -->
+            <div class="mt-1">
+              <div
+                v-if="isTreeLoading"
+                class="flex items-center justify-center py-4 text-on-surface-variant text-body-sm space-x-2"
+              >
+                <div
+                  class="w-3.5 h-3.5 border-2 border-primary border-t-transparent rounded-full animate-spin"
+                />
+                <span class="text-xs">Memuat...</span>
+              </div>
+              <FolderTree
+                v-else
+                :folders="rootFolders"
+                :selected-id="selectedFolderId"
+                @select="selectFolder"
+                @expand="expandFolder"
+              />
+            </div>
+
+            <button class="w-full flex items-center gap-3 px-3 py-1.5 text-on-surface-variant hover:bg-black/5 rounded-md text-body-sm font-body-sm transition-colors mt-1">
+              <span class="material-symbols-outlined">movie</span>
+              <span>Videos</span>
+            </button>
+          </div>
+
+          <!-- Group 4: Devices & Drives -->
+          <div class="mb-4">
+            <div class="px-3 mb-1 text-[10px] font-bold text-outline uppercase tracking-wider">Devices &amp; Drives</div>
+            <button class="w-full flex items-center gap-3 px-3 py-1.5 text-on-surface-variant hover:bg-black/5 rounded-md text-body-sm font-body-sm transition-colors">
+              <span class="material-symbols-outlined text-outline">database</span>
+              <span>Local Disk (C:)</span>
+            </button>
+            <button class="w-full flex items-center gap-3 px-3 py-1.5 text-on-surface-variant hover:bg-black/5 rounded-md text-body-sm font-body-sm transition-colors">
+              <span class="material-symbols-outlined text-outline">storage</span>
+              <span>Local Disk (D:)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Bottom Actions inside sidebar -->
+        <div class="p-2 border-t border-outline-variant/30 mt-auto">
+          <button class="w-full flex items-center gap-3 px-3 py-1.5 text-on-surface-variant hover:bg-black/5 rounded-md text-body-sm font-body-sm transition-colors">
+            <span class="material-symbols-outlined">language</span>
+            <span>Network</span>
+          </button>
+          <button class="w-full flex items-center gap-3 px-3 py-1.5 text-on-surface-variant hover:bg-black/5 rounded-md text-body-sm font-body-sm transition-colors">
+            <span class="material-symbols-outlined">delete</span>
+            <span>Recycle Bin</span>
+          </button>
         </div>
       </aside>
 
-      <!-- Panel Kanan: Isi Folder & Detail (70% lebar sisanya) -->
-      <main class="flex-1 flex flex-col bg-surface p-6 min-w-0">
-        <!-- Area Tampilan Isi Folder -->
+      <!-- Main Content (Details View) -->
+      <main class="flex-1 flex flex-col bg-surface p-6 min-w-0 overflow-hidden">
         <div class="flex-1 min-h-0 flex flex-col">
           <div
             v-if="!selectedFolderId && !isSearching"
@@ -305,6 +391,7 @@
 
           <FolderContents
             v-else
+            v-model:viewMode="viewMode"
             :subfolders="sortedSubfolders"
             :files="sortedFiles"
             :is-loading="selectedFolderContentsLoading || searchLoading"
@@ -313,15 +400,196 @@
             :active-item="activeItem"
             @navigate="selectFolder"
             @select-item="activeItem = $event"
+            @open-file="modalFile = $event"
           />
         </div>
       </main>
+
+      <!-- Right Preview Pane -->
+      <aside class="w-[320px] flex-none bg-surface-container-lowest border-l border-outline-variant/50 flex flex-col overflow-y-auto select-none p-6 shadow-sm">
+        <div v-if="previewItem" class="flex flex-col items-center text-center">
+          <div class="w-48 h-64 bg-surface-container rounded-lg shadow-sm mb-6 flex items-center justify-center overflow-hidden border border-outline-variant/60 relative group">
+            <!-- Menampilkan preview gambar atau cover ikon yang kaya -->
+            <img
+              v-if="previewItem.type === 'file' && isImageFile(previewItem.name)"
+              alt="Document Preview"
+              class="w-full h-full object-cover"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuA9octJA739EGCnRwoQmCfjmrO5OmyY8wq_U3W040ezCBkizNnSkKNpsEMQRLteb9RdMaO0LdLdxU1zJjmhnm_A0v3c2xwPSZKvudek3A-Z-7rROv6aoUQGJH_mvsUV5kEivn4jPENsLVFg5LNAQZksm39HwhLvyhnlbODccVwych8MA55mwTMQSw7FWlssbvVQhYLOTV1O0qkWn-5LRkN-Css05Cm8A8Ty4BxFAvhrPHEqZNVmJ1HoSCA0Jf2K_HYVb8iH44ro3Ao"
+            />
+            <div v-else class="flex flex-col items-center justify-center">
+              <span
+                class="material-symbols-outlined text-7xl"
+                :class="[previewItem.type === 'folder' ? 'text-[#ffc107]' : getFileIconDetails(previewItem.name).color]"
+                :style="{ fontVariationSettings: '\'FILL\' 1' }"
+              >
+                {{ previewItem.type === 'folder' ? getFolderIcon(previewItem.name) : getFileIconDetails(previewItem.name).icon }}
+              </span>
+            </div>
+            <div class="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors"></div>
+          </div>
+
+          <h2 class="font-title-sm text-title-sm mb-1 truncate w-full px-2" :title="previewItem.name">
+            {{ previewItem.name }}
+          </h2>
+          <p class="text-label-sm font-label-sm text-on-surface-variant mb-6">
+            {{ previewItem.type === 'folder' ? 'Folder' : getFileType(previewItem.name) }}
+          </p>
+
+          <div class="w-full space-y-4 text-left border-t border-outline-variant/20 pt-4">
+            <div>
+              <div class="text-[11px] font-bold text-on-surface-variant uppercase mb-2">Details</div>
+              <div class="grid grid-cols-2 gap-y-2.5 text-body-sm font-body-sm">
+                <span class="text-on-surface-variant">Author:</span>
+                <span class="text-on-surface truncate">{{ previewItem.type === 'file' ? 'Alex Rivera' : 'System' }}</span>
+                
+                <span class="text-on-surface-variant">Created:</span>
+                <span class="text-on-surface">10/24/2023</span>
+
+                <span class="text-on-surface-variant">Size:</span>
+                <span class="text-on-surface">
+                  {{ previewItem.type === 'file' ? formatBytes((previewItem as any).size) : '—' }}
+                </span>
+
+                <span class="text-on-surface-variant">Tags:</span>
+                <span class="px-2 py-0.5 bg-secondary-container text-on-secondary-container rounded-full w-fit text-xs font-semibold">
+                  {{ previewItem.type === 'file' ? 'Internal' : 'System Folder' }}
+                </span>
+              </div>
+            </div>
+
+            <button
+              v-if="previewItem.type === 'file'"
+              class="w-full py-2 bg-primary text-on-primary rounded-lg font-body-sm hover:bg-primary-container transition-colors shadow-sm font-medium mt-2"
+              @click="modalFile = previewItem"
+            >
+              Open File
+            </button>
+
+            <div class="pt-4 border-t border-outline-variant/30">
+              <div class="text-[11px] font-bold text-on-surface-variant uppercase mb-2">Properties</div>
+              <div class="text-body-sm font-body-sm space-y-2">
+                <div class="flex justify-between items-center">
+                  <span class="text-on-surface-variant">Status</span>
+                  <div class="flex items-center gap-1 text-green-600 font-medium">
+                    <span class="material-symbols-outlined text-xs">check_circle</span>
+                    <span>Synced</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div v-else class="h-full flex flex-col items-center justify-center text-center text-on-surface-variant/60 p-4">
+          <span class="material-symbols-outlined text-5xl mb-3">info</span>
+          <p class="text-body-sm">Pilih berkas atau folder untuk melihat pratinjau detail.</p>
+        </div>
+      </aside>
+    </div>
+
+    <!-- Status Bar (Footer Logic) -->
+    <footer class="h-7 bg-surface-container dark:bg-surface-container-high border-t border-outline-variant/30 flex items-center justify-between px-4 flex-none z-50 text-label-sm font-label-sm text-on-surface-variant select-none">
+      <div class="flex items-center gap-4">
+        <span>{{ totalItemsCount }} items</span>
+        <div v-if="selectedCount > 0" class="flex items-center gap-4">
+          <div class="w-px h-3 bg-outline-variant/50"></div>
+          <span class="text-on-surface font-semibold">{{ selectedCount }} item terpilih</span>
+          <span>{{ selectedItemsSize }}</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-4">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-xs">cloud_done</span>
+          <span>OneDrive Synced</span>
+        </div>
+        <div class="w-px h-3 bg-outline-variant/50"></div>
+        <div class="flex items-center gap-2">
+          <div class="w-16 h-1.5 bg-surface-variant rounded-full overflow-hidden">
+            <div class="bg-primary h-full w-[65%]"></div>
+          </div>
+          <span>C: 342 GB free of 512 GB</span>
+        </div>
+        <div class="flex items-center gap-1 ml-2">
+          <button
+            class="p-0.5 hover:text-primary transition-colors"
+            :class="{ 'text-primary': viewMode === 'grid' }"
+            @click="viewMode = 'grid'"
+          >
+            <span class="material-symbols-outlined text-sm">grid_view</span>
+          </button>
+          <button
+            class="p-0.5 hover:text-primary transition-colors"
+            :class="{ 'text-primary': viewMode === 'list' }"
+            @click="viewMode = 'list'"
+          >
+            <span class="material-symbols-outlined text-sm">view_list</span>
+          </button>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Modal Detail Berkas (Sesuai dengan Tes E2E) -->
+    <div
+      v-if="modalFile"
+      class="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50 transition-opacity"
+      @click.self="modalFile = null"
+    >
+      <div
+        class="bg-surface border border-outline-variant rounded shadow-2xl max-w-md w-full p-5 space-y-4 animate-scaleUp"
+      >
+        <div class="flex justify-between items-start">
+          <div class="flex items-center space-x-3">
+            <span
+              class="material-symbols-outlined text-3xl"
+              :class="getFileIconDetails(modalFile.name).color"
+            >
+              {{ getFileIconDetails(modalFile.name).icon }}
+            </span>
+            <div>
+              <h2 class="text-body-md font-semibold text-on-surface break-all">
+                {{ modalFile.name }}
+              </h2>
+              <p class="text-label-md text-on-surface-variant">
+                {{ getFileType(modalFile.name) }}
+              </p>
+            </div>
+          </div>
+          <button
+            class="text-on-surface-variant hover:text-on-surface text-lg font-bold"
+            @click="modalFile = null"
+          >
+            ×
+          </button>
+        </div>
+        <div
+          class="border-t border-outline-variant/30 pt-4 space-y-2 text-label-md text-on-surface-variant"
+        >
+          <div class="flex justify-between">
+            <span>Ukuran File:</span>
+            <span class="text-on-surface font-mono font-medium"
+              >{{ modalFile.size.toLocaleString() }} bytes ({{ formatBytes(modalFile.size) }})</span
+            >
+          </div>
+          <div class="flex justify-between">
+            <span>Lokasi:</span>
+            <span class="text-on-surface break-all">ID Folder: {{ modalFile.folderId }}</span>
+          </div>
+        </div>
+        <div class="flex justify-end pt-2">
+          <button
+            class="px-4 py-2 bg-primary hover:bg-primary/95 text-white font-medium rounded text-body-sm transition-colors shadow-sm"
+            @click="modalFile = null"
+          >
+            Tutup
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onMounted, ref, computed } from "vue";
 import { useExplorer } from "./composables/useExplorer";
 import FolderTree from "./components/FolderTree.vue";
 import FolderContents from "./components/FolderContents.vue";
@@ -332,9 +600,11 @@ const {
   rootFolders,
   selectedFolderId,
   selectedFolderContentsLoading,
+  selectedFolderContents,
   breadcrumbs,
   searchQuery,
   isSearching,
+  searchResults,
   searchLoading,
   historyStack,
   forwardStack,
@@ -363,7 +633,14 @@ const isTreeLoading = ref(true);
 
 // Toggles untuk menu popup lokal UI
 const isSortMenuOpen = ref(false);
+const isViewMenuOpen = ref(false);
 const isNewMenuOpen = ref(false);
+
+// Tampilan mode (grid atau list)
+const viewMode = ref<"grid" | "list">("grid");
+
+// Modal detail berkas
+const modalFile = ref<any>(null);
 
 const setSort = (field: "name" | "type" | "size", order: "asc" | "desc") => {
   sortBy.value = field;
@@ -380,6 +657,120 @@ const refreshCurrent = async () => {
   if (selectedFolderId.value) {
     await selectFolder(selectedFolderId.value, false);
   }
+};
+
+// Preview Pane Item Logic
+const previewItem = computed(() => {
+  if (activeItem.value) {
+    if (activeItem.value.type === "file") {
+      const fileObj = sortedFiles.value.find((f) => f.id === activeItem.value!.id);
+      return fileObj ? { ...fileObj, type: "file" } : null;
+    } else {
+      const folderObj = sortedSubfolders.value.find((f) => f.id === activeItem.value!.id);
+      return folderObj ? { ...folderObj, type: "folder" } : null;
+    }
+  }
+
+  // Jika tidak ada item yang aktif dipilih, tampilkan folder aktif saat ini
+  if (breadcrumbs.value.length > 0) {
+    const activeFolder = breadcrumbs.value[breadcrumbs.value.length - 1];
+    return { ...activeFolder, type: "folder" };
+  }
+
+  return null;
+});
+
+const isImageFile = (fileName: string): boolean => {
+  const ext = fileName.split(".").pop()?.toLowerCase();
+  return ["jpg", "jpeg", "png", "gif", "svg"].includes(ext || "");
+};
+
+// Item counts & sizes for Status Bar
+const totalItemsCount = computed(() => sortedSubfolders.value.length + sortedFiles.value.length);
+const selectedCount = computed(() => (activeItem.value ? 1 : 0));
+const selectedItemsSize = computed(() => {
+  if (!activeItem.value) return "";
+  if (activeItem.value.type === "folder") return "";
+  const fileObj = sortedFiles.value.find((f) => f.id === activeItem.value!.id);
+  return fileObj ? formatBytes(fileObj.size) : "";
+});
+
+// Helper-helper untuk visualisasi berkas & folder
+const getFolderIcon = (name: string) => {
+  const n = name.toLowerCase();
+  if (n === "documents") return "description";
+  if (n === "pictures") return "image";
+  if (n === "music") return "music_note";
+  if (n === "downloads") return "download";
+  if (n === "desktop") return "desktop_windows";
+  if (n === "videos") return "movie";
+  return "folder";
+};
+
+const getFileIconDetails = (fileName: string) => {
+  const ext = fileName.split(".").pop()?.toLowerCase();
+  switch (ext) {
+    case "pdf":
+      return { icon: "picture_as_pdf", color: "text-[#e01515]" };
+    case "docx":
+    case "doc":
+      return { icon: "description", color: "text-[#0078d4]" };
+    case "txt":
+    case "md":
+      return { icon: "article", color: "text-secondary" };
+    case "xlsx":
+    case "xls":
+      return { icon: "table_view", color: "text-[#107c41]" };
+    case "jpg":
+    case "jpeg":
+    case "png":
+    case "gif":
+    case "svg":
+      return { icon: "image", color: "text-[#0078d4]" };
+    case "zip":
+    case "rar":
+    case "tar":
+    case "gz":
+      return { icon: "folder_zip", color: "text-[#f39c12]" };
+    default:
+      return { icon: "draft", color: "text-secondary" };
+  }
+};
+
+const getFileType = (fileName: string): string => {
+  const ext = fileName.split(".").pop()?.toLowerCase();
+  switch (ext) {
+    case "pdf":
+      return "Berkas PDF";
+    case "docx":
+    case "doc":
+      return "Dokumen Word";
+    case "txt":
+      return "Berkas Teks";
+    case "md":
+      return "Markdown";
+    case "xlsx":
+    case "xls":
+      return "Lembar Kerja Excel";
+    case "jpg":
+    case "jpeg":
+    case "png":
+    case "gif":
+    case "svg":
+      return "Gambar";
+    case "zip":
+      return "Berkas ZIP";
+    default:
+      return "Berkas " + (ext?.toUpperCase() || "Lainnya");
+  }
+};
+
+const formatBytes = (bytes: number): string => {
+  if (bytes === 0) return "0 Bytes";
+  const k = 1024;
+  const sizes = ["Bytes", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
 };
 
 onMounted(async () => {
@@ -412,5 +803,19 @@ body {
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+@keyframes scaleUp {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.animate-scaleUp {
+  animation: scaleUp 0.15s ease-out forwards;
 }
 </style>

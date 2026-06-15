@@ -4,7 +4,7 @@
     <div
       class="flex items-center justify-between pb-4 border-b border-outline-variant/30 mb-4 shrink-0"
     >
-      <div class="text-body-sm text-on-surface-variant">
+      <div class="text-body-sm text-on-surface-variant font-body-sm">
         <span v-if="isSearching"
           >Hasil Pencarian untuk:
           <strong class="text-on-surface font-semibold">"{{ searchQuery }}"</strong></span
@@ -75,11 +75,11 @@
           v-for="subfolder in subfolders"
           :id="'content-folder-' + subfolder.id"
           :key="subfolder.id"
-          class="flex flex-col items-center p-3 rounded border border-transparent transition-all duration-150 hover:bg-black/5 cursor-pointer select-none text-center"
+          class="flex flex-col items-center p-3 rounded border border-transparent transition-all duration-150 hover:bg-black/5 cursor-pointer select-none text-center border-l-4"
           :class="[
             activeItem?.id === subfolder.id
-              ? 'bg-primary/10 border-primary/20 shadow-sm font-medium'
-              : ''
+              ? 'bg-[#eef7ff] border-primary border-primary/20 shadow-sm font-medium'
+              : 'border-transparent'
           ]"
           @click="selectItem(subfolder, 'folder')"
           @dblclick="openFolder(subfolder.id)"
@@ -100,11 +100,11 @@
           v-for="file in files"
           :id="'content-file-' + file.id"
           :key="file.id"
-          class="flex flex-col items-center p-3 rounded border border-transparent transition-all duration-150 hover:bg-black/5 cursor-pointer select-none text-center"
+          class="flex flex-col items-center p-3 rounded border border-transparent transition-all duration-150 hover:bg-black/5 cursor-pointer select-none text-center border-l-4"
           :class="[
             activeItem?.id === file.id
-              ? 'bg-primary/10 border-primary/20 shadow-sm font-medium'
-              : ''
+              ? 'bg-[#eef7ff] border-primary border-primary/20 shadow-sm font-medium'
+              : 'border-transparent'
           ]"
           @click="selectItem(file, 'file')"
           @dblclick="openFile(file)"
@@ -129,37 +129,39 @@
         <table class="w-full text-left border-collapse">
           <thead>
             <tr
-              class="border-b border-outline-variant/30 text-body-sm text-on-surface-variant font-semibold"
+              class="border-b border-outline-variant/30 text-label-sm font-semibold text-on-surface-variant bg-surface-container-low/50 h-9"
             >
-              <th class="pb-2 pl-4">Nama</th>
-              <th class="pb-2">Tipe</th>
-              <th class="pb-2 text-right pr-4">Ukuran</th>
+              <th class="pb-1 pl-4 w-1/2 align-middle font-semibold">Nama</th>
+              <th class="pb-1 w-1/6 align-middle font-semibold border-l border-outline-variant/30 pl-2">Tanggal modifikasi</th>
+              <th class="pb-1 w-1/6 align-middle font-semibold border-l border-outline-variant/30 pl-2">Tipe</th>
+              <th class="pb-1 text-right pr-4 w-1/6 align-middle font-semibold border-l border-outline-variant/30 pl-2">Ukuran</th>
             </tr>
           </thead>
-          <tbody class="text-body-sm divide-y divide-outline-variant/20">
+          <tbody class="text-body-sm divide-y divide-outline-variant/10">
             <!-- Subfolders -->
             <tr
               v-for="subfolder in subfolders"
               :id="'content-folder-' + subfolder.id"
               :key="subfolder.id"
-              class="hover:bg-black/5 transition-colors duration-100 cursor-pointer select-none"
+              class="hover:bg-black/5 transition-colors duration-100 cursor-pointer select-none h-[40px] border-l-4"
               :class="[
-                activeItem?.id === subfolder.id ? 'bg-primary/10 text-primary' : 'text-on-surface'
+                activeItem?.id === subfolder.id ? 'bg-[#eef7ff] border-primary text-primary font-semibold' : 'border-transparent text-on-surface'
               ]"
               @click="selectItem(subfolder, 'folder')"
               @dblclick="openFolder(subfolder.id)"
             >
-              <td class="py-2 pl-4 flex items-center max-w-xs sm:max-w-md md:max-w-xl truncate">
+              <td class="py-1 pl-4 flex items-center max-w-xs sm:max-w-md md:max-w-xl truncate h-[40px]">
                 <span
-                  class="material-symbols-outlined mr-3 text-[#ffc107] scale-90 animate-none"
+                  class="material-symbols-outlined mr-3 text-[#ffc107] scale-90 animate-none shrink-0"
                   :style="{ fontVariationSettings: '\'FILL\' 1' }"
                 >
                   folder
                 </span>
                 <span class="font-medium truncate">{{ subfolder.name }}</span>
               </td>
-              <td class="py-2 text-on-surface-variant">Folder</td>
-              <td class="py-2 text-right pr-4 text-on-surface-variant">—</td>
+              <td class="py-1 pl-2 text-on-surface-variant text-body-sm">10/24/2023 2:45 PM</td>
+              <td class="py-1 pl-2 text-on-surface-variant text-body-sm">Folder</td>
+              <td class="py-1 text-right pr-4 text-on-surface-variant font-mono">—</td>
             </tr>
 
             <!-- Files -->
@@ -167,26 +169,27 @@
               v-for="file in files"
               :id="'content-file-' + file.id"
               :key="file.id"
-              class="hover:bg-black/5 transition-colors duration-100 cursor-pointer select-none"
+              class="hover:bg-black/5 transition-colors duration-100 cursor-pointer select-none h-[40px] border-l-4"
               :class="[
-                activeItem?.id === file.id ? 'bg-primary/10 text-primary' : 'text-on-surface'
+                activeItem?.id === file.id ? 'bg-[#eef7ff] border-primary text-primary font-semibold' : 'border-transparent text-on-surface'
               ]"
               @click="selectItem(file, 'file')"
               @dblclick="openFile(file)"
             >
-              <td class="py-2 pl-4 flex items-center max-w-xs sm:max-w-md md:max-w-xl truncate">
+              <td class="py-1 pl-4 flex items-center max-w-xs sm:max-w-md md:max-w-xl truncate h-[40px]">
                 <span
-                  class="material-symbols-outlined mr-3 scale-90"
+                  class="material-symbols-outlined mr-3 scale-90 shrink-0"
                   :class="getFileIconDetails(file.name).color"
                 >
                   {{ getFileIconDetails(file.name).icon }}
                 </span>
                 <span class="font-medium truncate">{{ file.name }}</span>
               </td>
-              <td class="py-2 text-on-surface-variant">
+              <td class="py-1 pl-2 text-on-surface-variant text-body-sm">10/24/2023 2:45 PM</td>
+              <td class="py-1 pl-2 text-on-surface-variant text-body-sm">
                 {{ getFileType(file.name) }}
               </td>
-              <td class="py-2 text-right pr-4 text-on-surface-variant font-mono">
+              <td class="py-1 text-right pr-4 text-on-surface-variant font-mono">
                 {{ formatBytes(file.size) }}
               </td>
             </tr>
@@ -194,69 +197,11 @@
         </table>
       </div>
     </div>
-
-    <!-- Modal Detail Berkas (Ketika berkas di-double click) -->
-    <div
-      v-if="modalFile"
-      class="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50 transition-opacity"
-      @click.self="modalFile = null"
-    >
-      <div
-        class="bg-surface border border-outline-variant rounded shadow-2xl max-w-md w-full p-5 space-y-4 animate-scaleUp"
-      >
-        <div class="flex justify-between items-start">
-          <div class="flex items-center space-x-3">
-            <span
-              class="material-symbols-outlined text-3xl"
-              :class="getFileIconDetails(modalFile.name).color"
-            >
-              {{ getFileIconDetails(modalFile.name).icon }}
-            </span>
-            <div>
-              <h2 class="text-body-md font-semibold text-on-surface break-all">
-                {{ modalFile.name }}
-              </h2>
-              <p class="text-label-md text-on-surface-variant">
-                {{ getFileType(modalFile.name) }}
-              </p>
-            </div>
-          </div>
-          <button
-            class="text-on-surface-variant hover:text-on-surface text-lg font-bold"
-            @click="modalFile = null"
-          >
-            ×
-          </button>
-        </div>
-        <div
-          class="border-t border-outline-variant/30 pt-4 space-y-2 text-label-md text-on-surface-variant"
-        >
-          <div class="flex justify-between">
-            <span>Ukuran File:</span>
-            <span class="text-on-surface font-mono font-medium"
-              >{{ modalFile.size.toLocaleString() }} bytes ({{ formatBytes(modalFile.size) }})</span
-            >
-          </div>
-          <div class="flex justify-between">
-            <span>Lokasi:</span>
-            <span class="text-on-surface break-all">ID Folder: {{ modalFile.folderId }}</span>
-          </div>
-        </div>
-        <div class="flex justify-end pt-2">
-          <button
-            class="px-4 py-2 bg-primary hover:bg-primary/95 text-white font-medium rounded text-body-sm transition-colors shadow-sm"
-            @click="modalFile = null"
-          >
-            Tutup
-          </button>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { computed } from "vue";
 import { FolderDTO, FileDTO } from "@explorer/common";
 
 const props = defineProps<{
@@ -271,10 +216,10 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: "navigate", folderId: string): void;
   (e: "select-item", item: { id: string; type: "folder" | "file"; name: string } | null): void;
+  (e: "open-file", file: FileDTO): void;
 }>();
 
-const viewMode = ref<"grid" | "list">("grid");
-const modalFile = ref<FileDTO | null>(null);
+const viewMode = defineModel<"grid" | "list">("viewMode", { default: "grid" });
 
 const itemsCount = computed(() => props.subfolders.length + props.files.length);
 const isEmpty = computed(() => props.subfolders.length === 0 && props.files.length === 0);
@@ -289,7 +234,7 @@ const openFolder = (folderId: string) => {
 };
 
 const openFile = (file: FileDTO) => {
-  modalFile.value = file;
+  emit("open-file", file);
 };
 
 const getFileIconDetails = (fileName: string) => {
@@ -366,17 +311,5 @@ const formatBytes = (bytes: number): string => {
 </script>
 
 <style scoped>
-@keyframes scaleUp {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-.animate-scaleUp {
-  animation: scaleUp 0.15s ease-out forwards;
-}
+/* Scoped styles removed as modal is lifted up */
 </style>
