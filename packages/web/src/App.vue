@@ -61,7 +61,7 @@
         >
           <span
             class="material-symbols-outlined text-primary-container mr-2"
-            style="font-variation-settings: &quot;FILL&quot; 1"
+            style="font-variation-settings: 'FILL' 1"
             >folder</span
           >
           <Breadcrumbs :path="breadcrumbs" @navigate="selectFolder" />
@@ -577,14 +577,16 @@
         </div>
         <div class="flex items-center gap-1 ml-2">
           <button
-            class="p-0.5 hover:text-primary transition-colors"
+            id="view-grid-btn"
+            class="p-0.5 hover:text-[#005faa] transition-colors"
             :class="{ 'text-primary': viewMode === 'grid' }"
             @click="viewMode = 'grid'"
           >
             <span class="material-symbols-outlined text-sm">grid_view</span>
           </button>
           <button
-            class="p-0.5 hover:text-primary transition-colors"
+            id="view-list-btn"
+            class="p-0.5 hover:text-[#005faa] transition-colors"
             :class="{ 'text-primary': viewMode === 'list' }"
             @click="viewMode = 'list'"
           >
