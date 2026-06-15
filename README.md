@@ -4,7 +4,7 @@ This repository contains the implementation of a hierarchical web-based file man
 
 ## Key Features Implemented
 
-- **Windows 11 Fluent Light Mode UI**: A pixel-perfect 1:1 Windows 11 Explorer visual experience with light mode styling, system-inspired yellow folder icons, and custom file type icons.
+- **Windows-inspired Light Mode UI**: A clean visual experience inspired by Windows Explorer with light mode styling, yellow folder icons, and custom file type icons.
 - **History Navigation**: Fully functional Back, Forward, Up, and Refresh controls driven by history stacks.
 - **Toolbar Actions & Clipboard**: Support for creating new files/folders, deleting, renaming, and copy/cut/paste actions.
 - **Local Sorting**: Interactive sorting by Name (A-Z/Z-A), File Type, and File Size.
