@@ -60,13 +60,18 @@
 
         <!-- Global Actions -->
         <div class="flex items-center gap-1 text-on-surface-variant shrink-0">
-          <button class="p-1 hover:bg-surface-variant rounded-md">
+          <button class="p-1 hover:bg-surface-variant rounded-md" title="Settings">
             <span class="material-symbols-outlined">settings</span>
           </button>
-          <button class="p-1 hover:bg-surface-variant rounded-md">
+          <button 
+            class="p-1 hover:bg-surface-variant rounded-md transition-colors"
+            :class="{ 'bg-primary/10 text-primary': showPreviewPane }"
+            title="Toggle Details Pane"
+            @click="showPreviewPane = !showPreviewPane"
+          >
             <span class="material-symbols-outlined">info</span>
           </button>
-          <button class="p-1 hover:bg-surface-variant rounded-md">
+          <button class="p-1 hover:bg-surface-variant rounded-md" title="Profile">
             <span class="material-symbols-outlined">account_circle</span>
           </button>
         </div>
@@ -259,7 +264,7 @@
           </button>
           <div
             v-if="isViewMenuOpen"
-            class="absolute left-0 mt-1 w-40 bg-surface border border-outline-variant rounded shadow-lg z-20 py-1"
+            class="absolute left-0 mt-1 w-48 bg-surface border border-outline-variant rounded shadow-lg z-20 py-1"
           >
             <button
               class="w-full text-left px-4 py-2 text-body-sm hover:bg-black/5 flex items-center gap-2"
@@ -276,6 +281,17 @@
             >
               <span class="material-symbols-outlined text-xs">view_list</span>
               Detail List
+            </button>
+            <div class="h-px bg-outline-variant/30 my-1"></div>
+            <button
+              class="w-full text-left px-4 py-2 text-body-sm hover:bg-black/5 flex items-center justify-between"
+              @click="showPreviewPane = !showPreviewPane; isViewMenuOpen = false"
+            >
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-xs">info</span>
+                <span>Details pane</span>
+              </div>
+              <span v-if="showPreviewPane" class="material-symbols-outlined text-xs">check</span>
             </button>
           </div>
         </div>
@@ -383,7 +399,22 @@
       </main>
 
       <!-- Right Preview Pane -->
-      <section class="w-[320px] flex-none bg-surface-container-lowest border-l border-outline-variant/50 flex flex-col overflow-y-auto select-none p-6 shadow-sm">
+      <section 
+        v-if="showPreviewPane"
+        class="w-[320px] flex-none bg-surface-container-lowest border-l border-outline-variant/50 flex flex-col overflow-y-auto select-none p-6 shadow-sm relative"
+      >
+        <!-- Header Panel Pratinjau -->
+        <div class="flex items-center justify-between mb-4 pb-2 border-b border-outline-variant/20">
+          <span class="text-sm font-semibold text-on-surface">Details</span>
+          <button 
+            class="p-1 hover:bg-black/5 rounded-md text-on-surface-variant hover:text-on-surface transition-colors flex items-center justify-center"
+            title="Close Details Pane"
+            @click="showPreviewPane = false"
+          >
+            <span class="material-symbols-outlined text-sm">close</span>
+          </button>
+        </div>
+
         <div v-if="previewItem" class="flex flex-col items-center text-center">
           <div class="w-48 h-64 bg-surface-container rounded-lg shadow-sm mb-6 flex items-center justify-center overflow-hidden border border-outline-variant/60 relative group mx-auto">
             <!-- Menampilkan preview gambar atau cover ikon yang kaya -->
@@ -618,6 +649,9 @@ const isNewMenuOpen = ref(false);
 
 // Tampilan mode (grid atau list)
 const viewMode = ref<"grid" | "list">("grid");
+
+// Tampilkan / Sembunyikan panel pratinjau detail
+const showPreviewPane = ref(true);
 
 // Modal detail berkas
 const modalFile = ref<any>(null);
