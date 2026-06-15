@@ -4,7 +4,7 @@ import { FolderDTO, FileDTO, FolderContentsDTO, SearchResultsDTO } from "@explor
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:3001/api/v1";
 
 export const explorerApi = {
-  // Ambil subfolder langsung (untuk tree view)
+  // Fetch subfolders directly (for tree view)
   async getSubfolders(parentId: string | null = null): Promise<FolderDTO[]> {
     try {
       const url = parentId
@@ -19,7 +19,7 @@ export const explorerApi = {
     }
   },
 
-  // Ambil isi folder lengkap (subfolder + berkas) untuk panel kanan
+  // Fetch full folder contents (subfolders + files) for the right panel
   async getFolderContents(folderId: string): Promise<FolderContentsDTO> {
     try {
       const response = await fetch(`${API_BASE_URL}/folders/${folderId}/contents`);
@@ -31,7 +31,7 @@ export const explorerApi = {
     }
   },
 
-  // Ambil urutan breadcrumb path folder dari node ke root
+  // Fetch breadcrumb path from node to root
   async getFolderPath(folderId: string): Promise<FolderDTO[]> {
     try {
       const response = await fetch(`${API_BASE_URL}/folders/${folderId}/path`);
@@ -43,7 +43,7 @@ export const explorerApi = {
     }
   },
 
-  // Cari berkas dan folder secara global
+  // Search files and folders globally
   async search(query: string): Promise<SearchResultsDTO> {
     try {
       if (!query || query.trim().length < 2) {
@@ -58,7 +58,7 @@ export const explorerApi = {
     }
   },
 
-  // Membuat Folder Baru
+  // Create New Folder
   async createFolder(name: string, parentId: string | null): Promise<FolderDTO | null> {
     try {
       const response = await fetch(`${API_BASE_URL}/folders`, {
@@ -74,7 +74,7 @@ export const explorerApi = {
     }
   },
 
-  // Membuat Berkas Baru
+  // Create New File
   async createFile(name: string, folderId: string, size = 0): Promise<FileDTO | null> {
     try {
       const response = await fetch(`${API_BASE_URL}/files`, {
@@ -90,7 +90,7 @@ export const explorerApi = {
     }
   },
 
-  // Mengubah Nama Folder
+  // Rename Folder
   async renameFolder(id: string, name: string): Promise<FolderDTO | null> {
     try {
       const response = await fetch(`${API_BASE_URL}/folders/${id}`, {
@@ -106,7 +106,7 @@ export const explorerApi = {
     }
   },
 
-  // Mengubah Nama Berkas
+  // Rename File
   async renameFile(id: string, name: string): Promise<FileDTO | null> {
     try {
       const response = await fetch(`${API_BASE_URL}/files/${id}`, {
@@ -122,7 +122,7 @@ export const explorerApi = {
     }
   },
 
-  // Memindahkan Folder (Cut & Paste)
+  // Move Folder (Cut & Paste)
   async moveFolder(id: string, parentId: string | null): Promise<FolderDTO | null> {
     try {
       const response = await fetch(`${API_BASE_URL}/folders/${id}`, {
@@ -138,7 +138,7 @@ export const explorerApi = {
     }
   },
 
-  // Memindahkan Berkas (Cut & Paste)
+  // Move File (Cut & Paste)
   async moveFile(id: string, folderId: string): Promise<FileDTO | null> {
     try {
       const response = await fetch(`${API_BASE_URL}/files/${id}`, {
@@ -154,7 +154,7 @@ export const explorerApi = {
     }
   },
 
-  // Menyalin Folder (Copy & Paste)
+  // Copy Folder (Copy & Paste)
   async copyFolder(id: string, parentId: string | null): Promise<FolderDTO | null> {
     try {
       const response = await fetch(`${API_BASE_URL}/folders/${id}/copy`, {
@@ -170,7 +170,7 @@ export const explorerApi = {
     }
   },
 
-  // Menyalin Berkas (Copy & Paste)
+  // Copy File (Copy & Paste)
   async copyFile(id: string, folderId: string): Promise<FileDTO | null> {
     try {
       const response = await fetch(`${API_BASE_URL}/files/${id}/copy`, {
@@ -186,7 +186,7 @@ export const explorerApi = {
     }
   },
 
-  // Menghapus Folder
+  // Delete Folder
   async deleteFolder(id: string): Promise<boolean> {
     try {
       const response = await fetch(`${API_BASE_URL}/folders/${id}`, {
@@ -200,7 +200,7 @@ export const explorerApi = {
     }
   },
 
-  // Menghapus Berkas
+  // Delete File
   async deleteFile(id: string): Promise<boolean> {
     try {
       const response = await fetch(`${API_BASE_URL}/files/${id}`, {
@@ -214,7 +214,7 @@ export const explorerApi = {
     }
   },
 
-  // Mendapatkan ID folder pintasan (shortcuts) dari database
+  // Get shortcut folder IDs from the database
   async getShortcuts(): Promise<Record<string, string>> {
     try {
       const response = await fetch(`${API_BASE_URL}/shortcuts`);

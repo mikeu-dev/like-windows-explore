@@ -110,14 +110,14 @@
                 :style="{ fontVariationSettings: '\'FILL\' 1' }"
                 >folder</span
               >
-              Folder Baru
+              New Folder
             </button>
             <button
               class="w-full text-left px-4 py-2 text-body-sm hover:bg-black/5 flex items-center gap-2"
               @click="handleNewItem('file')"
             >
               <span class="material-symbols-outlined text-secondary">article</span>
-              Berkas Baru
+              New File
             </button>
           </div>
         </div>
@@ -318,10 +318,10 @@
             <div
               class="w-3.5 h-3.5 border-2 border-primary border-t-transparent rounded-full animate-spin"
             />
-            <span class="text-xs">Memuat...</span>
+            <span class="text-xs">Loading...</span>
           </div>
           <div v-else class="space-y-4">
-            <!-- Bagian 1: OneDrive & Umum -->
+            <!-- Section 1: OneDrive & General -->
             <div>
               <FolderTree
                 :folders="sidebarSection1"
@@ -331,7 +331,7 @@
               />
             </div>
 
-            <!-- Bagian 2: Pin Shortcuts (Flat / Leaf) -->
+            <!-- Section 2: Pinned Shortcuts (Flat / Leaf) -->
             <div>
               <div class="px-3 mb-1 text-[10px] font-bold text-outline uppercase tracking-wider">Quick Access</div>
               <FolderTree
@@ -342,7 +342,7 @@
               />
             </div>
 
-            <!-- Bagian 3: Devices Tree (This PC, Network, Linux) -->
+            <!-- Section 3: Devices Tree (This PC, Network, Linux) -->
             <div>
               <FolderTree
                 :folders="sidebarSection3"
@@ -354,7 +354,7 @@
           </div>
         </div>
 
-        <!-- Recycle Bin / Network Fallbacks di Bagian Paling Bawah Sidebar -->
+        <!-- Recycle Bin / Network Fallbacks at the bottom of the Sidebar -->
         <div class="p-2 border-t border-outline-variant/30 mt-auto">
           <button 
             class="w-full flex items-center gap-3 px-3 py-1.5 text-on-surface-variant hover:bg-black/5 rounded-md text-body-sm font-body-sm transition-colors"
@@ -375,9 +375,9 @@
           >
             <span class="material-symbols-outlined text-6xl text-[#ffc107]">folder</span>
             <div class="text-center">
-              <h3 class="text-body-md font-semibold text-on-surface">Belum ada folder terpilih</h3>
+              <h3 class="text-body-md font-semibold text-on-surface">No folder selected</h3>
               <p class="text-body-sm mt-1 text-on-surface-variant/75">
-                Silakan klik salah satu folder di panel navigasi kiri untuk melihat isinya.
+                Please click a folder in the left navigation panel to view its contents.
               </p>
             </div>
           </div>
@@ -464,8 +464,8 @@
                 </span>
 
                 <template v-if="previewItem.type === 'folder' && !activeItem">
-                  <span class="font-medium text-primary">Item Ditemukan:</span>
-                  <span class="font-semibold text-primary">{{ totalItemsCount }} item</span>
+                  <span class="font-medium text-primary">Items Found:</span>
+                  <span class="font-semibold text-primary">{{ totalItemsCount }} items</span>
                 </template>
               </div>
             </div>
@@ -495,7 +495,7 @@
 
         <div v-else class="h-full flex flex-col items-center justify-center text-center text-on-surface-variant/60 p-4">
           <span class="material-symbols-outlined text-5xl mb-3">info</span>
-          <p class="text-body-sm">Pilih berkas atau folder untuk melihat pratinjau detail.</p>
+          <p class="text-body-sm">Select a file or folder to view details preview.</p>
         </div>
       </section>
     </div>
@@ -506,7 +506,7 @@
         <span>{{ totalItemsCount }} items</span>
         <div v-if="selectedCount > 0" class="flex items-center gap-4">
           <div class="w-px h-3 bg-outline-variant/50"></div>
-          <span class="text-on-surface font-semibold">{{ selectedCount }} item terpilih</span>
+          <span class="text-on-surface font-semibold">{{ selectedCount }} item selected</span>
           <span>{{ selectedItemsSize }}</span>
         </div>
       </div>
@@ -541,7 +541,7 @@
       </div>
     </footer>
 
-    <!-- Modal Detail Berkas (Sesuai dengan Tes E2E) -->
+    <!-- File Detail Modal (Matches E2E Tests) -->
     <div
       v-if="modalFile"
       class="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50 transition-opacity"
@@ -578,14 +578,14 @@
           class="border-t border-outline-variant/30 pt-4 space-y-2 text-label-md text-on-surface-variant"
         >
           <div class="flex justify-between">
-            <span>Ukuran File:</span>
+            <span>File Size:</span>
             <span class="text-on-surface font-mono font-medium"
               >{{ modalFile.size.toLocaleString() }} bytes ({{ formatBytes(modalFile.size) }})</span
             >
           </div>
           <div class="flex justify-between">
-            <span>Lokasi:</span>
-            <span class="text-on-surface break-all">ID Folder: {{ modalFile.folderId }}</span>
+            <span>Location:</span>
+            <span class="text-on-surface break-all">Folder ID: {{ modalFile.folderId }}</span>
           </div>
         </div>
         <div class="flex justify-end pt-2">
@@ -593,7 +593,7 @@
             class="px-4 py-2 bg-primary hover:bg-primary/95 text-white font-medium rounded text-body-sm transition-colors shadow-sm"
             @click="modalFile = null"
           >
-            Tutup
+            Close
           </button>
         </div>
       </div>
@@ -647,18 +647,18 @@ const {
 
 const isTreeLoading = ref(true);
 
-// Toggles untuk menu popup lokal UI
+// UI popup local menu toggles
 const isSortMenuOpen = ref(false);
 const isViewMenuOpen = ref(false);
 const isNewMenuOpen = ref(false);
 
-// Tampilan mode (grid atau list)
+// View mode (grid or list)
 const viewMode = ref<"grid" | "list">("grid");
 
-// Tampilkan / Sembunyikan panel pratinjau detail
+// Show / Hide detail preview pane
 const showPreviewPane = ref(true);
 
-// Modal detail berkas
+// File detail modal
 const modalFile = ref<any>(null);
 
 const setSort = (field: "name" | "type" | "size", order: "asc" | "desc") => {
@@ -778,29 +778,29 @@ const getFileType = (fileName: string): string => {
   const ext = fileName.split(".").pop()?.toLowerCase();
   switch (ext) {
     case "pdf":
-      return "Berkas PDF";
+      return "PDF Document";
     case "docx":
     case "doc":
-      return "Dokumen Word";
+      return "Word Document";
     case "txt":
-      return "Berkas Teks";
+      return "Text Document";
     case "md":
-      return "Markdown";
+      return "Markdown File";
     case "xlsx":
     case "xls":
-      return "Lembar Kerja Excel";
+      return "Excel Spreadsheet";
     case "jpg":
     case "jpeg":
     case "png":
-      return "Gambar";
+      return "Image File";
     case "gif":
-      return "GIF";
+      return "GIF Image";
     case "svg":
-      return "Vektor SVG";
+      return "SVG Vector Image";
     case "zip":
-      return "Berkas ZIP";
+      return "ZIP Archive";
     default:
-      return "Berkas " + (ext?.toUpperCase() || "Lainnya");
+      return (ext?.toUpperCase() || "Unknown") + " File";
   }
 };
 
@@ -816,7 +816,7 @@ onMounted(async () => {
   try {
     await loadRootFolders();
   } catch (e) {
-    console.error("Gagal melakukan inisialisasi aplikasi", e);
+    console.error("Failed to initialize application", e);
   } finally {
     isTreeLoading.value = false;
   }
@@ -824,7 +824,7 @@ onMounted(async () => {
 </script>
 
 <style>
-/* CSS Reset Ringan & Animasi */
+/* Lightweight CSS Reset & Animations */
 html,
 body,
 #app {

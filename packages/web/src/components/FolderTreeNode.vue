@@ -1,6 +1,6 @@
 <template>
   <div class="select-none">
-    <!-- Row Folder -->
+    <!-- Folder Row -->
     <div
       :id="'folder-node-' + folder.id"
       class="relative flex items-center py-1 px-2 rounded cursor-pointer transition-colors duration-150 text-body-sm group"
@@ -11,7 +11,7 @@
       ]"
       @click="emit('select', folder.id)"
     >
-      <!-- Indikator Ekspansi / Buka-Tutup (Chevron) -->
+      <!-- Expansion / Collapse Indicator (Chevron) -->
       <span
         :id="'caret-' + folder.id"
         class="w-5 h-5 flex items-center justify-center mr-1 text-on-surface-variant transition-transform duration-200"
@@ -40,7 +40,7 @@
       <span class="truncate flex-1">{{ folder.name }}</span>
     </div>
 
-    <!-- Subfolders (Rekursif) -->
+    <!-- Subfolders (Recursive) -->
     <div
       v-if="folder.isOpen && folder.children && folder.children.length > 0"
       class="pl-4 border-l border-outline-variant/30 mt-0.5 space-y-0.5 ml-4"

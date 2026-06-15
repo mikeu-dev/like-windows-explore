@@ -2,7 +2,7 @@ import { ref, computed, reactive } from "vue";
 import { FolderDTO, FileDTO, FolderContentsDTO } from "@explorer/common";
 import { explorerApi } from "../services/api";
 
-// Definisikan tipe untuk node folder yang dapat diekspansi di frontend
+// Define type for expandable folder nodes on the frontend
 export interface ClientFolderNode extends FolderDTO {
   children?: ClientFolderNode[];
   isOpen?: boolean;
@@ -22,7 +22,7 @@ export function useExplorer() {
   const isSearching = ref(false);
   const searchLoading = ref(false);
 
-  // Stack navigasi riwayat
+  // Navigation history stacks
   const historyStack = ref<string[]>([]);
   const forwardStack = ref<string[]>([]);
 
@@ -41,10 +41,10 @@ export function useExplorer() {
     sourceFolderId: string;
   } | null>(null);
 
-  // Map untuk akses cepat O(1) ke node mana pun dalam pohon
+  // Map for fast O(1) access to any node in the tree
   const folderMap = reactive(new Map<string, ClientFolderNode>());
 
-  // Daftar folder virtual
+  // List of virtual folders
   const virtualFolders = [
     "this-pc",
     "desktop",
@@ -56,15 +56,15 @@ export function useExplorer() {
     "linux"
   ];
 
-  // Menyimpan status terbuka/tertutup folder virtual
+  // Stores the open/collapsed state of virtual folders
   const openFolderIds = ref<Record<string, boolean>>({
-    "this-pc": true, // Terbuka secara default
+    "this-pc": true, // Open by default
     "network": false,
     "linux": false,
     "onedrive-root": false
   });
 
-  // Pemetaan ID folder pintasan (shortcuts) dari database
+  // Mapping of shortcut folder IDs from the database
   const shortcutFolderIds = ref<Record<string, string>>({
     desktop: "",
     downloads: "",
@@ -77,7 +77,7 @@ export function useExplorer() {
     localD: ""
   });
 
-  // Node OneDrive Virtual di Section 1
+  // Virtual OneDrive Node in Section 1
   const oneDriveNode = computed<ClientFolderNode>(() => {
     const id = shortcutFolderIds.value.onedrive || "onedrive-virtual";
     const mapNode = folderMap.get(id);
@@ -163,7 +163,7 @@ export function useExplorer() {
     ];
   });
 
-  // Memperoleh folder yang terurut berdasarkan kriteria
+  // Get sorted folders/files based on criteria
   const sortedSubfolders = computed(() => {
     const list = isSearching.value
       ? searchResults.value.folders
@@ -198,7 +198,7 @@ export function useExplorer() {
     return filesList;
   });
 
-  // Memuat folder tingkat teratas (Root)
+  // Load top-level root folders
   async function loadRootFolders() {
     try {
       const [shortcuts, data] = await Promise.all([
@@ -223,10 +223,10 @@ export function useExplorer() {
     }
   }
 
-  // Melakukan ekspansi folder dan memuat subfolder di dalamnya secara bertahap (lazy loading)
+  // Expand a folder and load its subfolders progressively (lazy loading)
   async function expandFolder(folder: ClientFolderNode) {
     if (!folder) return;
-    // Penanganan khusus untuk OneDrive
+    // Special handling for OneDrive
     if (
       folder.id === "onedrive-root" ||
       folder.id === "onedrive-virtual" ||
@@ -284,7 +284,7 @@ export function useExplorer() {
       return;
     }
 
-    // Ambil referensi simpul asli dari folderMap agar perubahan reaktif disimpan pada objek tunggal
+    // Retrieve target node reference from folderMap so reactive changes are saved on a single object
     let targetNode = folderMap.get(folder.id);
     if (!targetNode) {
       folderMap.set(folder.id, folder);
@@ -308,7 +308,7 @@ export function useExplorer() {
     }
 
     targetNode.isLoading = true;
-    targetNode.isOpen = true; // Buka chevron dan area subfolder segera agar UI responsif (perceived performance)
+    targetNode.isOpen = true; // Open chevron and subfolder area immediately for perceived performance
     try {
       const childrenData = await explorerApi.getSubfolders(targetNode.id);
       targetNode.children = childrenData.map((f) => {
@@ -325,28 +325,28 @@ export function useExplorer() {
       targetNode.isLoaded = true;
     } catch (e) {
       console.error("Gagal memuat subfolder", e);
-      targetNode.isOpen = false; // Batalkan pembukaan jika gagal memuat
+      targetNode.isOpen = false; // Revert open status if load fails
     } finally {
       targetNode.isLoading = false;
     }
   }
 
-  // Memilih folder, memuat isinya di panel kanan, serta memuat breadcrumb path
+  // Select a folder, load its contents in the right panel, and fetch the breadcrumb path
   async function selectFolder(folderId: string, pushToHistory = true) {
-    // Bersihkan pilihan item saat berpindah folder
+    // Clear item selection when changing folders
     activeItem.value = null;
 
     if (pushToHistory && selectedFolderId.value && selectedFolderId.value !== folderId) {
       historyStack.value.push(selectedFolderId.value);
-      forwardStack.value = []; // Reset forward stack pada aksi navigasi baru
+      forwardStack.value = []; // Reset forward stack on new navigation action
     }
 
     selectedFolderId.value = folderId;
     selectedFolderContentsLoading.value = true;
-    isSearching.value = false; // Keluar dari mode pencarian jika memilih folder
+    isSearching.value = false; // Exit search mode when selecting a folder
     searchQuery.value = "";
 
-    // Tangani Redirection OneDrive
+    // Handle OneDrive Redirection
     if (folderId === "onedrive-root") {
       const id = shortcutFolderIds.value.onedrive;
       if (id) {
@@ -359,7 +359,7 @@ export function useExplorer() {
       return;
     }
 
-    // Tangani Folder Virtual
+    // Handle Virtual Folders
     if (virtualFolders.includes(folderId) || folderId.endsWith("-virtual")) {
       try {
         if (folderId === "this-pc") {
@@ -367,7 +367,7 @@ export function useExplorer() {
             subfolders: rootFolders.value,
             files: []
           };
-          breadcrumbs.value = []; // Root / Ini PC
+          breadcrumbs.value = []; // Root / This PC
         } else {
           selectedFolderContents.value = { subfolders: [], files: [] };
           let name = "";
@@ -393,9 +393,9 @@ export function useExplorer() {
       return;
     }
 
-    // Tangani Folder DB Asli
+    // Handle DB Folders
     try {
-      // Jalankan paralel untuk efisiensi
+      // Run queries in parallel for efficiency
       const [contents, path] = await Promise.all([
         explorerApi.getFolderContents(folderId),
         explorerApi.getFolderPath(folderId)
@@ -404,10 +404,10 @@ export function useExplorer() {
       selectedFolderContents.value = contents;
       breadcrumbs.value = path;
 
-      // Pastikan node yang dipilih dalam pohon terekspansi dan ter-load di panel kiri
+      // Ensure the selected node in the tree is expanded and loaded in the left panel
       const node = folderMap.get(folderId);
       if (node) {
-        // Ekspansi seluruh parent dari node ini agar terlihat di tree view
+        // Expand the parent hierarchy so it is visible in the tree view
         expandParentHierarchy(node);
       }
     } catch (e) {
@@ -417,7 +417,7 @@ export function useExplorer() {
     }
   }
 
-  // Kembali ke folder sebelumnya
+  // Go back to the previous folder
   function goBack() {
     if (historyStack.value.length > 0) {
       const prevId = historyStack.value.pop()!;
@@ -428,7 +428,7 @@ export function useExplorer() {
     }
   }
 
-  // Maju ke folder selanjutnya (setelah Back)
+  // Go forward to the next folder (after Back)
   function goForward() {
     if (forwardStack.value.length > 0) {
       const nextId = forwardStack.value.pop()!;
@@ -439,7 +439,7 @@ export function useExplorer() {
     }
   }
 
-  // Naik satu level ke folder induk (Up)
+  // Go up one level to the parent folder (Up)
   function goUp() {
     if (selectedFolderId.value) {
       const currentFolder = folderMap.get(selectedFolderId.value);
@@ -449,7 +449,7 @@ export function useExplorer() {
         const parentFolder = breadcrumbs.value[breadcrumbs.value.length - 2];
         selectFolder(parentFolder.id);
       } else if (selectedFolderId.value !== "this-pc") {
-        // Jika berada di root DB folder, Up akan mengarahkan ke This PC
+        // If in DB root folder, Up navigates to This PC
         selectFolder("this-pc");
       }
     }
@@ -464,7 +464,7 @@ export function useExplorer() {
     await loadRootFolders();
   }
 
-  // Membuat Folder/Berkas Baru
+  // Create a New Folder/File
   async function createNewItem(type: "folder" | "file") {
     if (!selectedFolderId.value) return;
     const defaultName = type === "folder" ? "New Folder" : "New File.txt";
@@ -477,7 +477,7 @@ export function useExplorer() {
     await refreshView();
   }
 
-  // Menghapus Item terpilih
+  // Delete selected item
   async function deleteItem() {
     if (!activeItem.value || !selectedFolderId.value) return;
     const confirmDelete = confirm(`Apakah Anda yakin ingin menghapus "${activeItem.value.name}"?`);
@@ -492,7 +492,7 @@ export function useExplorer() {
     await refreshView();
   }
 
-  // Mengubah Nama Item terpilih
+  // Rename selected item
   async function renameItem() {
     if (!activeItem.value || !selectedFolderId.value) return;
     const newName = prompt(`Ubah nama "${activeItem.value.name}" menjadi:`, activeItem.value.name);
@@ -570,7 +570,7 @@ export function useExplorer() {
     await refreshView();
   }
 
-  // Melakukan ekspansi semua folder induk secara rekursif
+  // Recursively expand all parent folders
   function expandParentHierarchy(node: ClientFolderNode) {
     if (node.parentId) {
       if (node.parentId === "this-pc") {
@@ -585,9 +585,9 @@ export function useExplorer() {
     }
   }
 
-  // Menangani pencarian
+  // Handle search queries
   async function performSearch(query: string) {
-    activeItem.value = null; // Bersihkan selection saat pencarian dipicu
+    activeItem.value = null; // Clear selection when search is triggered
     searchQuery.value = query;
     if (query.trim().length < 2) {
       isSearching.value = false;

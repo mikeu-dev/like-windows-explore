@@ -2,7 +2,7 @@
   <div class="h-full flex flex-col">
 
 
-    <!-- Area Konten Utama -->
+    <!-- Main Content Area -->
     <div class="flex-1 overflow-y-auto min-h-0 pr-1 no-scrollbar">
       <div
         v-if="isLoading"
@@ -11,7 +11,7 @@
         <div
           class="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"
         />
-        <span class="text-body-sm">Memuat konten...</span>
+        <span class="text-body-sm">Loading contents...</span>
       </div>
 
       <div
@@ -19,10 +19,10 @@
         class="flex flex-col items-center justify-center h-64 text-on-surface-variant space-y-2"
       >
         <span class="material-symbols-outlined text-4xl text-[#ffc107]">folder_open</span>
-        <span class="text-body-sm">Folder ini kosong.</span>
+        <span class="text-body-sm">This folder is empty.</span>
       </div>
 
-      <!-- Tampilan Grid (Large Icons) -->
+      <!-- Grid View (Large Icons) -->
       <div
         v-else-if="viewMode === 'grid'"
         class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3"
@@ -81,17 +81,17 @@
         </div>
       </div>
 
-      <!-- Tampilan List (Detail List) -->
+      <!-- List View (Detail List) -->
       <div v-else class="w-full overflow-x-auto">
         <table class="w-full text-left border-collapse">
           <thead>
             <tr
               class="border-b border-outline-variant/30 text-label-sm font-semibold text-on-surface-variant bg-surface-container-low/50 h-9"
             >
-              <th class="pb-1 pl-4 w-1/2 align-middle font-semibold">Nama</th>
-              <th class="pb-1 w-1/6 align-middle font-semibold border-l border-outline-variant/30 pl-2">Tanggal modifikasi</th>
-              <th class="pb-1 w-1/6 align-middle font-semibold border-l border-outline-variant/30 pl-2">Tipe</th>
-              <th class="pb-1 text-right pr-4 w-1/6 align-middle font-semibold border-l border-outline-variant/30 pl-2">Ukuran</th>
+              <th class="pb-1 pl-4 w-1/2 align-middle font-semibold">Name</th>
+              <th class="pb-1 w-1/6 align-middle font-semibold border-l border-outline-variant/30 pl-2">Date modified</th>
+              <th class="pb-1 w-1/6 align-middle font-semibold border-l border-outline-variant/30 pl-2">Type</th>
+              <th class="pb-1 text-right pr-4 w-1/6 align-middle font-semibold border-l border-outline-variant/30 pl-2">Size</th>
             </tr>
           </thead>
           <tbody class="text-body-sm divide-y divide-outline-variant/10">
@@ -228,33 +228,33 @@ const getFileType = (fileName: string): string => {
   const ext = fileName.split(".").pop()?.toLowerCase();
   switch (ext) {
     case "pdf":
-      return "Berkas PDF";
+      return "PDF Document";
     case "docx":
     case "doc":
-      return "Dokumen Word";
+      return "Word Document";
     case "txt":
-      return "Berkas Teks";
+      return "Text Document";
     case "md":
-      return "Markdown";
+      return "Markdown File";
     case "xlsx":
     case "xls":
-      return "Lembar Kerja Excel";
+      return "Excel Spreadsheet";
     case "jpg":
     case "jpeg":
     case "png":
     case "gif":
     case "svg":
-      return "Gambar";
+      return "Image File";
     case "zip":
-      return "Berkas ZIP";
+      return "ZIP Archive";
     case "rar":
-      return "Berkas RAR";
+      return "RAR Archive";
     case "tar":
-      return "Berkas TAR";
+      return "TAR Archive";
     case "gz":
-      return "Berkas GZIP";
+      return "GZIP Archive";
     default:
-      return "Berkas " + (ext?.toUpperCase() || "Lainnya");
+      return (ext?.toUpperCase() || "Unknown") + " File";
   }
 };
 
