@@ -2,6 +2,8 @@
 
 A full-stack, web-based hierarchical file management application inspired by Windows Explorer. Built as a monorepo with Bun Workspaces, featuring a Vue 3 frontend, Elysia.js REST API backend, PostgreSQL database, and comprehensive test coverage spanning unit, component, and E2E layers.
 
+![Like Windows Explorer Screenshot](./screenshot.png)
+
 ## Tech Stack
 
 | Layer        | Technology                                    |
