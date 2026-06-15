@@ -249,6 +249,8 @@ export function useExplorer() {
         }
         if (!mapNode.isLoaded) {
           await expandFolder(mapNode);
+        } else {
+          mapNode.isOpen = !mapNode.isOpen;
         }
       }
       return;
@@ -259,21 +261,28 @@ export function useExplorer() {
       return;
     }
 
-    if (folder.isLoaded) {
-      folder.isOpen = !folder.isOpen;
+    // Ambil referensi simpul asli dari folderMap agar perubahan reaktif disimpan pada objek tunggal
+    let targetNode = folderMap.get(folder.id);
+    if (!targetNode) {
+      folderMap.set(folder.id, folder);
+      targetNode = folder;
+    }
+
+    if (targetNode.isLoaded) {
+      targetNode.isOpen = !targetNode.isOpen;
       return;
     }
 
-    if (!folder.hasChildren) {
-      folder.isLoaded = true;
-      folder.isOpen = !folder.isOpen;
+    if (!targetNode.hasChildren) {
+      targetNode.isLoaded = true;
+      targetNode.isOpen = !targetNode.isOpen;
       return;
     }
 
-    folder.isLoading = true;
+    targetNode.isLoading = true;
     try {
-      const childrenData = await explorerApi.getSubfolders(folder.id);
-      folder.children = childrenData.map((f) => {
+      const childrenData = await explorerApi.getSubfolders(targetNode.id);
+      targetNode.children = childrenData.map((f) => {
         const node: ClientFolderNode = {
           ...f,
           children: [],
@@ -284,12 +293,12 @@ export function useExplorer() {
         folderMap.set(node.id, node);
         return node;
       });
-      folder.isLoaded = true;
-      folder.isOpen = true;
+      targetNode.isLoaded = true;
+      targetNode.isOpen = true;
     } catch (e) {
       console.error("Gagal memuat subfolder", e);
     } finally {
-      folder.isLoading = false;
+      targetNode.isLoading = false;
     }
   }
 
