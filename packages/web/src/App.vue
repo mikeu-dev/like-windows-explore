@@ -416,9 +416,13 @@
             :is-searching="isSearching"
             :search-query="searchQuery"
             :active-item="activeItem"
+            :renaming-item-id="renamingItemId"
             @navigate="selectFolder"
             @select-item="activeItem = $event"
             @open-file="modalFile = $event"
+            @submit-rename="submitRename"
+            @cancel-rename="cancelRename"
+            @start-rename="renameItem"
           />
         </div>
       </main>
@@ -657,7 +661,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, computed } from "vue";
+import { onMounted, onUnmounted, ref, computed } from "vue";
 import { useExplorer } from "./composables/useExplorer";
 import FolderTree from "./components/FolderTree.vue";
 import FolderContents from "./components/FolderContents.vue";
@@ -692,6 +696,9 @@ const {
   createNewItem,
   deleteItem,
   renameItem,
+  submitRename,
+  cancelRename,
+  renamingItemId,
   cutItem,
   copyItem,
   pasteItem
@@ -864,7 +871,15 @@ const formatBytes = (bytes: number): string => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
 };
 
+const handleGlobalKeyDown = (e: KeyboardEvent) => {
+  if (e.key === "F2" && activeItem.value && !renamingItemId.value) {
+    e.preventDefault();
+    renameItem();
+  }
+};
+
 onMounted(async () => {
+  window.addEventListener("keydown", handleGlobalKeyDown);
   try {
     await loadRootFolders();
   } catch (e) {
@@ -872,6 +887,10 @@ onMounted(async () => {
   } finally {
     isTreeLoading.value = false;
   }
+});
+
+onUnmounted(() => {
+  window.removeEventListener("keydown", handleGlobalKeyDown);
 });
 </script>
 

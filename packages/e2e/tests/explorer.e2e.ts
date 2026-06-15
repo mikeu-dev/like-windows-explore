@@ -221,13 +221,13 @@ test.describe("File Explorer App", () => {
 
     // 2. Rename folder to TestCrudFolder
     await page.locator('[id^="content-folder-"]:has-text("New Folder")').click();
-
-    // Set prompt dialog handler before clicking Rename
-    page.once("dialog", async (dialog) => {
-      expect(dialog.type()).toBe("prompt");
-      await dialog.accept("TestCrudFolder");
-    });
     await page.locator('button[title="Rename"]').click();
+
+    // Fill the inline rename input and submit by pressing Enter
+    const renameInput = page.locator("main input.rename-input");
+    await expect(renameInput).toBeVisible();
+    await renameInput.fill("TestCrudFolder");
+    await renameInput.press("Enter");
 
     // Ensure folder name is changed
     await expect(page.locator("main >> text=TestCrudFolder")).toBeVisible();

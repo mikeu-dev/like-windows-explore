@@ -45,9 +45,23 @@
           >
             folder
           </span>
-          <span class="text-body-sm text-on-surface font-medium line-clamp-2 w-full break-all">{{
-            subfolder.name
-          }}</span>
+          <input
+            v-if="renamingItemId === subfolder.id"
+            v-focus-select
+            type="text"
+            class="rename-input text-body-sm text-on-surface text-center bg-white border border-primary px-1 py-0.5 rounded outline-none w-full max-w-full font-medium"
+            :value="tempName"
+            @input="tempName = ($event.target as HTMLInputElement).value"
+            @keydown.enter="submitRenameLocal"
+            @keydown.esc="cancelRenameLocal"
+            @blur="submitRenameLocal"
+            @click.stop
+          />
+          <span
+            v-else
+            class="text-body-sm text-on-surface font-medium line-clamp-2 w-full break-all"
+            >{{ subfolder.name }}</span
+          >
         </div>
 
         <!-- Loop Files -->
@@ -70,9 +84,23 @@
           >
             {{ getFileIconDetails(file.name).icon }}
           </span>
-          <span class="text-body-sm text-on-surface font-medium line-clamp-1 w-full break-all">{{
-            file.name
-          }}</span>
+          <input
+            v-if="renamingItemId === file.id"
+            v-focus-select
+            type="text"
+            class="rename-input text-body-sm text-on-surface text-center bg-white border border-primary px-1 py-0.5 rounded outline-none w-full max-w-full font-medium"
+            :value="tempName"
+            @input="tempName = ($event.target as HTMLInputElement).value"
+            @keydown.enter="submitRenameLocal"
+            @keydown.esc="cancelRenameLocal"
+            @blur="submitRenameLocal"
+            @click.stop
+          />
+          <span
+            v-else
+            class="text-body-sm text-on-surface font-medium line-clamp-1 w-full break-all"
+            >{{ file.name }}</span
+          >
           <span class="text-label-md text-on-surface-variant mt-1">{{
             formatBytes(file.size)
           }}</span>
@@ -128,7 +156,19 @@
                 >
                   folder
                 </span>
-                <span class="font-medium truncate">{{ subfolder.name }}</span>
+                <input
+                  v-if="renamingItemId === subfolder.id"
+                  v-focus-select
+                  type="text"
+                  class="rename-input text-body-sm text-on-surface bg-white border border-primary px-1.5 py-0.5 rounded outline-none font-medium w-64 max-w-full"
+                  :value="tempName"
+                  @input="tempName = ($event.target as HTMLInputElement).value"
+                  @keydown.enter="submitRenameLocal"
+                  @keydown.esc="cancelRenameLocal"
+                  @blur="submitRenameLocal"
+                  @click.stop
+                />
+                <span v-else class="font-medium truncate">{{ subfolder.name }}</span>
               </td>
               <td class="py-1 pl-2 text-on-surface-variant text-body-sm">10/24/2023 2:45 PM</td>
               <td class="py-1 pl-2 text-on-surface-variant text-body-sm">Folder</td>
@@ -158,7 +198,19 @@
                 >
                   {{ getFileIconDetails(file.name).icon }}
                 </span>
-                <span class="font-medium truncate">{{ file.name }}</span>
+                <input
+                  v-if="renamingItemId === file.id"
+                  v-focus-select
+                  type="text"
+                  class="rename-input text-body-sm text-on-surface bg-white border border-primary px-1.5 py-0.5 rounded outline-none font-medium w-64 max-w-full"
+                  :value="tempName"
+                  @input="tempName = ($event.target as HTMLInputElement).value"
+                  @keydown.enter="submitRenameLocal"
+                  @keydown.esc="cancelRenameLocal"
+                  @blur="submitRenameLocal"
+                  @click.stop
+                />
+                <span v-else class="font-medium truncate">{{ file.name }}</span>
               </td>
               <td class="py-1 pl-2 text-on-surface-variant text-body-sm">10/24/2023 2:45 PM</td>
               <td class="py-1 pl-2 text-on-surface-variant text-body-sm">
@@ -176,7 +228,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref, watch } from "vue";
 import { FolderDTO, FileDTO } from "@explorer/common";
 
 const props = defineProps<{
@@ -186,20 +238,84 @@ const props = defineProps<{
   isSearching: boolean;
   searchQuery: string;
   activeItem: { id: string; type: "folder" | "file"; name: string } | null;
+  renamingItemId: string | null;
 }>();
 
 const emit = defineEmits<{
   (e: "navigate", folderId: string): void;
   (e: "select-item", item: { id: string; type: "folder" | "file"; name: string } | null): void;
   (e: "open-file", file: FileDTO): void;
+  (e: "submit-rename", newName: string): void;
+  (e: "cancel-rename"): void;
+  (e: "start-rename"): void;
 }>();
 
 const viewMode = defineModel<"grid" | "list">("viewMode", { default: "grid" });
 
 const isEmpty = computed(() => props.subfolders.length === 0 && props.files.length === 0);
 
+const tempName = ref("");
+let isCancel = false;
+
+// Click-to-Rename tracking state
+const lastClickTime = ref(0);
+
+// Watch renamingItemId to prefill tempName
+watch(
+  () => props.renamingItemId,
+  (newId) => {
+    if (newId) {
+      const folder = props.subfolders.find((f) => f.id === newId);
+      if (folder) {
+        tempName.value = folder.name;
+        return;
+      }
+      const file = props.files.find((f) => f.id === newId);
+      if (file) {
+        tempName.value = file.name;
+      }
+    } else {
+      tempName.value = "";
+    }
+  }
+);
+
+// Custom directive to focus and select text without extension
+const vFocusSelect = {
+  mounted(el: HTMLInputElement) {
+    el.focus();
+    isCancel = false;
+    const name = el.value;
+    const dotIndex = name.lastIndexOf(".");
+    if (dotIndex > 0) {
+      el.setSelectionRange(0, dotIndex);
+    } else {
+      el.select();
+    }
+  }
+};
+
+const submitRenameLocal = () => {
+  if (isCancel) return;
+  emit("submit-rename", tempName.value);
+};
+
+const cancelRenameLocal = () => {
+  isCancel = true;
+  emit("cancel-rename");
+};
+
 const selectItem = (item: any, type: "folder" | "file") => {
-  emit("select-item", { id: item.id, type, name: item.name });
+  const now = Date.now();
+  if (props.activeItem?.id === item.id) {
+    const diff = now - lastClickTime.value;
+    if (diff > 500 && diff < 3000 && props.renamingItemId !== item.id) {
+      emit("start-rename");
+    }
+  } else {
+    emit("select-item", { id: item.id, type, name: item.name });
+  }
+  lastClickTime.value = now;
 };
 
 const openFolder = (folderId: string) => {

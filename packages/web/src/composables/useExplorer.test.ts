@@ -262,14 +262,14 @@ describe("useExplorer Composable Tests", () => {
     explorer.selectedFolderId.value = "1";
     explorer.activeItem.value = { id: "101", type: "file", name: "resume.pdf" };
 
-    // Mock prompt
-    const promptSpy = spyOn(globalThis, "prompt").mockImplementation(() => "cv.pdf");
+    // 1. Enter edit mode
+    explorer.renameItem();
+    expect(explorer.renamingItemId.value).toBe("101");
 
-    await explorer.renameItem();
-    expect(promptSpy).toHaveBeenCalled();
+    // 2. Submit new name
+    await explorer.submitRename("cv.pdf");
     expect(renameFileMock).toHaveBeenCalledWith("101", "cv.pdf");
-
-    promptSpy.mockRestore();
+    expect(explorer.renamingItemId.value).toBeNull();
   });
 
   it("should benchmark collapsible duration at different levels", async () => {
