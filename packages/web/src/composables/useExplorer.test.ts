@@ -5,14 +5,14 @@ import { FolderDTO } from "@explorer/common";
 
 // Mock data
 const mockRootFolders: FolderDTO[] = [
-  { id: "1", name: "Documents", parentId: null },
-  { id: "2", name: "Pictures", parentId: null }
+  { id: "1", name: "Documents", parentId: null, hasChildren: true },
+  { id: "2", name: "Pictures", parentId: null, hasChildren: false }
 ];
 
 const mockContents = {
   subfolders: [
-    { id: "3", name: "Work", parentId: "1" },
-    { id: "4", name: "Personal", parentId: "1" }
+    { id: "3", name: "Work", parentId: "1", hasChildren: false },
+    { id: "4", name: "Personal", parentId: "1", hasChildren: false }
   ],
   files: [
     { id: "101", name: "resume.pdf", size: 500000, folderId: "1" },
@@ -20,11 +20,21 @@ const mockContents = {
   ]
 };
 
-const mockPath: FolderDTO[] = [{ id: "1", name: "Documents", parentId: null }];
+const mockPath: FolderDTO[] = [{ id: "1", name: "Documents", parentId: null, hasChildren: true }];
 
 // Mock API module
 const getSubfoldersMock = mock((parentId: string | null = null) => {
   if (parentId === null) return Promise.resolve(mockRootFolders);
+  if (parentId === "1") return Promise.resolve(mockContents.subfolders);
+  if (parentId === "onedrive-id")
+    return Promise.resolve([
+      {
+        id: "onedrive-sub-1",
+        name: "OneDrive Subfolder",
+        parentId: "onedrive-id",
+        hasChildren: false
+      }
+    ]);
   return Promise.resolve([]);
 });
 
@@ -37,6 +47,20 @@ const getFolderPathMock = mock((folderId: string) => {
   if (folderId === "1") return Promise.resolve(mockPath);
   return Promise.resolve([]);
 });
+
+const getShortcutsMock = mock(() =>
+  Promise.resolve({
+    desktop: "",
+    downloads: "",
+    documents: "1",
+    pictures: "2",
+    music: "",
+    videos: "",
+    onedrive: "onedrive-id",
+    localC: "1",
+    localD: "2"
+  })
+);
 
 const createFolderMock = mock(() => Promise.resolve({} as any));
 const createFileMock = mock(() => Promise.resolve({} as any));
@@ -56,6 +80,7 @@ mock.module("../services/api", () => {
       getSubfolders: getSubfoldersMock,
       getFolderContents: getFolderContentsMock,
       getFolderPath: getFolderPathMock,
+      getShortcuts: getShortcutsMock,
       createFolder: createFolderMock,
       createFile: createFileMock,
       renameFolder: renameFolderMock,
@@ -73,10 +98,11 @@ mock.module("../services/api", () => {
 
 describe("useExplorer Composable Tests", () => {
   beforeEach(() => {
-    // Reset global mocks jika diperlukan
+    // Reset global mocks if necessary
     getSubfoldersMock.mockClear();
     getFolderContentsMock.mockClear();
     getFolderPathMock.mockClear();
+    getShortcutsMock.mockClear();
     createFolderMock.mockClear();
     createFileMock.mockClear();
     renameFolderMock.mockClear();
@@ -122,10 +148,10 @@ describe("useExplorer Composable Tests", () => {
   it("should handle history stack navigation (goBack, goForward, goUp)", async () => {
     const explorer = useExplorer();
 
-    // Inisiasi folder root map
+    // Initialize root folder map
     await explorer.loadRootFolders();
 
-    // Navigasi: root -> folder "1" -> folder "2"
+    // Navigation: root -> folder "1" -> folder "2"
     await explorer.selectFolder("1");
     await explorer.selectFolder("2");
 
@@ -177,7 +203,7 @@ describe("useExplorer Composable Tests", () => {
     const explorer = useExplorer();
     await explorer.selectFolder("1");
 
-    // Pilih item
+    // Select item
     explorer.activeItem.value = { id: "101", type: "file", name: "resume.pdf" };
 
     // Copy
@@ -198,7 +224,7 @@ describe("useExplorer Composable Tests", () => {
     explorer.activeItem.value = { id: "101", type: "file", name: "resume.pdf" };
     explorer.copyItem();
 
-    // Ubah folder tujuan
+    // Change destination folder
     explorer.selectedFolderId.value = "2";
 
     await explorer.pasteItem();
@@ -244,5 +270,78 @@ describe("useExplorer Composable Tests", () => {
     expect(renameFileMock).toHaveBeenCalledWith("101", "cv.pdf");
 
     promptSpy.mockRestore();
+  });
+
+  it("should benchmark collapsible duration at different levels", async () => {
+    const explorer = useExplorer();
+
+    // 1. Level 1: Virtual Folder / "This PC"
+    const startL1 = performance.now();
+    await explorer.expandFolder({
+      id: "this-pc",
+      name: "This PC",
+      parentId: null,
+      hasChildren: true
+    });
+    const endL1 = performance.now();
+    const durationL1 = endL1 - startL1;
+
+    // 2. Level 2: Local Disk C (Root DB Folder)
+    // We load root folders first to populate folderMap and rootFolders
+    await explorer.loadRootFolders();
+    const localC =
+      explorer.rootFolders.value.find((f) => f.name.includes("Documents")) ||
+      explorer.rootFolders.value[0];
+
+    const startL2 = performance.now();
+    await explorer.expandFolder(localC);
+    const endL2 = performance.now();
+    const durationL2 = endL2 - startL2;
+
+    // 3. Level 3: Subfolder (Child DB Folder)
+    // Since localC is loaded, we can find its children in folderMap
+    const subfolder = localC.children?.[0];
+    let durationL3 = 0;
+    if (subfolder) {
+      const startL3 = performance.now();
+      await explorer.expandFolder(subfolder);
+      const endL3 = performance.now();
+      durationL3 = endL3 - startL3;
+    }
+
+    console.log("\n==========================================");
+    console.log("   BENCHMARK DURASI COLLAPSIBLE TIAP LEVEL");
+    console.log("==========================================");
+    console.log(`Level 1 (This PC - Virtual) : ${durationL1.toFixed(4)} ms`);
+    console.log(`Level 2 (Documents - DB Root): ${durationL2.toFixed(4)} ms`);
+    if (subfolder) {
+      console.log(`Level 3 (Work - DB Child)    : ${durationL3.toFixed(4)} ms`);
+    } else {
+      console.log("Level 3 (Work - DB Child)    : N/A");
+    }
+    console.log("==========================================\n");
+
+    expect(durationL1).toBeLessThan(50); // Level 1 virtual is sync & very fast
+  });
+
+  it("should expand and lazy load OneDrive contents", async () => {
+    const explorer = useExplorer();
+
+    // Load root folders first to populate shortcutFolderIds
+    await explorer.loadRootFolders();
+    expect(explorer.sidebarSection1.value[2].id).toBe("onedrive-id");
+
+    // Expand OneDrive root
+    await explorer.expandFolder(explorer.sidebarSection1.value[2]);
+
+    // Check that open status is toggled and children are lazy loaded
+    expect(explorer.sidebarSection1.value[2].isOpen).toBe(true);
+    expect(explorer.sidebarSection1.value[2].isLoaded).toBe(true);
+    expect(explorer.sidebarSection1.value[2].children).toHaveLength(1);
+    expect(explorer.sidebarSection1.value[2].children?.[0].name).toBe("OneDrive Subfolder");
+
+    // Collapse OneDrive root
+    await explorer.expandFolder(explorer.sidebarSection1.value[2]);
+    expect(explorer.sidebarSection1.value[2].isOpen).toBe(false);
   });
 });

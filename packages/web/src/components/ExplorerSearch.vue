@@ -43,7 +43,7 @@ const emit = defineEmits<{
 const localQuery = ref(props.modelValue);
 let debounceTimeout: any = null;
 
-// Sync input lokal jika modelValue dari parent berubah (misalnya di-clear dari luar)
+// Sync local input if modelValue from parent changes (e.g., cleared from outside)
 watch(
   () => props.modelValue,
   (newVal) => {
@@ -51,7 +51,7 @@ watch(
   }
 );
 
-// Menangani perubahan input dengan teknik Debounce (300ms)
+// Handle input changes using Debounce (300ms)
 watch(localQuery, (newVal) => {
   if (debounceTimeout) clearTimeout(debounceTimeout);
   debounceTimeout = setTimeout(() => {

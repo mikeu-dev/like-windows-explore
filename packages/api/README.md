@@ -1,64 +1,236 @@
-# Explorer API Backend - @explorer/api
+# @explorer/api — Backend API Service
 
-This backend API service is built with Elysia.js, Bun, and Drizzle ORM to manage folder and file data structures in a PostgreSQL database.
+REST API backend service built with **Elysia.js**, **Bun**, and **Drizzle ORM** for managing hierarchical folder and file data structures in a **PostgreSQL** database.
 
-## Features
+## Architecture
 
-- Extremely fast HTTP endpoints using Elysia.js running on top of Bun runtime.
-- Type-safe database queries via Drizzle ORM to PostgreSQL.
-- Optimized database query structures supporting global case-insensitive search.
-- Recursive self-referential parent-child folder relationship.
+The backend follows **Clean / Hexagonal Architecture** patterns to separate concerns across four layers:
 
-## Source Code Structure
+```
+src/
+├── controllers/v1/       # HTTP transport (Elysia router + TypeBox validation)
+│   ├── explorer.controller.ts
+│   └── explorer.controller.test.ts
+├── services/             # Application core (business logic + use cases)
+│   ├── explorer.service.ts
+│   └── explorer.service.test.ts
+├── repositories/         # Data access layer (ports + adapters)
+│   ├── folder-repository.interface.ts    # Port
+│   ├── file-repository.interface.ts      # Port
+│   ├── drizzle-folder.repository.ts      # Adapter (PostgreSQL)
+│   └── drizzle-file.repository.ts        # Adapter (PostgreSQL)
+├── domain/entities/      # Plain domain models (zero dependencies)
+│   ├── folder.ts
+│   └── file.ts
+├── db/
+│   ├── connection.ts     # Drizzle + postgres.js connection
+│   ├── schema.ts         # Barrel export
+│   ├── schema/
+│   │   ├── folders.ts    # Drizzle schema + relations + indices
+│   │   └── files.ts      # Drizzle schema + relations + indices
+│   ├── seed.ts           # Seed orchestrator
+│   └── seeds/
+│       ├── folders.seed.ts
+│       └── files.seed.ts
+└── index.ts              # Elysia app entry point (CORS, router, listener)
+```
 
-The backend project is designed using clean architecture patterns to separate HTTP transport, business logic, data models, and database access:
+### Dependency Injection
 
-- src/db/: Database configuration, schema definitions (folders, files), and structured seed scripts.
-- src/domain/entities/: Plain domain entity models (Folder, File).
-- src/repositories/: Data access layer (DAL) containing concrete repository adapters querying PostgreSQL via Drizzle ORM.
-- src/services/: Application service layer (ExplorerService) implementing core business rules.
-- src/controllers/: HTTP controller mappings (Elysia.js) defining the router group.
-- src/index.ts: Application entry point launching the HTTP listener.
+`ExplorerService` accepts `IFolderRepository` and `IFileRepository` via constructor injection, enabling mock substitution during unit testing without requiring a database connection.
+
+---
 
 ## Environment Variables
 
-The API service requires a `.env` file inside `packages/api/` folder to resolve database credentials:
+Create a `.env` file inside `packages/api/`:
 
 ```env
-DATABASE_URL="postgres://username:password@127.0.0.1:5432/database_name"
 PORT=3001
+DATABASE_URL="postgres://username:password@127.0.0.1:5432/database_name"
 ```
 
-## Database Operations (Drizzle Commands)
+A `.env.example` file is provided as reference.
 
-- bun db:generate: Generate migration files based on schema changes.
-- bun db:push: Sync schema changes immediately to PostgreSQL database (ideal for development).
-- bun db:seed: Clean database tables and insert initial structured mock directory trees.
+---
 
-## API Endpoint References
+## Database Commands
 
-All HTTP endpoints are mapped under the `/api/v1` router prefix:
+Run from the `packages/api/` directory (or via root scripts):
 
-### 1. Get Subfolders
+| Command           | Description                                                 |
+| ----------------- | ----------------------------------------------------------- |
+| `bun db:generate` | Generate Drizzle migration files from schema changes        |
+| `bun db:push`     | Push schema changes directly to PostgreSQL (development)    |
+| `bun db:seed`     | Clear all tables and insert structured mock directory trees |
 
-- Route: GET `/api/v1/folders`
-- Query Parameters: `parentId` (string, optional) - The UUID parent folder to fetch children of. If omitted or null, returns root-level folders.
-- Description: Returns a list of direct subfolders belonging to the parent folder.
+---
 
-### 2. Get Folder Contents
+## Database Schema
 
-- Route: GET `/api/v1/folders/:id/contents`
-- Path Parameters: `id` (string, required) - The UUID target folder.
-- Description: Returns an object containing both `subfolders` and `files` directly under the folder ID.
+### `folders` Table
 
-### 3. Get Folder Path (Breadcrumbs)
+| Column       | Type      | Constraints                                    |
+| ------------ | --------- | ---------------------------------------------- |
+| `id`         | UUID      | PK, default random                             |
+| `name`       | TEXT      | NOT NULL                                       |
+| `parent_id`  | UUID      | FK → `folders.id`, ON DELETE CASCADE, nullable |
+| `created_at` | TIMESTAMP | NOT NULL, default NOW                          |
+| `updated_at` | TIMESTAMP | NOT NULL, default NOW                          |
 
-- Route: GET `/api/v1/folders/:id/path`
-- Path Parameters: `id` (string, required) - The UUID target folder.
-- Description: Traverses parent hierarchy recursively up to root level to build the folder breadcrumb path list.
+**Indices**: `folders_parent_id_idx` (parent_id), `folders_parent_name_idx` (parent_id, name)
 
-### 4. Global Search
+**Self-referential relation**: `parent_id` references `folders.id` with cascade deletion, enabling unlimited directory nesting depth.
 
-- Route: GET `/api/v1/search`
-- Query Parameters: `q` (string, required) - The case-insensitive search string (minimum 2 characters).
-- Description: Performs global search matching folder or file names against the query.
+### `files` Table
+
+| Column       | Type      | Constraints                                    |
+| ------------ | --------- | ---------------------------------------------- |
+| `id`         | UUID      | PK, default random                             |
+| `name`       | TEXT      | NOT NULL                                       |
+| `size`       | INTEGER   | NOT NULL, default 0                            |
+| `folder_id`  | UUID      | FK → `folders.id`, ON DELETE CASCADE, NOT NULL |
+| `created_at` | TIMESTAMP | NOT NULL, default NOW                          |
+| `updated_at` | TIMESTAMP | NOT NULL, default NOW                          |
+
+**Indices**: `files_folder_id_idx` (folder_id), `files_folder_name_idx` (folder_id, name)
+
+---
+
+## API Endpoint Reference
+
+All endpoints are prefixed with `/api/v1`.
+
+### Query Endpoints
+
+#### GET `/shortcuts`
+
+Returns a map of special shortcut folder IDs (Desktop, Downloads, Documents, Pictures, Music, Videos, OneDrive, Local Disk C:, Local Disk D:).
+
+**Response**: `Record<string, string>`
+
+#### GET `/folders`
+
+Returns direct subfolders of a parent folder. If `parentId` is omitted, returns root-level folders.
+
+**Query Parameters**: `parentId` (string, optional)
+
+**Response**: `FolderDTO[]` (includes `hasChildren` boolean for chevron rendering)
+
+#### GET `/folders/:id/contents`
+
+Returns both subfolders and files inside a folder.
+
+**Path Parameters**: `id` (string, required)
+
+**Response**: `{ subfolders: FolderDTO[], files: FileDTO[] }`
+
+#### GET `/folders/:id/path`
+
+Traverses the parent hierarchy recursively to build a breadcrumb path from root to the target folder.
+
+**Path Parameters**: `id` (string, required)
+
+**Response**: `FolderDTO[]`
+
+#### GET `/search`
+
+Performs global case-insensitive search across folder and file names. Minimum query length: 2 characters. Results limited to 50 matches per entity type.
+
+**Query Parameters**: `q` (string, required)
+
+**Response**: `{ folders: FolderDTO[], files: FileDTO[] }`
+
+---
+
+### Mutation Endpoints
+
+#### POST `/folders`
+
+Creates a new folder.
+
+**Body**: `{ name: string, parentId: string | null }`
+
+**Response**: `FolderDTO`
+
+#### POST `/files`
+
+Creates a new file.
+
+**Body**: `{ name: string, folderId: string, size?: number }`
+
+**Response**: `FileDTO`
+
+#### PATCH `/folders/:id`
+
+Renames or moves a folder. Send `name` to rename, or `parentId` to move.
+
+**Body**: `{ name?: string, parentId?: string | null }`
+
+**Response**: `FolderDTO`
+
+#### PATCH `/files/:id`
+
+Renames or moves a file. Send `name` to rename, or `folderId` to move.
+
+**Body**: `{ name?: string, folderId?: string }`
+
+**Response**: `FileDTO`
+
+#### POST `/folders/:id/copy`
+
+Recursively deep-copies an entire folder tree (all subfolders and files at every level). Automatically appends "- Copy" suffix when pasting in the same directory.
+
+**Body**: `{ parentId: string | null }`
+
+**Response**: `FolderDTO`
+
+#### POST `/files/:id/copy`
+
+Copies a file to a target folder. Automatically generates a "- Copy" filename when pasting in the same folder.
+
+**Body**: `{ folderId: string }`
+
+**Response**: `FileDTO`
+
+#### DELETE `/folders/:id`
+
+Deletes a folder and all of its contents recursively (via database CASCADE).
+
+**Response**: `{ success: true }`
+
+#### DELETE `/files/:id`
+
+Deletes a file.
+
+**Response**: `{ success: true }`
+
+---
+
+## Security
+
+- **CORS**: Strict whitelist limited to local development origins (`localhost:5173`, `127.0.0.1:5173`, `localhost:3000`, `127.0.0.1:3000`).
+- **Localhost binding**: The server listens on `127.0.0.1` only (configurable via `PORT` env var).
+- **Input validation**: All request bodies and query parameters are validated by Elysia's TypeBox schema definitions.
+
+---
+
+## Testing
+
+### Unit Tests — Service Layer
+
+**File**: `src/services/explorer.service.test.ts`
+
+Tests all `ExplorerService` use cases with mock repository implementations (no database required).
+
+### Unit Tests — Controller Layer
+
+**File**: `src/controllers/v1/explorer.controller.test.ts`
+
+Tests Elysia HTTP routing and response mapping using simulated `Request` objects. Uses `mock.module()` to intercept `ExplorerService` and prevent database initialization.
+
+Run all tests:
+
+```bash
+bun test packages/api
+```

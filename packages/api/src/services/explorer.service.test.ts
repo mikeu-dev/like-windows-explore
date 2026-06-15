@@ -101,10 +101,10 @@ describe("ExplorerService Unit Tests", () => {
   });
 
   it("should construct folder breadcrumb path recursively upwards", async () => {
-    // Jalur untuk folder ID "3" (Work, anak dari Documents)
+    // Path for folder ID "3" (Work, child of Documents)
     const path = await service.getFolderPath("3");
     expect(path).toHaveLength(2);
-    expect(path[0].name).toBe("Documents"); // Root paling pertama
+    expect(path[0].name).toBe("Documents"); // Root folder first
     expect(path[1].name).toBe("Work"); // Subfolder
   });
 });
