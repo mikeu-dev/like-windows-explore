@@ -17,7 +17,7 @@ export class DrizzleFolderRepository implements IFolderRepository {
         parentId: folders.parentId,
         createdAt: folders.createdAt,
         updatedAt: folders.updatedAt,
-        hasChildren: sql<boolean>`EXISTS(SELECT 1 FROM ${folders} AS sub WHERE sub.parent_id = ${folders.id})`
+        hasChildren: sql<boolean>`exists (select 1 from folders sub where sub.parent_id = "folders"."id")`
       })
       .from(folders);
 
@@ -27,7 +27,6 @@ export class DrizzleFolderRepository implements IFolderRepository {
     } else {
       results = await query.where(eq(parentIdColumn, parentId)).orderBy(folders.name);
     }
-
     return results;
   }
 

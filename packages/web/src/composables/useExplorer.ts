@@ -128,12 +128,6 @@ export function useExplorer() {
 
   // Section 3: Collapsible Menu (This PC, Network, Linux)
   const thisPCNode = computed<ClientFolderNode>(() => {
-    // Di Windows 11 modern, This PC hanya menampilkan drive lokal.
-    const drives = rootFolders.value.map((f) => ({
-      ...f,
-      parentId: "this-pc"
-    }));
-
     return {
       id: "this-pc",
       name: "This PC",
@@ -141,7 +135,7 @@ export function useExplorer() {
       hasChildren: true,
       isOpen: !!openFolderIds.value["this-pc"],
       isLoaded: true,
-      children: drives
+      children: rootFolders.value
     };
   });
 
@@ -217,6 +211,7 @@ export function useExplorer() {
     rootFolders.value = data.map((f) => {
       const node: ClientFolderNode = {
         ...f,
+        parentId: "this-pc",
         children: [],
         isOpen: false,
         isLoading: false,
@@ -334,9 +329,8 @@ export function useExplorer() {
     if (virtualFolders.includes(folderId) || folderId.endsWith("-virtual")) {
       try {
         if (folderId === "this-pc") {
-          const drives = rootFolders.value.map((f) => ({ ...f, parentId: "this-pc" }));
           selectedFolderContents.value = {
-            subfolders: drives,
+            subfolders: rootFolders.value,
             files: []
           };
           breadcrumbs.value = []; // Root / Ini PC
