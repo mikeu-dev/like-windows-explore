@@ -93,7 +93,8 @@ export class ExplorerService {
 
   // Create New Folder
   async createFolder(name: string, parentId: string | null): Promise<FolderDTO> {
-    const folder = await this.folderRepo.create({ name, parentId });
+    const uniqueName = await this.getUniqueFolderName(name, parentId);
+    const folder = await this.folderRepo.create({ name: uniqueName, parentId });
     return {
       id: folder.id,
       name: folder.name,
@@ -104,7 +105,8 @@ export class ExplorerService {
 
   // Create New File
   async createFile(name: string, folderId: string, size: number = 0): Promise<FileDTO> {
-    const file = await this.fileRepo.create({ name, folderId, size });
+    const uniqueName = await this.getUniqueFileName(name, folderId);
+    const file = await this.fileRepo.create({ name: uniqueName, folderId, size });
     return {
       id: file.id,
       name: file.name,
@@ -125,7 +127,10 @@ export class ExplorerService {
 
   // Rename Folder
   async renameFolder(id: string, name: string): Promise<FolderDTO> {
-    const folder = await this.folderRepo.update(id, { name });
+    const folderObj = await this.folderRepo.findById(id);
+    if (!folderObj) throw new Error("Folder tidak ditemukan");
+    const uniqueName = await this.getUniqueFolderName(name, folderObj.parentId, id);
+    const folder = await this.folderRepo.update(id, { name: uniqueName });
     const subfolders = await this.folderRepo.findSubfolders(id);
     return {
       id: folder.id,
@@ -137,7 +142,10 @@ export class ExplorerService {
 
   // Rename File
   async renameFile(id: string, name: string): Promise<FileDTO> {
-    const file = await this.fileRepo.update(id, { name });
+    const fileObj = await this.fileRepo.findById(id);
+    if (!fileObj) throw new Error("Berkas tidak ditemukan");
+    const uniqueName = await this.getUniqueFileName(name, fileObj.folderId, id);
+    const file = await this.fileRepo.update(id, { name: uniqueName });
     return {
       id: file.id,
       name: file.name,
@@ -148,7 +156,10 @@ export class ExplorerService {
 
   // Move Folder (Cut & Paste)
   async moveFolder(id: string, parentId: string | null): Promise<FolderDTO> {
-    const folder = await this.folderRepo.update(id, { parentId });
+    const folderObj = await this.folderRepo.findById(id);
+    if (!folderObj) throw new Error("Folder tidak ditemukan");
+    const uniqueName = await this.getUniqueFolderName(folderObj.name, parentId, id);
+    const folder = await this.folderRepo.update(id, { parentId, name: uniqueName });
     const subfolders = await this.folderRepo.findSubfolders(id);
     return {
       id: folder.id,
@@ -160,7 +171,10 @@ export class ExplorerService {
 
   // Move File (Cut & Paste)
   async moveFile(id: string, folderId: string): Promise<FileDTO> {
-    const file = await this.fileRepo.update(id, { folderId });
+    const fileObj = await this.fileRepo.findById(id);
+    if (!fileObj) throw new Error("Berkas tidak ditemukan");
+    const uniqueName = await this.getUniqueFileName(fileObj.name, folderId, id);
+    const file = await this.fileRepo.update(id, { folderId, name: uniqueName });
     return {
       id: file.id,
       name: file.name,
@@ -175,8 +189,10 @@ export class ExplorerService {
     if (!srcFolder) throw new Error("Folder sumber tidak ditemukan");
 
     // Determine duplicate folder name if inside the same directory
-    const name = srcFolder.parentId === parentId ? `${srcFolder.name} - Copy` : srcFolder.name;
-    const copiedFolder = await this.folderRepo.create({ name, parentId });
+    const baseCopyName =
+      srcFolder.parentId === parentId ? `${srcFolder.name} - Copy` : srcFolder.name;
+    const uniqueName = await this.getUniqueFolderName(baseCopyName, parentId);
+    const copiedFolder = await this.folderRepo.create({ name: uniqueName, parentId });
 
     // Recursion to copy all subfolders inside
     const subfolders = await this.folderRepo.findSubfolders(id);
@@ -228,13 +244,15 @@ export class ExplorerService {
     const srcFile = await this.fileRepo.findById(id);
     if (!srcFile) throw new Error("Berkas sumber tidak ditemukan");
 
-    const name =
-      srcFile.folderId === folderId
-        ? `${srcFile.name.split(".").shift()} - Copy.${srcFile.name.split(".").pop()}`
-        : srcFile.name;
+    const dotIndex = srcFile.name.lastIndexOf(".");
+    const baseName = dotIndex !== -1 ? srcFile.name.slice(0, dotIndex) : srcFile.name;
+    const ext = dotIndex !== -1 ? srcFile.name.slice(dotIndex) : "";
+
+    const baseCopyName = srcFile.folderId === folderId ? `${baseName} - Copy${ext}` : srcFile.name;
+    const uniqueName = await this.getUniqueFileName(baseCopyName, folderId);
 
     const copiedFile = await this.fileRepo.create({
-      name,
+      name: uniqueName,
       size: srcFile.size,
       folderId
     });
@@ -292,5 +310,77 @@ export class ExplorerService {
     }
 
     return shortcuts;
+  }
+
+  // Helper to generate a unique folder name in the target directory (case-insensitive)
+  private async getUniqueFolderName(
+    name: string,
+    parentId: string | null,
+    excludeId?: string
+  ): Promise<string> {
+    const existingFolders = await this.folderRepo.findSubfolders(parentId);
+    const existingNames = new Set(
+      existingFolders
+        .filter((f) => !excludeId || f.id !== excludeId)
+        .map((f) => f.name.toLowerCase())
+    );
+
+    let targetName = name;
+    if (!existingNames.has(targetName.toLowerCase())) {
+      return targetName;
+    }
+
+    const match = name.match(/(.+)\s\((\d+)\)$/);
+    let baseName = name;
+    let counter = 2;
+
+    if (match) {
+      baseName = match[1];
+      counter = parseInt(match[2], 10);
+    }
+
+    while (existingNames.has(targetName.toLowerCase())) {
+      targetName = `${baseName} (${counter})`;
+      counter++;
+    }
+
+    return targetName;
+  }
+
+  // Helper to generate a unique file name in the target directory (case-insensitive)
+  private async getUniqueFileName(
+    name: string,
+    folderId: string,
+    excludeId?: string
+  ): Promise<string> {
+    const existingFiles = await this.fileRepo.findFilesByFolderId(folderId);
+    const existingNames = new Set(
+      existingFiles.filter((f) => !excludeId || f.id !== excludeId).map((f) => f.name.toLowerCase())
+    );
+
+    let targetName = name;
+    if (!existingNames.has(targetName.toLowerCase())) {
+      return targetName;
+    }
+
+    const dotIndex = name.lastIndexOf(".");
+    const baseName = dotIndex !== -1 ? name.slice(0, dotIndex) : name;
+    const ext = dotIndex !== -1 ? name.slice(dotIndex) : "";
+
+    const match = baseName.match(/(.+)\s\((\d+)\)$/);
+    let realBase = baseName;
+    let counter = 2;
+
+    if (match) {
+      realBase = match[1];
+      counter = parseInt(match[2], 10);
+    }
+
+    while (existingNames.has(targetName.toLowerCase())) {
+      targetName = `${realBase} (${counter})${ext}`;
+      counter++;
+    }
+
+    return targetName;
   }
 }
