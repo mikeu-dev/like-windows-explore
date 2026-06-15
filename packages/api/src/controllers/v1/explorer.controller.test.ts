@@ -32,6 +32,7 @@ mock.module("../../services/explorer.service", () => {
 });
 
 // Import the controller dynamically to ensure mock.module runs first
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const { explorerController } = require("./explorer.controller");
 
 explorerController.onError(({ error }: { error: any }) => {
