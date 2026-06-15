@@ -4,6 +4,14 @@ import { SeededFolderIds } from "./folders.seed";
 
 export async function seedFiles(db: DbType, folderIds: SeededFolderIds) {
   await db.insert(files).values([
+    // Files in Projects folder (Stitch Mockup Files)
+    { name: "Project Proposal.docx", size: 48200, folderId: folderIds.projectsFolder.id },
+    { name: "UI Mockup.fig", size: 12400000, folderId: folderIds.projectsFolder.id },
+    { name: "Budget.xlsx", size: 820000, folderId: folderIds.projectsFolder.id },
+    { name: "Assets.zip", size: 245200000, folderId: folderIds.projectsFolder.id },
+    { name: "Meeting Notes.txt", size: 4096, folderId: folderIds.projectsFolder.id },
+    { name: "Presentation.pptx", size: 5800000, folderId: folderIds.projectsFolder.id },
+
     // Files in Work folder
     { name: "curriculum_vitae.pdf", size: 1240500, folderId: folderIds.workFolder.id },
     { name: "project_requirements.docx", size: 345000, folderId: folderIds.workFolder.id },
@@ -28,6 +36,11 @@ export async function seedFiles(db: DbType, folderIds: SeededFolderIds) {
 
     // Files in Downloads
     { name: "bun_linux_x64.tar.gz", size: 45000000, folderId: folderIds.downloadFolder.id },
-    { name: "vscode_installer.deb", size: 89000000, folderId: folderIds.downloadFolder.id }
+    { name: "vscode_installer.deb", size: 89000000, folderId: folderIds.downloadFolder.id },
+    { name: "windows_11_iso.iso", size: 5400000000, folderId: folderIds.downloadFolder.id },
+
+    // Files in OneDrive Shared Documents
+    { name: "cloud_architecture.pdf", size: 2800000, folderId: folderIds.oneDriveDocs.id },
+    { name: "meeting_recording.mp4", size: 145000000, folderId: folderIds.oneDriveDocs.id }
   ]);
 }
