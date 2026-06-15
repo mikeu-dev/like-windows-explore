@@ -80,6 +80,7 @@ This starts a PostgreSQL 15 container on port `5432` with credentials `postgres:
 
 1. **Verify that PostgreSQL is running:**
    Ensure your PostgreSQL service is active. You can check its status using:
+
    ```bash
    # Check if Postgres is responding on port 5432
    pg_isready -h localhost -p 5432
@@ -93,19 +94,22 @@ This starts a PostgreSQL 15 container on port `5432` with credentials `postgres:
 
 2. **Create the database manually:**
    Connect to your PostgreSQL server and create the database.
-   
-   *Note: Since the database name contains dashes, it must be enclosed in double quotes in SQL.*
-   
+
+   _Note: Since the database name contains dashes, it must be enclosed in double quotes in SQL._
+
    ```bash
    # Connect using psql (replace 'postgres' with your superuser username if needed)
    psql -U postgres
    ```
+
    Inside the SQL prompt, run:
+
    ```sql
    CREATE DATABASE "db-like-windows-explore";
    ```
-   
+
    Alternatively, you can run this command directly from your terminal:
+
    ```bash
    createdb -U postgres db-like-windows-explore
    ```
@@ -117,6 +121,7 @@ This starts a PostgreSQL 15 container on port `5432` with credentials `postgres:
 PORT=3001
 DATABASE_URL="postgres://postgres:password@127.0.0.1:5432/db-like-windows-explore"
 ```
+
 Ensure that the PostgreSQL user has sufficient privileges to create tables and execute migrations on this database.
 
 ### 3. Configure Frontend Environment
