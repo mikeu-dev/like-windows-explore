@@ -1,49 +1,6 @@
 <template>
   <div class="h-full flex flex-col">
-    <!-- Toolbar Panel Kanan -->
-    <div
-      class="flex items-center justify-between pb-4 border-b border-outline-variant/30 mb-4 shrink-0"
-    >
-      <div class="text-body-sm text-on-surface-variant font-body-sm">
-        <span v-if="isSearching"
-          >Hasil Pencarian untuk:
-          <strong class="text-on-surface font-semibold">"{{ searchQuery }}"</strong></span
-        >
-        <span v-else>{{ itemsCount }} item ditemukan</span>
-      </div>
 
-      <!-- Toggle Tampilan (Grid / List) -->
-      <div
-        class="flex items-center space-x-1 bg-surface-container p-1 rounded border border-outline-variant/50 text-xs"
-      >
-        <button
-          id="view-grid-btn"
-          class="px-2.5 py-1.5 rounded transition-all duration-150 flex items-center gap-1 font-medium"
-          :class="[
-            viewMode === 'grid'
-              ? 'bg-[#e2e2e2] text-primary shadow-sm font-semibold'
-              : 'text-on-surface-variant hover:text-on-surface'
-          ]"
-          @click="viewMode = 'grid'"
-        >
-          <span class="material-symbols-outlined scale-75">grid_view</span>
-          Grid
-        </button>
-        <button
-          id="view-list-btn"
-          class="px-2.5 py-1.5 rounded transition-all duration-150 flex items-center gap-1 font-medium"
-          :class="[
-            viewMode === 'list'
-              ? 'bg-[#e2e2e2] text-primary shadow-sm font-semibold'
-              : 'text-on-surface-variant hover:text-on-surface'
-          ]"
-          @click="viewMode = 'list'"
-        >
-          <span class="material-symbols-outlined scale-75">view_list</span>
-          Detail List
-        </button>
-      </div>
-    </div>
 
     <!-- Area Konten Utama -->
     <div class="flex-1 overflow-y-auto min-h-0 pr-1 no-scrollbar">
