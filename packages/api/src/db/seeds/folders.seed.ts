@@ -3,23 +3,25 @@ import { folders } from "../schema";
 
 export async function seedFolders(db: DbType) {
   // 1. Root Level Folders
-  const [docFolder, picFolder, , downloadFolder] = await db
+  const [docFolder, picFolder, musicFolder, downloadFolder, oneDriveFolder] = await db
     .insert(folders)
     .values([
       { name: "Documents", parentId: null },
       { name: "Pictures", parentId: null },
       { name: "Music", parentId: null },
-      { name: "Downloads", parentId: null }
+      { name: "Downloads", parentId: null },
+      { name: "OneDrive", parentId: null }
     ])
     .returning();
 
   // 2. Subfolders under Documents
-  const [workFolder, personalFolder, archiveFolder] = await db
+  const [workFolder, personalFolder, archiveFolder, projectsFolder] = await db
     .insert(folders)
     .values([
       { name: "Work", parentId: docFolder.id },
       { name: "Personal", parentId: docFolder.id },
-      { name: "Archive", parentId: docFolder.id }
+      { name: "Archive", parentId: docFolder.id },
+      { name: "Projects", parentId: docFolder.id }
     ])
     .returning();
 
@@ -32,8 +34,18 @@ export async function seedFolders(db: DbType) {
     ])
     .returning();
 
-  // 4. Nested Folder under Archive (3rd Level)
-  const [archive2024] = await db
+  // 4. Subfolders under OneDrive
+  const [oneDriveDocs, oneDrivePics, oneDriveBackups] = await db
+    .insert(folders)
+    .values([
+      { name: "Shared Documents", parentId: oneDriveFolder.id },
+      { name: "Family Photos", parentId: oneDriveFolder.id },
+      { name: "System Backups", parentId: oneDriveFolder.id }
+    ])
+    .returning();
+
+  // 5. Nested Folder under Archive (3rd Level)
+  const [archive2024, archive2025] = await db
     .insert(folders)
     .values([
       { name: "2024 Records", parentId: archiveFolder.id },
@@ -41,7 +53,7 @@ export async function seedFolders(db: DbType) {
     ])
     .returning();
 
-  // 5. Deeply nested folder (4th Level)
+  // 6. Deeply nested folder (4th Level)
   const [taxes2024] = await db
     .insert(folders)
     .values([{ name: "Tax Returns", parentId: archive2024.id }])
@@ -53,7 +65,10 @@ export async function seedFolders(db: DbType) {
     vacationFolder,
     projectsPicFolder,
     taxes2024,
-    downloadFolder
+    downloadFolder,
+    oneDriveFolder,
+    projectsFolder,
+    oneDriveDocs
   };
 }
 export type SeededFolderIds = Awaited<ReturnType<typeof seedFolders>>;
