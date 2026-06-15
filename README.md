@@ -76,14 +76,53 @@ docker compose up -d
 
 This starts a PostgreSQL 15 container on port `5432` with credentials `postgres:password` and database `db-like-windows-explore`.
 
-**Option B — Using an existing PostgreSQL instance:**
+**Option B — Using an existing PostgreSQL instance (Non-Docker):**
 
-Create a `.env` file inside `packages/api/`:
+1. **Verify that PostgreSQL is running:**
+   Ensure your PostgreSQL service is active. You can check its status using:
+
+   ```bash
+   # Check if Postgres is responding on port 5432
+   pg_isready -h localhost -p 5432
+
+   # Or check service status (Linux)
+   sudo systemctl status postgresql
+
+   # Or check service status (macOS Homebrew)
+   brew services list
+   ```
+
+2. **Create the database manually:**
+   Connect to your PostgreSQL server and create the database.
+
+   _Note: Since the database name contains dashes, it must be enclosed in double quotes in SQL._
+
+   ```bash
+   # Connect using psql (replace 'postgres' with your superuser username if needed)
+   psql -U postgres
+   ```
+
+   Inside the SQL prompt, run:
+
+   ```sql
+   CREATE DATABASE "db-like-windows-explore";
+   ```
+
+   Alternatively, you can run this command directly from your terminal:
+
+   ```bash
+   createdb -U postgres db-like-windows-explore
+   ```
+
+3. **Configure Environment Variables:**
+   Create a `.env` file inside `packages/api/` (you can copy from `.env.example` if available) and update the `DATABASE_URL` with your credentials and database name:
 
 ```env
 PORT=3001
-DATABASE_URL="postgres://username:password@127.0.0.1:5432/database_name"
+DATABASE_URL="postgres://postgres:password@127.0.0.1:5432/db-like-windows-explore"
 ```
+
+Ensure that the PostgreSQL user has sufficient privileges to create tables and execute migrations on this database.
 
 ### 3. Configure Frontend Environment
 
