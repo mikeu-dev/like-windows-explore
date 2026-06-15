@@ -1,6 +1,7 @@
+/// <reference types="vite/client" />
 import { FolderDTO, FileDTO, FolderContentsDTO, SearchResultsDTO } from "@explorer/common";
 
-const API_BASE_URL = "http://127.0.0.1:3001/api/v1";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:3001/api/v1";
 
 export const explorerApi = {
   // Ambil subfolder langsung (untuk tree view)
