@@ -1,5 +1,5 @@
 import "../test-env.d.ts";
-import { describe, expect, it, mock, beforeEach, spyOn } from "bun:test";
+import { describe, expect, it, mock, beforeEach } from "bun:test";
 import { useExplorer } from "./useExplorer";
 import { FolderDTO } from "@explorer/common";
 
@@ -247,14 +247,8 @@ describe("useExplorer Composable Tests", () => {
     explorer.selectedFolderId.value = "1";
     explorer.activeItem.value = { id: "3", type: "folder", name: "Work" };
 
-    // Mock confirm
-    const confirmSpy = spyOn(globalThis, "confirm").mockImplementation(() => true);
-
     await explorer.deleteItem();
-    expect(confirmSpy).toHaveBeenCalled();
     expect(deleteFolderMock).toHaveBeenCalledWith("3");
-
-    confirmSpy.mockRestore();
   });
 
   it("should perform renameItem CRUD operation", async () => {

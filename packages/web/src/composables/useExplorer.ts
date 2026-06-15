@@ -484,8 +484,6 @@ export function useExplorer() {
   // Delete selected item
   async function deleteItem() {
     if (!activeItem.value || !selectedFolderId.value) return;
-    const confirmDelete = confirm(`Apakah Anda yakin ingin menghapus "${activeItem.value.name}"?`);
-    if (!confirmDelete) return;
 
     if (activeItem.value.type === "folder") {
       await explorerApi.deleteFolder(activeItem.value.id);
