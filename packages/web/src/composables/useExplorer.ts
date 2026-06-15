@@ -49,8 +49,6 @@ export function useExplorer() {
     "this-pc",
     "desktop",
     "videos",
-    "local-c",
-    "local-d",
     "home",
     "gallery",
     "onedrive-root",
@@ -66,24 +64,33 @@ export function useExplorer() {
     "onedrive-root": false
   });
 
-  // Folder root OneDrive di DB
-  const dbOneDriveFolder = computed(() =>
-    rootFolders.value.find((f) => f.name.toLowerCase() === "onedrive")
-  );
+  // Pemetaan ID folder pintasan (shortcuts) dari database
+  const shortcutFolderIds = ref<Record<string, string>>({
+    desktop: "",
+    downloads: "",
+    documents: "",
+    pictures: "",
+    music: "",
+    videos: "",
+    onedrive: "",
+    localC: "",
+    localD: ""
+  });
 
   // Node OneDrive Virtual di Section 1
   const oneDriveNode = computed<ClientFolderNode>(() => {
-    const dbFolder = dbOneDriveFolder.value;
+    const id = shortcutFolderIds.value.onedrive || "onedrive-virtual";
+    const mapNode = folderMap.get(id);
     return {
-      id: "onedrive-root",
+      id,
       name: "OneDrive - Personal",
       parentId: null,
-      hasChildren: dbFolder ? dbFolder.hasChildren : false,
+      hasChildren: mapNode ? mapNode.hasChildren : true,
       isOpen: !!openFolderIds.value["onedrive-root"],
-      isLoaded: dbFolder ? dbFolder.isLoaded : true,
-      isLoading: dbFolder ? dbFolder.isLoading : false,
-      children: dbFolder ? dbFolder.children : [],
-      dbFolderId: dbFolder ? dbFolder.id : undefined
+      isLoaded: mapNode ? mapNode.isLoaded : false,
+      isLoading: mapNode ? mapNode.isLoading : false,
+      children: mapNode ? mapNode.children : [],
+      dbFolderId: id !== "onedrive-virtual" ? id : undefined
     };
   });
 
@@ -98,55 +105,34 @@ export function useExplorer() {
 
   // Section 2: Pinned Shortcuts (Desktop, Downloads, Documents, Pictures, Music, Videos)
   const sidebarSection2 = computed<ClientFolderNode[]>(() => {
-    const findDbFolder = (name: string) =>
-      rootFolders.value.find((f) => f.name.toLowerCase() === name.toLowerCase());
-    const docs = findDbFolder("documents");
-    const pics = findDbFolder("pictures");
-    const music = findDbFolder("music");
-    const downloads = findDbFolder("downloads");
+    const getShortcutNode = (key: string, name: string) => {
+      const id = shortcutFolderIds.value[key] || `${key}-virtual`;
+      return {
+        id,
+        name,
+        parentId: null,
+        hasChildren: false,
+        children: []
+      };
+    };
 
     return [
-      { id: "desktop", name: "Desktop", parentId: null, hasChildren: false, children: [] },
-      {
-        id: downloads ? downloads.id : "downloads-virtual",
-        name: "Downloads",
-        parentId: null,
-        hasChildren: false,
-        children: []
-      },
-      {
-        id: docs ? docs.id : "documents-virtual",
-        name: "Documents",
-        parentId: null,
-        hasChildren: false,
-        children: []
-      },
-      {
-        id: pics ? pics.id : "pictures-virtual",
-        name: "Pictures",
-        parentId: null,
-        hasChildren: false,
-        children: []
-      },
-      {
-        id: music ? music.id : "music-virtual",
-        name: "Music",
-        parentId: null,
-        hasChildren: false,
-        children: []
-      },
-      { id: "videos", name: "Videos", parentId: null, hasChildren: false, children: [] }
+      getShortcutNode("desktop", "Desktop"),
+      getShortcutNode("downloads", "Downloads"),
+      getShortcutNode("documents", "Documents"),
+      getShortcutNode("pictures", "Pictures"),
+      getShortcutNode("music", "Music"),
+      getShortcutNode("videos", "Videos")
     ];
   });
 
   // Section 3: Collapsible Menu (This PC, Network, Linux)
   const thisPCNode = computed<ClientFolderNode>(() => {
-    const dbRootsMapped = rootFolders.value
-      .filter((f) => f.name.toLowerCase() !== "onedrive")
-      .map((f) => ({
-        ...f,
-        parentId: "this-pc"
-      }));
+    // Di Windows 11 modern, This PC hanya menampilkan drive lokal.
+    const drives = rootFolders.value.map((f) => ({
+      ...f,
+      parentId: "this-pc"
+    }));
 
     return {
       id: "this-pc",
@@ -155,25 +141,7 @@ export function useExplorer() {
       hasChildren: true,
       isOpen: !!openFolderIds.value["this-pc"],
       isLoaded: true,
-      children: [
-        { id: "desktop", name: "Desktop", parentId: "this-pc", hasChildren: false, children: [] },
-        ...dbRootsMapped,
-        { id: "videos", name: "Videos", parentId: "this-pc", hasChildren: false, children: [] },
-        {
-          id: "local-c",
-          name: "Local Disk (C:)",
-          parentId: "this-pc",
-          hasChildren: false,
-          children: []
-        },
-        {
-          id: "local-d",
-          name: "Local Disk (D:)",
-          parentId: "this-pc",
-          hasChildren: false,
-          children: []
-        }
-      ]
+      children: drives
     };
   });
 
@@ -238,6 +206,13 @@ export function useExplorer() {
 
   // Memuat folder tingkat teratas (Root)
   async function loadRootFolders() {
+    try {
+      const shortcuts = await explorerApi.getShortcuts();
+      shortcutFolderIds.value = shortcuts;
+    } catch (e) {
+      console.error("Gagal memuat shortcuts", e);
+    }
+
     const data = await explorerApi.getSubfolders(null);
     rootFolders.value = data.map((f) => {
       const node: ClientFolderNode = {
@@ -254,11 +229,27 @@ export function useExplorer() {
 
   // Melakukan ekspansi folder dan memuat subfolder di dalamnya secara bertahap (lazy loading)
   async function expandFolder(folder: ClientFolderNode) {
-    if (folder.id === "onedrive-root") {
+    if (folder.id === "onedrive-root" || folder.id === shortcutFolderIds.value.onedrive) {
       openFolderIds.value["onedrive-root"] = !openFolderIds.value["onedrive-root"];
-      const dbFolder = dbOneDriveFolder.value;
-      if (dbFolder && !dbFolder.isLoaded) {
-        await expandFolder(dbFolder);
+      const id = shortcutFolderIds.value.onedrive;
+      if (id) {
+        let mapNode = folderMap.get(id);
+        if (!mapNode) {
+          mapNode = {
+            id,
+            name: "OneDrive",
+            parentId: null,
+            children: [],
+            isOpen: false,
+            isLoading: false,
+            isLoaded: false,
+            hasChildren: true
+          };
+          folderMap.set(id, mapNode);
+        }
+        if (!mapNode.isLoaded) {
+          await expandFolder(mapNode);
+        }
       }
       return;
     }
@@ -319,9 +310,9 @@ export function useExplorer() {
 
     // Tangani Redirection OneDrive
     if (folderId === "onedrive-root") {
-      const dbFolder = dbOneDriveFolder.value;
-      if (dbFolder) {
-        await selectFolder(dbFolder.id, false);
+      const id = shortcutFolderIds.value.onedrive;
+      if (id) {
+        await selectFolder(id, false);
       } else {
         selectedFolderContents.value = { subfolders: [], files: [] };
         breadcrumbs.value = [{ id: "onedrive-root", name: "OneDrive - Personal", parentId: null }];
@@ -331,35 +322,29 @@ export function useExplorer() {
     }
 
     // Tangani Folder Virtual
-    if (virtualFolders.includes(folderId)) {
+    if (virtualFolders.includes(folderId) || folderId.endsWith("-virtual")) {
       try {
         if (folderId === "this-pc") {
-          const dbRootsMapped = rootFolders.value
-            .filter((f) => f.name.toLowerCase() !== "onedrive")
-            .map((f) => ({ ...f, parentId: "this-pc" }));
-
+          const drives = rootFolders.value.map((f) => ({ ...f, parentId: "this-pc" }));
           selectedFolderContents.value = {
-            subfolders: [
-              { id: "desktop", name: "Desktop", parentId: "this-pc" },
-              ...dbRootsMapped,
-              { id: "videos", name: "Videos", parentId: "this-pc" },
-              { id: "local-c", name: "Local Disk (C:)", parentId: "this-pc" },
-              { id: "local-d", name: "Local Disk (D:)", parentId: "this-pc" }
-            ],
+            subfolders: drives,
             files: []
           };
           breadcrumbs.value = []; // Root / Ini PC
         } else {
           selectedFolderContents.value = { subfolders: [], files: [] };
           let name = "";
-          if (folderId === "desktop") name = "Desktop";
-          else if (folderId === "videos") name = "Videos";
-          else if (folderId === "local-c") name = "Local Disk (C:)";
-          else if (folderId === "local-d") name = "Local Disk (D:)";
-          else if (folderId === "home") name = "Home";
-          else if (folderId === "gallery") name = "Gallery";
-          else if (folderId === "network") name = "Network";
-          else if (folderId === "linux") name = "Linux";
+          const cleanId = folderId.replace("-virtual", "");
+          if (cleanId === "desktop") name = "Desktop";
+          else if (cleanId === "videos") name = "Videos";
+          else if (cleanId === "downloads") name = "Downloads";
+          else if (cleanId === "documents") name = "Documents";
+          else if (cleanId === "pictures") name = "Pictures";
+          else if (cleanId === "music") name = "Music";
+          else if (cleanId === "home") name = "Home";
+          else if (cleanId === "gallery") name = "Gallery";
+          else if (cleanId === "network") name = "Network";
+          else if (cleanId === "linux") name = "Linux";
 
           breadcrumbs.value = [{ id: folderId, name, parentId: "this-pc" }];
         }
@@ -432,6 +417,7 @@ export function useExplorer() {
       }
     }
   }
+
 
   // Reload current view
   async function refreshView() {
