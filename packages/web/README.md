@@ -38,6 +38,14 @@ The project features a sleek dark mode theme using custom variables for active s
 }
 ```
 
+## Environment Variables
+
+The frontend application uses a `.env` file inside `packages/web/` folder to target the backend API:
+
+```env
+VITE_API_URL="http://127.0.0.1:3001/api/v1"
+```
+
 ## Development Reference
 
 Run these commands inside the `packages/web/` directory:
