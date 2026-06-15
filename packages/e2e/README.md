@@ -6,10 +6,10 @@ End-to-End test suite using **Playwright** to validate the full application stac
 
 The `playwright.config.ts` includes a `webServer` configuration that automatically starts both development servers before running tests:
 
-| Server | Command | Health Check URL |
-| --- | --- | --- |
-| Backend API | `bun --cwd ../api dev` | `http://127.0.0.1:3001/api/v1/folders` |
-| Frontend Web | `bun --cwd ../web dev` | `http://localhost:5173` |
+| Server       | Command                | Health Check URL                       |
+| ------------ | ---------------------- | -------------------------------------- |
+| Backend API  | `bun --cwd ../api dev` | `http://127.0.0.1:3001/api/v1/folders` |
+| Frontend Web | `bun --cwd ../web dev` | `http://localhost:5173`                |
 
 Playwright waits for both services to become healthy, executes the test suite, and terminates server processes upon completion.
 
@@ -48,6 +48,7 @@ The test suite in `explorer.e2e.ts` covers 7 comprehensive scenarios:
 ### 1. Initial Load State
 
 Verifies the application renders correctly on first load:
+
 - Title ("File Explorer") and subtitle are present.
 - Sidebar shows main folders (Documents, Pictures, Music, Downloads).
 - Right panel displays "No folder selected" placeholder message.
@@ -55,6 +56,7 @@ Verifies the application renders correctly on first load:
 ### 2. Directory Navigation
 
 Validates multi-level navigation through the folder hierarchy:
+
 - Click a sidebar folder → breadcrumbs and contents panel update.
 - Double-click a subfolder in the content panel → drill down and breadcrumbs extend.
 - Click a breadcrumb segment → navigate back to that folder level.
@@ -62,6 +64,7 @@ Validates multi-level navigation through the folder hierarchy:
 ### 3. Global Search
 
 Tests the debounced search functionality:
+
 - Type a query ("budget") → matching results appear (`monthly_budget.xlsx`).
 - Non-matching items are hidden.
 - Click the clear button → search resets to empty state.
@@ -69,6 +72,7 @@ Tests the debounced search functionality:
 ### 4. View Mode Toggle
 
 Verifies switching between display modes:
+
 - Grid mode active by default (grid button highlighted).
 - Click list button → table headers (Name, Type, Size) appear, grid button deactivated.
 - Click grid button → table disappears, grid mode restored.
@@ -76,6 +80,7 @@ Verifies switching between display modes:
 ### 5. File Detail Modal
 
 Tests file metadata overlay:
+
 - Navigate to `Documents > Work`.
 - Double-click `curriculum_vitae.pdf` → modal appears with filename, type ("PDF Document"), and file size.
 - Click "Close" → modal dismissed.
@@ -83,6 +88,7 @@ Tests file metadata overlay:
 ### 6. History Navigation Controls
 
 Validates Back, Forward, Up, and Refresh buttons:
+
 - Navigate `Documents → Work`.
 - **Back** → returns to Documents (breadcrumbs confirmed).
 - **Forward** → returns to Work.
@@ -92,6 +98,7 @@ Validates Back, Forward, Up, and Refresh buttons:
 ### 7. CRUD Operations + Clipboard
 
 Full lifecycle test covering create, rename, copy, paste, and delete:
+
 1. Navigate to Documents.
 2. **Create** new folder → "New Folder" appears.
 3. **Rename** to "TestCrudFolder" via prompt dialog.
@@ -139,6 +146,7 @@ bun --cwd packages/e2e playwright show-report
 ## CI Integration
 
 In the GitHub Actions pipeline, Playwright:
+
 1. Installs browser binaries via `playwright install --with-deps`.
 2. Starts fresh API + web servers (database is pre-seeded).
 3. Runs the full test suite.

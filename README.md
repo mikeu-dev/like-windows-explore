@@ -4,18 +4,18 @@ A full-stack, web-based hierarchical file management application inspired by Win
 
 ## Tech Stack
 
-| Layer | Technology |
-| --- | --- |
-| Runtime | Bun |
-| Frontend | Vue 3 (Composition API), Vite, Tailwind CSS 3 |
-| Backend | Elysia.js |
-| Database | PostgreSQL 15 |
-| ORM | Drizzle ORM |
-| Shared Types | `@explorer/common` workspace package |
-| Unit Testing | Bun Test, `@vue/test-utils`, `happy-dom` |
-| E2E Testing | Playwright (Chromium, Firefox, WebKit) |
-| Linting | ESLint (flat config), Prettier |
-| CI/CD | GitHub Actions |
+| Layer        | Technology                                    |
+| ------------ | --------------------------------------------- |
+| Runtime      | Bun                                           |
+| Frontend     | Vue 3 (Composition API), Vite, Tailwind CSS 3 |
+| Backend      | Elysia.js                                     |
+| Database     | PostgreSQL 15                                 |
+| ORM          | Drizzle ORM                                   |
+| Shared Types | `@explorer/common` workspace package          |
+| Unit Testing | Bun Test, `@vue/test-utils`, `happy-dom`      |
+| E2E Testing  | Playwright (Chromium, Firefox, WebKit)        |
+| Linting      | ESLint (flat config), Prettier                |
+| CI/CD        | GitHub Actions                                |
 
 ## Key Features
 
@@ -105,9 +105,9 @@ This runs Drizzle schema push followed by the seed script to populate a structur
 bun dev
 ```
 
-| Service | URL |
-| --- | --- |
-| Frontend | http://localhost:5173 |
+| Service     | URL                   |
+| ----------- | --------------------- |
+| Frontend    | http://localhost:5173 |
 | Backend API | http://127.0.0.1:3001 |
 
 ---
@@ -118,35 +118,35 @@ All commands are run from the monorepo root directory.
 
 ### Development
 
-| Command | Description |
-| --- | --- |
-| `bun dev` | Start both API and web servers concurrently |
-| `bun dev:api` | Start the backend API server only |
-| `bun dev:web` | Start the frontend client only |
-| `bun build` | Build production assets for all packages |
+| Command       | Description                                 |
+| ------------- | ------------------------------------------- |
+| `bun dev`     | Start both API and web servers concurrently |
+| `bun dev:api` | Start the backend API server only           |
+| `bun dev:web` | Start the frontend client only              |
+| `bun build`   | Build production assets for all packages    |
 
 ### Database
 
-| Command | Description |
-| --- | --- |
+| Command        | Description                                                 |
+| -------------- | ----------------------------------------------------------- |
 | `bun db:setup` | Sync schema + seed database (runs `db:push` then `db:seed`) |
 
 ### Testing
 
-| Command | Description |
-| --- | --- |
-| `bun test` | Run unit tests (API + Web) |
+| Command        | Description                                          |
+| -------------- | ---------------------------------------------------- |
+| `bun test`     | Run unit tests (API + Web)                           |
 | `bun test:e2e` | Run Playwright E2E tests (Chromium, Firefox, WebKit) |
 
 ### Code Quality
 
-| Command | Description |
-| --- | --- |
-| `bun lint` | Lint all TypeScript and Vue files with ESLint |
-| `bun lint:fix` | Auto-fix linting issues |
-| `bun format` | Format source files with Prettier |
-| `bun format:check` | Check formatting compliance |
-| `bun check` | Run TypeScript type-checking across all packages |
+| Command            | Description                                      |
+| ------------------ | ------------------------------------------------ |
+| `bun lint`         | Lint all TypeScript and Vue files with ESLint    |
+| `bun lint:fix`     | Auto-fix linting issues                          |
+| `bun format`       | Format source files with Prettier                |
+| `bun format:check` | Check formatting compliance                      |
+| `bun check`        | Run TypeScript type-checking across all packages |
 
 ---
 

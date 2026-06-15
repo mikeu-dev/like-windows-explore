@@ -8,12 +8,12 @@ This document describes the software architecture, design patterns, scalability 
 
 The project is structured as a monorepo using Bun Workspaces with four isolated packages:
 
-| Package | Purpose | Key Dependencies |
-| --- | --- | --- |
-| `packages/common` | Shared TypeScript DTO type contracts | None (pure types) |
-| `packages/api` | REST API backend (HTTP transport + business logic + data access) | Elysia.js, Drizzle ORM, postgres.js |
-| `packages/web` | Frontend client (SPA) | Vue 3, Vite, Tailwind CSS 3 |
-| `packages/e2e` | End-to-end integration tests | Playwright |
+| Package           | Purpose                                                          | Key Dependencies                    |
+| ----------------- | ---------------------------------------------------------------- | ----------------------------------- |
+| `packages/common` | Shared TypeScript DTO type contracts                             | None (pure types)                   |
+| `packages/api`    | REST API backend (HTTP transport + business logic + data access) | Elysia.js, Drizzle ORM, postgres.js |
+| `packages/web`    | Frontend client (SPA)                                            | Vue 3, Vite, Tailwind CSS 3         |
+| `packages/e2e`    | End-to-end integration tests                                     | Playwright                          |
 
 **Key benefits:**
 
@@ -104,23 +104,23 @@ Concrete implementations of repository interfaces using Drizzle ORM to query Pos
 
 Contains all business logic and use cases:
 
-| Method | Functionality |
-| --- | --- |
-| `getSubfolders(parentId)` | Fetch direct child folders (lazy loading) |
-| `getFolderContents(folderId)` | Fetch subfolders + files (right panel) |
-| `getFolderPath(folderId)` | Build breadcrumb path by traversing parent hierarchy |
-| `search(query)` | Global case-insensitive search (min 2 characters) |
-| `createFolder(name, parentId)` | Create new folder |
-| `createFile(name, folderId, size)` | Create new file |
-| `renameFolder(id, name)` | Rename a folder |
-| `renameFile(id, name)` | Rename a file |
-| `moveFolder(id, parentId)` | Move folder to new parent (Cut & Paste) |
-| `moveFile(id, folderId)` | Move file to new folder (Cut & Paste) |
-| `copyFolder(id, parentId)` | Recursively deep-copy folder tree + files |
-| `copyFile(id, folderId)` | Copy file to target folder |
-| `deleteFolder(id)` | Delete folder (cascading) |
-| `deleteFile(id)` | Delete file |
-| `getShortcutFolderIds()` | Resolve Windows-style shortcut folder IDs |
+| Method                             | Functionality                                        |
+| ---------------------------------- | ---------------------------------------------------- |
+| `getSubfolders(parentId)`          | Fetch direct child folders (lazy loading)            |
+| `getFolderContents(folderId)`      | Fetch subfolders + files (right panel)               |
+| `getFolderPath(folderId)`          | Build breadcrumb path by traversing parent hierarchy |
+| `search(query)`                    | Global case-insensitive search (min 2 characters)    |
+| `createFolder(name, parentId)`     | Create new folder                                    |
+| `createFile(name, folderId, size)` | Create new file                                      |
+| `renameFolder(id, name)`           | Rename a folder                                      |
+| `renameFile(id, name)`             | Rename a file                                        |
+| `moveFolder(id, parentId)`         | Move folder to new parent (Cut & Paste)              |
+| `moveFile(id, folderId)`           | Move file to new folder (Cut & Paste)                |
+| `copyFolder(id, parentId)`         | Recursively deep-copy folder tree + files            |
+| `copyFile(id, folderId)`           | Copy file to target folder                           |
+| `deleteFolder(id)`                 | Delete folder (cascading)                            |
+| `deleteFile(id)`                   | Delete file                                          |
+| `getShortcutFolderIds()`           | Resolve Windows-style shortcut folder IDs            |
 
 **Dependency Injection**: The `ExplorerService` constructor accepts `IFolderRepository` and `IFileRepository` via constructor injection, enabling seamless mock substitution during unit testing.
 
@@ -136,26 +136,26 @@ All endpoints are prefixed with `/api/v1`.
 
 ### Query Endpoints
 
-| Method | Route | Description |
-| --- | --- | --- |
-| `GET` | `/shortcuts` | Get shortcut folder IDs (Desktop, Downloads, Documents, etc.) |
-| `GET` | `/folders?parentId=` | Get direct subfolders (root if `parentId` omitted) |
-| `GET` | `/folders/:id/contents` | Get subfolders + files for a folder |
-| `GET` | `/folders/:id/path` | Get breadcrumb path from folder to root |
-| `GET` | `/search?q=` | Global search (min 2 chars, case-insensitive) |
+| Method | Route                   | Description                                                   |
+| ------ | ----------------------- | ------------------------------------------------------------- |
+| `GET`  | `/shortcuts`            | Get shortcut folder IDs (Desktop, Downloads, Documents, etc.) |
+| `GET`  | `/folders?parentId=`    | Get direct subfolders (root if `parentId` omitted)            |
+| `GET`  | `/folders/:id/contents` | Get subfolders + files for a folder                           |
+| `GET`  | `/folders/:id/path`     | Get breadcrumb path from folder to root                       |
+| `GET`  | `/search?q=`            | Global search (min 2 chars, case-insensitive)                 |
 
 ### Mutation Endpoints
 
-| Method | Route | Body | Description |
-| --- | --- | --- | --- |
-| `POST` | `/folders` | `{ name, parentId }` | Create new folder |
-| `POST` | `/files` | `{ name, folderId, size? }` | Create new file |
-| `PATCH` | `/folders/:id` | `{ name? }` or `{ parentId? }` | Rename or move folder |
-| `PATCH` | `/files/:id` | `{ name? }` or `{ folderId? }` | Rename or move file |
-| `POST` | `/folders/:id/copy` | `{ parentId }` | Recursively copy folder tree |
-| `POST` | `/files/:id/copy` | `{ folderId }` | Copy file to target folder |
-| `DELETE` | `/folders/:id` | — | Delete folder (cascade) |
-| `DELETE` | `/files/:id` | — | Delete file |
+| Method   | Route               | Body                           | Description                  |
+| -------- | ------------------- | ------------------------------ | ---------------------------- |
+| `POST`   | `/folders`          | `{ name, parentId }`           | Create new folder            |
+| `POST`   | `/files`            | `{ name, folderId, size? }`    | Create new file              |
+| `PATCH`  | `/folders/:id`      | `{ name? }` or `{ parentId? }` | Rename or move folder        |
+| `PATCH`  | `/files/:id`        | `{ name? }` or `{ folderId? }` | Rename or move file          |
+| `POST`   | `/folders/:id/copy` | `{ parentId }`                 | Recursively copy folder tree |
+| `POST`   | `/files/:id/copy`   | `{ folderId }`                 | Copy file to target folder   |
+| `DELETE` | `/folders/:id`      | —                              | Delete folder (cascade)      |
+| `DELETE` | `/files/:id`        | —                              | Delete file                  |
 
 ---
 
@@ -165,26 +165,26 @@ PostgreSQL with Drizzle ORM. Schema defined in `packages/api/src/db/schema/`.
 
 ### `folders` Table
 
-| Column | Type | Constraints |
-| --- | --- | --- |
-| `id` | UUID | Primary key, default random |
-| `name` | TEXT | NOT NULL |
-| `parent_id` | UUID | FK → `folders.id`, ON DELETE CASCADE, nullable |
-| `created_at` | TIMESTAMP | NOT NULL, default NOW |
-| `updated_at` | TIMESTAMP | NOT NULL, default NOW |
+| Column       | Type      | Constraints                                    |
+| ------------ | --------- | ---------------------------------------------- |
+| `id`         | UUID      | Primary key, default random                    |
+| `name`       | TEXT      | NOT NULL                                       |
+| `parent_id`  | UUID      | FK → `folders.id`, ON DELETE CASCADE, nullable |
+| `created_at` | TIMESTAMP | NOT NULL, default NOW                          |
+| `updated_at` | TIMESTAMP | NOT NULL, default NOW                          |
 
 **Indices**: `folders_parent_id_idx`, `folders_parent_name_idx` (composite on `parent_id, name`)
 
 ### `files` Table
 
-| Column | Type | Constraints |
-| --- | --- | --- |
-| `id` | UUID | Primary key, default random |
-| `name` | TEXT | NOT NULL |
-| `size` | INTEGER | NOT NULL, default 0 |
-| `folder_id` | UUID | FK → `folders.id`, ON DELETE CASCADE, NOT NULL |
-| `created_at` | TIMESTAMP | NOT NULL, default NOW |
-| `updated_at` | TIMESTAMP | NOT NULL, default NOW |
+| Column       | Type      | Constraints                                    |
+| ------------ | --------- | ---------------------------------------------- |
+| `id`         | UUID      | Primary key, default random                    |
+| `name`       | TEXT      | NOT NULL                                       |
+| `size`       | INTEGER   | NOT NULL, default 0                            |
+| `folder_id`  | UUID      | FK → `folders.id`, ON DELETE CASCADE, NOT NULL |
+| `created_at` | TIMESTAMP | NOT NULL, default NOW                          |
+| `updated_at` | TIMESTAMP | NOT NULL, default NOW                          |
 
 **Indices**: `files_folder_id_idx`, `files_folder_name_idx` (composite on `folder_id, name`)
 
@@ -240,19 +240,19 @@ App.vue (root layout)
 
 Centralized state management implemented as a Vue 3 composable (`src/composables/useExplorer.ts`) without external state libraries. Key state objects:
 
-| State | Purpose |
-| --- | --- |
-| `rootFolders` | Top-level folder nodes (under "This PC") |
-| `selectedFolderId` | Currently selected folder ID |
-| `selectedFolderContents` | Subfolders + files of the selected folder |
-| `breadcrumbs` | Active path segments for address bar |
-| `searchQuery` / `searchResults` | Global search state |
-| `historyStack` / `forwardStack` | Navigation history (Back / Forward) |
-| `sortBy` / `sortOrder` | Client-side sorting criteria |
-| `activeItem` | Currently highlighted item (for CRUD actions) |
-| `clipboard` | Cut/Copy clipboard state (item, type, action) |
-| `folderMap` | O(1) reactive node lookup map |
-| `sidebarSection1/2/3` | Computed sidebar sections (Home/Gallery/OneDrive, Shortcuts, This PC/Network/Linux) |
+| State                           | Purpose                                                                             |
+| ------------------------------- | ----------------------------------------------------------------------------------- |
+| `rootFolders`                   | Top-level folder nodes (under "This PC")                                            |
+| `selectedFolderId`              | Currently selected folder ID                                                        |
+| `selectedFolderContents`        | Subfolders + files of the selected folder                                           |
+| `breadcrumbs`                   | Active path segments for address bar                                                |
+| `searchQuery` / `searchResults` | Global search state                                                                 |
+| `historyStack` / `forwardStack` | Navigation history (Back / Forward)                                                 |
+| `sortBy` / `sortOrder`          | Client-side sorting criteria                                                        |
+| `activeItem`                    | Currently highlighted item (for CRUD actions)                                       |
+| `clipboard`                     | Cut/Copy clipboard state (item, type, action)                                       |
+| `folderMap`                     | O(1) reactive node lookup map                                                       |
+| `sidebarSection1/2/3`           | Computed sidebar sections (Home/Gallery/OneDrive, Shortcuts, This PC/Network/Linux) |
 
 ### Sidebar Layout (3 Sections)
 
@@ -287,13 +287,13 @@ Located in `useExplorer.ts`, navigation is driven by two array-based stacks:
 - **`historyStack`**: When navigating to a new folder, the current folder ID is pushed onto this stack. The forward stack is cleared.
 - **`forwardStack`**: When clicking "Back", the current folder is pushed here, and the previous folder is popped from `historyStack`.
 
-| Action | historyStack | forwardStack |
-| --- | --- | --- |
-| Navigate A → B | push(A) | clear |
-| Back (B → A) | pop() → A | push(B) |
-| Forward (A → B) | push(A) | pop() → B |
-| Up | Navigate to parent | — |
-| Refresh | Re-fetch current folder | — |
+| Action          | historyStack            | forwardStack |
+| --------------- | ----------------------- | ------------ |
+| Navigate A → B  | push(A)                 | clear        |
+| Back (B → A)    | pop() → A               | push(B)      |
+| Forward (A → B) | push(A)                 | pop() → B    |
+| Up              | Navigate to parent      | —            |
+| Refresh         | Re-fetch current folder | —            |
 
 ### Recursive Parent Expansion
 
@@ -329,7 +329,7 @@ origin: [
   "http://127.0.0.1:5173",
   "http://localhost:3000",
   "http://127.0.0.1:3000"
-]
+];
 ```
 
 ### Localhost-Only Binding
@@ -375,15 +375,15 @@ Tests Vue Single File Components using `@vue/test-utils` with `happy-dom`. Valid
 
 Full-system integration tests running across Chromium, Firefox, and WebKit. Playwright automatically orchestrates both API and web dev servers via `playwright.config.ts`. The test suite covers 7 scenarios:
 
-| # | Scenario | Coverage |
-| --- | --- | --- |
-| 1 | Initial Load | Header, sidebar folders, empty state message |
-| 2 | Directory Navigation | Sidebar click, double-click drill-down, breadcrumb navigation |
-| 3 | Global Search | Debounced search, result filtering, search clearing |
-| 4 | View Mode Toggle | Grid ↔ Detail List switching, table header verification |
-| 5 | File Detail Modal | Double-click file, modal content, close button |
-| 6 | History Navigation | Back, Forward, Up, Refresh controls |
-| 7 | CRUD + Clipboard | Create folder/file, rename, copy, paste, delete |
+| #   | Scenario             | Coverage                                                      |
+| --- | -------------------- | ------------------------------------------------------------- |
+| 1   | Initial Load         | Header, sidebar folders, empty state message                  |
+| 2   | Directory Navigation | Sidebar click, double-click drill-down, breadcrumb navigation |
+| 3   | Global Search        | Debounced search, result filtering, search clearing           |
+| 4   | View Mode Toggle     | Grid ↔ Detail List switching, table header verification       |
+| 5   | File Detail Modal    | Double-click file, modal content, close button                |
+| 6   | History Navigation   | Back, Forward, Up, Refresh controls                           |
+| 7   | CRUD + Clipboard     | Create folder/file, rename, copy, paste, delete               |
 
 ### CI Integration
 

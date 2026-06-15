@@ -58,11 +58,11 @@ A `.env.example` file is provided as reference.
 
 Run from the `packages/api/` directory (or via root scripts):
 
-| Command | Description |
-| --- | --- |
-| `bun db:generate` | Generate Drizzle migration files from schema changes |
-| `bun db:push` | Push schema changes directly to PostgreSQL (development) |
-| `bun db:seed` | Clear all tables and insert structured mock directory trees |
+| Command           | Description                                                 |
+| ----------------- | ----------------------------------------------------------- |
+| `bun db:generate` | Generate Drizzle migration files from schema changes        |
+| `bun db:push`     | Push schema changes directly to PostgreSQL (development)    |
+| `bun db:seed`     | Clear all tables and insert structured mock directory trees |
 
 ---
 
@@ -70,13 +70,13 @@ Run from the `packages/api/` directory (or via root scripts):
 
 ### `folders` Table
 
-| Column | Type | Constraints |
-| --- | --- | --- |
-| `id` | UUID | PK, default random |
-| `name` | TEXT | NOT NULL |
-| `parent_id` | UUID | FK → `folders.id`, ON DELETE CASCADE, nullable |
-| `created_at` | TIMESTAMP | NOT NULL, default NOW |
-| `updated_at` | TIMESTAMP | NOT NULL, default NOW |
+| Column       | Type      | Constraints                                    |
+| ------------ | --------- | ---------------------------------------------- |
+| `id`         | UUID      | PK, default random                             |
+| `name`       | TEXT      | NOT NULL                                       |
+| `parent_id`  | UUID      | FK → `folders.id`, ON DELETE CASCADE, nullable |
+| `created_at` | TIMESTAMP | NOT NULL, default NOW                          |
+| `updated_at` | TIMESTAMP | NOT NULL, default NOW                          |
 
 **Indices**: `folders_parent_id_idx` (parent_id), `folders_parent_name_idx` (parent_id, name)
 
@@ -84,14 +84,14 @@ Run from the `packages/api/` directory (or via root scripts):
 
 ### `files` Table
 
-| Column | Type | Constraints |
-| --- | --- | --- |
-| `id` | UUID | PK, default random |
-| `name` | TEXT | NOT NULL |
-| `size` | INTEGER | NOT NULL, default 0 |
-| `folder_id` | UUID | FK → `folders.id`, ON DELETE CASCADE, NOT NULL |
-| `created_at` | TIMESTAMP | NOT NULL, default NOW |
-| `updated_at` | TIMESTAMP | NOT NULL, default NOW |
+| Column       | Type      | Constraints                                    |
+| ------------ | --------- | ---------------------------------------------- |
+| `id`         | UUID      | PK, default random                             |
+| `name`       | TEXT      | NOT NULL                                       |
+| `size`       | INTEGER   | NOT NULL, default 0                            |
+| `folder_id`  | UUID      | FK → `folders.id`, ON DELETE CASCADE, NOT NULL |
+| `created_at` | TIMESTAMP | NOT NULL, default NOW                          |
+| `updated_at` | TIMESTAMP | NOT NULL, default NOW                          |
 
 **Indices**: `files_folder_id_idx` (folder_id), `files_folder_name_idx` (folder_id, name)
 

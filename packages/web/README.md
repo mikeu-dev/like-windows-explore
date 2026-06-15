@@ -50,15 +50,15 @@ src/
 
 The UI uses a **light-mode** Material Design 3 color palette defined in `tailwind.config.js`:
 
-| Token | Value | Usage |
-| --- | --- | --- |
-| `primary` | `#005faa` | Active links, selection highlights |
-| `primary-container` | `#0078d4` | Folder icons, accent elements |
-| `surface` / `background` | `#f9f9f9` | Page background |
-| `on-surface` | `#1a1c1c` | Body text |
-| `secondary` | `#5d5f5f` | Muted text |
-| `outline-variant` | `#c0c7d4` | Borders, dividers |
-| `surface-container-low` | `#f3f3f4` | Sidebar background |
+| Token                    | Value     | Usage                              |
+| ------------------------ | --------- | ---------------------------------- |
+| `primary`                | `#005faa` | Active links, selection highlights |
+| `primary-container`      | `#0078d4` | Folder icons, accent elements      |
+| `surface` / `background` | `#f9f9f9` | Page background                    |
+| `on-surface`             | `#1a1c1c` | Body text                          |
+| `secondary`              | `#5d5f5f` | Muted text                         |
+| `outline-variant`        | `#c0c7d4` | Borders, dividers                  |
+| `surface-container-low`  | `#f3f3f4` | Sidebar background                 |
 
 Custom CSS utilities:
 
@@ -76,18 +76,18 @@ State is centralized in the `useExplorer` composable (`src/composables/useExplor
 
 ### Reactive State
 
-| State | Type | Purpose |
-| --- | --- | --- |
-| `rootFolders` | `ClientFolderNode[]` | Top-level disk drives (under This PC) |
-| `selectedFolderId` | `string \| null` | Currently selected folder |
-| `selectedFolderContents` | `FolderContentsDTO` | Contents of the right panel |
-| `breadcrumbs` | `FolderDTO[]` | Active breadcrumb path |
-| `historyStack` / `forwardStack` | `string[]` | Navigation history stacks |
-| `searchQuery` / `searchResults` | — | Search state |
-| `sortBy` / `sortOrder` | — | Sorting criteria and direction |
-| `activeItem` | — | Selected item (for CRUD operations) |
-| `clipboard` | — | Cut/Copy clipboard (item, type, action, source) |
-| `folderMap` | `Map<string, ClientFolderNode>` | O(1) reactive node lookup |
+| State                           | Type                            | Purpose                                         |
+| ------------------------------- | ------------------------------- | ----------------------------------------------- |
+| `rootFolders`                   | `ClientFolderNode[]`            | Top-level disk drives (under This PC)           |
+| `selectedFolderId`              | `string \| null`                | Currently selected folder                       |
+| `selectedFolderContents`        | `FolderContentsDTO`             | Contents of the right panel                     |
+| `breadcrumbs`                   | `FolderDTO[]`                   | Active breadcrumb path                          |
+| `historyStack` / `forwardStack` | `string[]`                      | Navigation history stacks                       |
+| `searchQuery` / `searchResults` | —                               | Search state                                    |
+| `sortBy` / `sortOrder`          | —                               | Sorting criteria and direction                  |
+| `activeItem`                    | —                               | Selected item (for CRUD operations)             |
+| `clipboard`                     | —                               | Cut/Copy clipboard (item, type, action, source) |
+| `folderMap`                     | `Map<string, ClientFolderNode>` | O(1) reactive node lookup                       |
 
 ### Sidebar Sections (Computed)
 
@@ -117,11 +117,11 @@ A `.env.example` file is provided as reference.
 
 Run from `packages/web/` or from the monorepo root:
 
-| Command | Description |
-| --- | --- |
-| `bun dev` | Start Vite dev server (http://localhost:5173) |
-| `bun build` | TypeScript check + production build to `dist/` |
-| `bun preview` | Serve production assets locally |
+| Command       | Description                                    |
+| ------------- | ---------------------------------------------- |
+| `bun dev`     | Start Vite dev server (http://localhost:5173)  |
+| `bun build`   | TypeScript check + production build to `dist/` |
+| `bun preview` | Serve production assets locally                |
 
 ---
 
@@ -129,15 +129,15 @@ Run from `packages/web/` or from the monorepo root:
 
 Component and composable unit tests use **Bun Test**, **@vue/test-utils**, and **happy-dom**:
 
-| Test File | Coverage |
-| --- | --- |
-| `App.test.ts` | Root layout rendering, sidebar sections, empty state |
-| `Breadcrumbs.test.ts` | Props binding, path rendering, navigate event emission |
-| `ExplorerSearch.test.ts` | Input sync, search event, clear button, debounce handling |
-| `FolderTree.test.ts` | Section rendering, empty state, select/expand event propagation |
-| `FolderTreeNode.test.ts` | Recursive rendering, chevron toggle, folder icon resolution |
-| `FolderContents.test.ts` | Grid/List mode rendering, file icons, item click events |
-| `useExplorer.test.ts` | State management, API integration, navigation history |
+| Test File                | Coverage                                                        |
+| ------------------------ | --------------------------------------------------------------- |
+| `App.test.ts`            | Root layout rendering, sidebar sections, empty state            |
+| `Breadcrumbs.test.ts`    | Props binding, path rendering, navigate event emission          |
+| `ExplorerSearch.test.ts` | Input sync, search event, clear button, debounce handling       |
+| `FolderTree.test.ts`     | Section rendering, empty state, select/expand event propagation |
+| `FolderTreeNode.test.ts` | Recursive rendering, chevron toggle, folder icon resolution     |
+| `FolderContents.test.ts` | Grid/List mode rendering, file icons, item click events         |
+| `useExplorer.test.ts`    | State management, API integration, navigation history           |
 
 Run all frontend tests:
 
