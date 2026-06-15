@@ -8,9 +8,7 @@ mock.module("../../services/explorer.service", () => {
       getSubfolders = mock((parentId: string | null) =>
         Promise.resolve([{ id: "1", name: "Documents", parentId }])
       );
-      getFolderContents = mock((_id: string) =>
-        Promise.resolve({ subfolders: [], files: [] })
-      );
+      getFolderContents = mock((_id: string) => Promise.resolve({ subfolders: [], files: [] }));
       getFolderPath = mock((_id: string) => Promise.resolve([]));
       search = mock((_q: string) => Promise.resolve([]));
       createFolder = mock((name: string, _parentId: string | null) =>
@@ -20,17 +18,13 @@ mock.module("../../services/explorer.service", () => {
         Promise.resolve({ id: "101", name })
       );
       renameFolder = mock((id: string, name: string) => Promise.resolve({ id, name }));
-      moveFolder = mock((id: string, parentId: string | null) =>
-        Promise.resolve({ id, parentId })
-      );
+      moveFolder = mock((id: string, parentId: string | null) => Promise.resolve({ id, parentId }));
       renameFile = mock((id: string, name: string) => Promise.resolve({ id, name }));
       moveFile = mock((id: string, folderId: string) => Promise.resolve({ id, folderId }));
       copyFolder = mock((_id: string, _parentId: string | null) =>
         Promise.resolve({ id: "copy-id" })
       );
-      copyFile = mock((_id: string, _folderId: string) =>
-        Promise.resolve({ id: "copy-file-id" })
-      );
+      copyFile = mock((_id: string, _folderId: string) => Promise.resolve({ id: "copy-file-id" }));
       deleteFolder = mock((_id: string) => Promise.resolve());
       deleteFile = mock((_id: string) => Promise.resolve());
     }
@@ -46,9 +40,7 @@ explorerController.onError(({ error }: { error: any }) => {
 
 describe("ExplorerController Unit Tests", () => {
   it("GET /shortcuts should return shortcut folder IDs", async () => {
-    const response = await explorerController.handle(
-      new Request("http://localhost/v1/shortcuts")
-    );
+    const response = await explorerController.handle(new Request("http://localhost/v1/shortcuts"));
     expect(response.status).toBe(200);
     const data = await response.json();
     expect(data).toEqual({ documents: "1", pictures: "2" });

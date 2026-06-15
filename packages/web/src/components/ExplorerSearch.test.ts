@@ -38,6 +38,6 @@ describe("ExplorerSearch Component SFC Verification", () => {
   it("should render clear button conditionally", () => {
     expect(fileContent).toContain('v-if="localQuery"');
     expect(fileContent).toContain('id="search-clear-btn"');
-    expect(fileContent).toContain("@click=\"clearSearch\"");
+    expect(fileContent).toContain('@click="clearSearch"');
   });
 });

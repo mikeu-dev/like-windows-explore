@@ -36,7 +36,7 @@ describe("Breadcrumbs Component SFC Verification", () => {
 
   it("should iterate through path and render breadcrumb items", () => {
     expect(fileContent).toContain('v-for="(folder, index) in path"');
-    expect(fileContent).toContain(':id="\'breadcrumb-item-\' + folder.id"');
+    expect(fileContent).toContain(":id=\"'breadcrumb-item-' + folder.id\"");
     expect(fileContent).toContain("@click=\"emit('navigate', folder.id)\"");
   });
 });

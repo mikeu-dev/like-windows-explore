@@ -61,7 +61,7 @@
         >
           <span
             class="material-symbols-outlined text-primary-container mr-2"
-            style="font-variation-settings: 'FILL' 1"
+            style="font-variation-settings: &quot;FILL&quot; 1"
             >folder</span
           >
           <Breadcrumbs :path="breadcrumbs" @navigate="selectFolder" />
