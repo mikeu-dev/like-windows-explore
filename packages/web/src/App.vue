@@ -462,6 +462,11 @@
                 <span class="px-2 py-0.5 bg-secondary-container text-on-secondary-container rounded-full w-fit text-xs font-semibold">
                   {{ previewItem.type === 'file' ? 'Internal' : 'System Folder' }}
                 </span>
+
+                <template v-if="previewItem.type === 'folder' && !activeItem">
+                  <span class="font-medium text-primary">Item Ditemukan:</span>
+                  <span class="font-semibold text-primary">{{ totalItemsCount }} item</span>
+                </template>
               </div>
             </div>
 
@@ -689,6 +694,24 @@ const previewItem = computed(() => {
   if (breadcrumbs.value.length > 0) {
     const activeFolder = breadcrumbs.value[breadcrumbs.value.length - 1];
     return { ...activeFolder, type: "folder" };
+  }
+
+  // Tangani kasus "This PC" atau folder virtual lain di mana breadcrumbs kosong
+  if (selectedFolderId.value) {
+    let name = "This PC";
+    if (selectedFolderId.value === "recycle-bin") name = "Recycle Bin";
+    else if (selectedFolderId.value === "home") name = "Home";
+    else if (selectedFolderId.value === "gallery") name = "Gallery";
+    else if (selectedFolderId.value === "network") name = "Network";
+    else if (selectedFolderId.value === "linux") name = "Linux";
+    else if (selectedFolderId.value === "onedrive-root") name = "OneDrive - Personal";
+    
+    return {
+      id: selectedFolderId.value,
+      name,
+      parentId: null,
+      type: "folder"
+    };
   }
 
   return null;
