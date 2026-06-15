@@ -3,7 +3,7 @@ import { ExplorerService } from "../../services/explorer.service";
 import { DrizzleFolderRepository } from "../../repositories/drizzle-folder.repository";
 import { DrizzleFileRepository } from "../../repositories/drizzle-file.repository";
 
-// Menggunakan manual dependency injection untuk menjaga arsitektur tetap bersih & testable
+// Using manual dependency injection to keep architecture clean & testable
 const folderRepo = new DrizzleFolderRepository();
 const fileRepo = new DrizzleFileRepository();
 const explorerService = new ExplorerService(folderRepo, fileRepo);
@@ -61,7 +61,7 @@ export const explorerController = new Elysia({ prefix: "/v1" })
       })
     }
   )
-  // Mutasi: Create
+  // Mutation: Create
   .post(
     "/folders",
     async ({ body: { name, parentId } }) => {
@@ -87,7 +87,7 @@ export const explorerController = new Elysia({ prefix: "/v1" })
       })
     }
   )
-  // Mutasi: Update (Rename / Move)
+  // Mutation: Update (Rename / Move)
   .patch(
     "/folders/:id",
     async ({ params: { id }, body: { name, parentId } }) => {
@@ -130,7 +130,7 @@ export const explorerController = new Elysia({ prefix: "/v1" })
       })
     }
   )
-  // Mutasi: Copy
+  // Mutation: Copy
   .post(
     "/folders/:id/copy",
     async ({ params: { id }, body: { parentId } }) => {
@@ -159,7 +159,7 @@ export const explorerController = new Elysia({ prefix: "/v1" })
       })
     }
   )
-  // Mutasi: Delete
+  // Mutation: Delete
   .delete(
     "/folders/:id",
     async ({ params: { id } }) => {

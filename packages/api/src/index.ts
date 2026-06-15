@@ -5,7 +5,7 @@ import { explorerController } from "./controllers/v1/explorer.controller";
 const app = new Elysia()
   .use(
     cors({
-      // Kebijakan CORS yang ketat, hanya memperbolehkan akses dari domain frontend development lokal yang valid
+      // Strict CORS policy, only allowing access from valid local development frontend domains
       origin: [
         "http://localhost:5173",
         "http://127.0.0.1:5173",
@@ -19,7 +19,7 @@ const app = new Elysia()
   .group("/api", (app) => app.use(explorerController))
   .listen({
     port: process.env.PORT ? parseInt(process.env.PORT) : 3001,
-    hostname: "127.0.0.1" // Keamanan: Wajib mendengarkan di localhost/127.0.0.1 selama pengujian
+    hostname: "127.0.0.1" // Security: Must listen on localhost/127.0.0.1 during testing
   });
 
 console.log(

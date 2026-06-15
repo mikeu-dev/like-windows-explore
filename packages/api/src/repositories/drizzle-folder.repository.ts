@@ -8,8 +8,8 @@ export class DrizzleFolderRepository implements IFolderRepository {
   async findSubfolders(parentId: string | null): Promise<(Folder & { hasChildren: boolean })[]> {
     const parentIdColumn = folders.parentId;
 
-    // Gunakan subquery EXISTS yang dioptimasi untuk mendeteksi apakah subfolder memiliki anak lagi.
-    // Index folders_parent_id_idx akan digunakan oleh PostgreSQL untuk mengoptimalkan EXISTS ini.
+    // Use optimized EXISTS subquery to detect if a subfolder has children.
+    // The folders_parent_id_idx index will be utilized by PostgreSQL to optimize this EXISTS query.
     const query = db
       .select({
         id: folders.id,
