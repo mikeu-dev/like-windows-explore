@@ -40,11 +40,16 @@ bun install
 
 ### Step 2: Configure Environment Variables
 
-Create a `.env` file inside the `packages/api/` directory and configure your database connection:
+1. Create a `.env` file inside the `packages/api/` directory to configure your database connection and port:
+   ```env
+   PORT=3001
+   DATABASE_URL="postgres://username:password@127.0.0.1:5432/database_name"
+   ```
 
-```env
-DATABASE_URL="postgres://username:password@127.0.0.1:5432/database_name"
-```
+2. Create a `.env` file inside the `packages/web/` directory to configure the API endpoint URL:
+   ```env
+   VITE_API_URL="http://127.0.0.1:3001/api/v1"
+   ```
 
 ### Step 3: Database Migration and Seeding
 
