@@ -743,7 +743,7 @@ const startEditingPath = (event: MouseEvent) => {
   }
   isEditingPath.value = true;
   pathInputVal.value = getPathString();
-  
+
   nextTick(() => {
     if (pathInputRef.value) {
       pathInputRef.value.focus();
@@ -775,7 +775,7 @@ const resolvePathAndNavigate = async (pathStr: string) => {
 
   const shortcuts = await explorerApi.getShortcuts();
   const firstPartLower = parts[0].toLowerCase();
-  
+
   let currentFolderId: string | null = null;
   let startIndex = 0;
 
@@ -831,11 +831,20 @@ const resolvePathAndNavigate = async (pathStr: string) => {
   }
 
   let currentId: string | null = currentFolderId;
-  const virtualFolders = ["this-pc", "desktop", "videos", "home", "gallery", "onedrive-root", "network", "linux"];
+  const virtualFolders = [
+    "this-pc",
+    "desktop",
+    "videos",
+    "home",
+    "gallery",
+    "onedrive-root",
+    "network",
+    "linux"
+  ];
 
   for (let i = startIndex; i < parts.length; i++) {
     const partName = parts[i].toLowerCase();
-    
+
     let subfolders: any[] = [];
     if (currentId === "this-pc") {
       if (rootFolders.value.length === 0) {
