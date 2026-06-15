@@ -41,6 +41,7 @@ bun install
 ### Step 2: Configure Environment Variables
 
 1. Create a `.env` file inside the `packages/api/` directory to configure your database connection and port:
+
    ```env
    PORT=3001
    DATABASE_URL="postgres://username:password@127.0.0.1:5432/database_name"

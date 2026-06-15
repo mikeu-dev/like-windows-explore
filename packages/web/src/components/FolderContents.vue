@@ -1,7 +1,5 @@
 <template>
   <div class="h-full flex flex-col">
-
-
     <!-- Main Content Area -->
     <div class="flex-1 overflow-y-auto min-h-0 pr-1 no-scrollbar">
       <div
@@ -89,9 +87,21 @@
               class="border-b border-outline-variant/30 text-label-sm font-semibold text-on-surface-variant bg-surface-container-low/50 h-9"
             >
               <th class="pb-1 pl-4 w-1/2 align-middle font-semibold">Name</th>
-              <th class="pb-1 w-1/6 align-middle font-semibold border-l border-outline-variant/30 pl-2">Date modified</th>
-              <th class="pb-1 w-1/6 align-middle font-semibold border-l border-outline-variant/30 pl-2">Type</th>
-              <th class="pb-1 text-right pr-4 w-1/6 align-middle font-semibold border-l border-outline-variant/30 pl-2">Size</th>
+              <th
+                class="pb-1 w-1/6 align-middle font-semibold border-l border-outline-variant/30 pl-2"
+              >
+                Date modified
+              </th>
+              <th
+                class="pb-1 w-1/6 align-middle font-semibold border-l border-outline-variant/30 pl-2"
+              >
+                Type
+              </th>
+              <th
+                class="pb-1 text-right pr-4 w-1/6 align-middle font-semibold border-l border-outline-variant/30 pl-2"
+              >
+                Size
+              </th>
             </tr>
           </thead>
           <tbody class="text-body-sm divide-y divide-outline-variant/10">
@@ -102,12 +112,16 @@
               :key="subfolder.id"
               class="hover:bg-black/5 transition-colors duration-100 cursor-pointer select-none h-[40px] border-l-4"
               :class="[
-                activeItem?.id === subfolder.id ? 'bg-[#eef7ff] border-primary text-primary font-semibold' : 'border-transparent text-on-surface'
+                activeItem?.id === subfolder.id
+                  ? 'bg-[#eef7ff] border-primary text-primary font-semibold'
+                  : 'border-transparent text-on-surface'
               ]"
               @click="selectItem(subfolder, 'folder')"
               @dblclick="openFolder(subfolder.id)"
             >
-              <td class="py-1 pl-4 flex items-center max-w-xs sm:max-w-md md:max-w-xl truncate h-[40px]">
+              <td
+                class="py-1 pl-4 flex items-center max-w-xs sm:max-w-md md:max-w-xl truncate h-[40px]"
+              >
                 <span
                   class="material-symbols-outlined mr-3 text-[#ffc107] scale-90 animate-none shrink-0"
                   :style="{ fontVariationSettings: '\'FILL\' 1' }"
@@ -128,12 +142,16 @@
               :key="file.id"
               class="hover:bg-black/5 transition-colors duration-100 cursor-pointer select-none h-[40px] border-l-4"
               :class="[
-                activeItem?.id === file.id ? 'bg-[#eef7ff] border-primary text-primary font-semibold' : 'border-transparent text-on-surface'
+                activeItem?.id === file.id
+                  ? 'bg-[#eef7ff] border-primary text-primary font-semibold'
+                  : 'border-transparent text-on-surface'
               ]"
               @click="selectItem(file, 'file')"
               @dblclick="openFile(file)"
             >
-              <td class="py-1 pl-4 flex items-center max-w-xs sm:max-w-md md:max-w-xl truncate h-[40px]">
+              <td
+                class="py-1 pl-4 flex items-center max-w-xs sm:max-w-md md:max-w-xl truncate h-[40px]"
+              >
                 <span
                   class="material-symbols-outlined mr-3 scale-90 shrink-0"
                   :class="getFileIconDetails(file.name).color"

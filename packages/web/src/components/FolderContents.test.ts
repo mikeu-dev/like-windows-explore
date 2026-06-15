@@ -43,5 +43,4 @@ describe("FolderContents Component SFC Verification", () => {
     expect(fileContent).toContain("v-else-if=\"viewMode === 'grid'\"");
     expect(fileContent).toContain('v-else class="w-full overflow-x-auto"');
   });
-
 });

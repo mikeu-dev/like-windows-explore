@@ -10,12 +10,9 @@ const explorerService = new ExplorerService(folderRepo, fileRepo);
 
 export const explorerController = new Elysia({ prefix: "/v1" })
   // Query
-  .get(
-    "/shortcuts",
-    async () => {
-      return await explorerService.getShortcutFolderIds();
-    }
-  )
+  .get("/shortcuts", async () => {
+    return await explorerService.getShortcutFolderIds();
+  })
   .get(
     "/folders",
     async ({ query }) => {

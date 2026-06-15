@@ -158,7 +158,12 @@ export async function seedFiles(db: DbType, folderIds: SeededFolderIds) {
   });
 
   // --- DRIVE D: GAMES ---
-  const cyberpunkFiles = ["cyberpunk2077.exe", "archive_pc.archive", "redengine.dll", "steam_api64.dll"];
+  const cyberpunkFiles = [
+    "cyberpunk2077.exe",
+    "archive_pc.archive",
+    "redengine.dll",
+    "steam_api64.dll"
+  ];
   cyberpunkFiles.forEach((file) => {
     const size = file.endsWith(".exe") ? 65000000 : 1500000000; // 1.5GB
     dynamicFiles.push({ name: file, size, folderId: folderIds.localD.id }); // default to localD if parent empty, or witcherGames/cyberpunkGames etc
@@ -173,10 +178,7 @@ export async function seedFiles(db: DbType, folderIds: SeededFolderIds) {
 
   // --- BACKUPS IN D: ---
   // Photos Backup
-  const photosBackupFiles = [
-    "photos_archive_2024.zip",
-    "old_phone_camera_backup.rar"
-  ];
+  const photosBackupFiles = ["photos_archive_2024.zip", "old_phone_camera_backup.rar"];
   photosBackupFiles.forEach((file) => {
     dynamicFiles.push({ name: file, size: 1200000000, folderId: folderIds.photosBackups.id });
   });

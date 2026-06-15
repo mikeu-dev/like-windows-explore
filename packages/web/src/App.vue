@@ -15,7 +15,9 @@
         <div class="flex items-center gap-1 text-on-surface-variant">
           <button
             class="p-1 hover:bg-surface-variant rounded-md transition-colors"
-            :class="historyStack.length === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-black/5'"
+            :class="
+              historyStack.length === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-black/5'
+            "
             :disabled="historyStack.length === 0"
             @click="goBack"
           >
@@ -23,7 +25,9 @@
           </button>
           <button
             class="p-1 hover:bg-surface-variant rounded-md transition-colors"
-            :class="forwardStack.length === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-black/5'"
+            :class="
+              forwardStack.length === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-black/5'
+            "
             :disabled="forwardStack.length === 0"
             @click="goForward"
           >
@@ -31,7 +35,11 @@
           </button>
           <button
             class="p-1 hover:bg-surface-variant rounded-md transition-colors"
-            :class="!selectedFolderId || breadcrumbs.length <= 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-black/5'"
+            :class="
+              !selectedFolderId || breadcrumbs.length <= 1
+                ? 'opacity-50 cursor-not-allowed'
+                : 'hover:bg-black/5'
+            "
             :disabled="!selectedFolderId || breadcrumbs.length <= 1"
             @click="goUp"
           >
@@ -51,7 +59,11 @@
         <div
           class="flex-grow flex items-center bg-surface-container-lowest border border-outline-variant rounded px-2 h-8 address-bar-focus transition-all overflow-hidden"
         >
-          <span class="material-symbols-outlined text-primary-container mr-2" style="font-variation-settings: 'FILL' 1;">folder</span>
+          <span
+            class="material-symbols-outlined text-primary-container mr-2"
+            style="font-variation-settings: &quot;FILL&quot; 1"
+            >folder</span
+          >
           <Breadcrumbs :path="breadcrumbs" @navigate="selectFolder" />
         </div>
 
@@ -63,7 +75,7 @@
           <button class="p-1 hover:bg-surface-variant rounded-md" title="Settings">
             <span class="material-symbols-outlined">settings</span>
           </button>
-          <button 
+          <button
             class="p-1 hover:bg-surface-variant rounded-md transition-colors"
             :class="{ 'bg-primary/10 text-primary': showPreviewPane }"
             title="Toggle Details Pane"
@@ -79,7 +91,9 @@
     </header>
 
     <!-- Command Bar (Toolbar) -->
-    <section class="h-11 flex items-center px-4 bg-surface-bright border-b border-outline-variant flex-none">
+    <section
+      class="h-11 flex items-center px-4 bg-surface-bright border-b border-outline-variant flex-none"
+    >
       <div class="flex items-center gap-1 w-full text-body-sm font-body-sm">
         <!-- New Button & Dropdown -->
         <div class="relative">
@@ -235,9 +249,7 @@
               @click="setSort('type', 'asc')"
             >
               Type
-              <span v-if="sortBy === 'type'" class="material-symbols-outlined text-xs"
-                >check</span
-              >
+              <span v-if="sortBy === 'type'" class="material-symbols-outlined text-xs">check</span>
             </button>
             <button
               class="w-full text-left px-4 py-2 text-body-sm hover:bg-black/5 flex items-center justify-between"
@@ -245,9 +257,7 @@
               @click="setSort('size', 'asc')"
             >
               Size
-              <span v-if="sortBy === 'size'" class="material-symbols-outlined text-xs"
-                >check</span
-              >
+              <span v-if="sortBy === 'size'" class="material-symbols-outlined text-xs">check</span>
             </button>
           </div>
         </div>
@@ -258,7 +268,9 @@
             class="flex items-center gap-2 px-3 py-1.5 hover:bg-surface-variant rounded transition-colors text-on-surface-variant"
             @click="isViewMenuOpen = !isViewMenuOpen"
           >
-            <span class="material-symbols-outlined">{{ viewMode === 'grid' ? 'grid_view' : 'view_list' }}</span>
+            <span class="material-symbols-outlined">{{
+              viewMode === "grid" ? "grid_view" : "view_list"
+            }}</span>
             <span>View</span>
             <span class="material-symbols-outlined text-xs">expand_more</span>
           </button>
@@ -269,7 +281,10 @@
             <button
               class="w-full text-left px-4 py-2 text-body-sm hover:bg-black/5 flex items-center gap-2"
               :class="{ 'text-primary font-medium': viewMode === 'grid' }"
-              @click="viewMode = 'grid'; isViewMenuOpen = false"
+              @click="
+                viewMode = 'grid';
+                isViewMenuOpen = false;
+              "
             >
               <span class="material-symbols-outlined text-xs">grid_view</span>
               Grid
@@ -277,7 +292,10 @@
             <button
               class="w-full text-left px-4 py-2 text-body-sm hover:bg-black/5 flex items-center gap-2"
               :class="{ 'text-primary font-medium': viewMode === 'list' }"
-              @click="viewMode = 'list'; isViewMenuOpen = false"
+              @click="
+                viewMode = 'list';
+                isViewMenuOpen = false;
+              "
             >
               <span class="material-symbols-outlined text-xs">view_list</span>
               Detail List
@@ -285,7 +303,10 @@
             <div class="h-px bg-outline-variant/30 my-1"></div>
             <button
               class="w-full text-left px-4 py-2 text-body-sm hover:bg-black/5 flex items-center justify-between"
-              @click="showPreviewPane = !showPreviewPane; isViewMenuOpen = false"
+              @click="
+                showPreviewPane = !showPreviewPane;
+                isViewMenuOpen = false;
+              "
             >
               <div class="flex items-center gap-2">
                 <span class="material-symbols-outlined text-xs">info</span>
@@ -298,7 +319,9 @@
 
         <div class="w-px h-6 bg-outline-variant mx-1"></div>
 
-        <button class="p-2 hover:bg-surface-variant rounded transition-colors text-on-surface-variant">
+        <button
+          class="p-2 hover:bg-surface-variant rounded transition-colors text-on-surface-variant"
+        >
           <span class="material-symbols-outlined">more_horiz</span>
         </button>
       </div>
@@ -333,7 +356,9 @@
 
             <!-- Section 2: Pinned Shortcuts (Flat / Leaf) -->
             <div>
-              <div class="px-3 mb-1 text-[10px] font-bold text-outline uppercase tracking-wider">Quick Access</div>
+              <div class="px-3 mb-1 text-[10px] font-bold text-outline uppercase tracking-wider">
+                Quick Access
+              </div>
               <FolderTree
                 :folders="sidebarSection2"
                 :selected-id="selectedFolderId"
@@ -356,7 +381,7 @@
 
         <!-- Recycle Bin / Network Fallbacks at the bottom of the Sidebar -->
         <div class="p-2 border-t border-outline-variant/30 mt-auto">
-          <button 
+          <button
             class="w-full flex items-center gap-3 px-3 py-1.5 text-on-surface-variant hover:bg-black/5 rounded-md text-body-sm font-body-sm transition-colors"
             @click="selectFolder('recycle-bin')"
           >
@@ -399,14 +424,14 @@
       </main>
 
       <!-- Right Preview Pane -->
-      <section 
+      <section
         v-if="showPreviewPane"
         class="w-[320px] flex-none bg-surface-container-lowest border-l border-outline-variant/50 flex flex-col overflow-y-auto select-none p-6 shadow-sm relative"
       >
         <!-- Header Panel Pratinjau -->
         <div class="flex items-center justify-between mb-4 pb-2 border-b border-outline-variant/20">
           <span class="text-sm font-semibold text-on-surface">Details</span>
-          <button 
+          <button
             class="p-1 hover:bg-black/5 rounded-md text-on-surface-variant hover:text-on-surface transition-colors flex items-center justify-center"
             title="Close Details Pane"
             @click="showPreviewPane = false"
@@ -416,7 +441,9 @@
         </div>
 
         <div v-if="previewItem" class="flex flex-col items-center text-center">
-          <div class="w-48 h-64 bg-surface-container rounded-lg shadow-sm mb-6 flex items-center justify-center overflow-hidden border border-outline-variant/60 relative group mx-auto">
+          <div
+            class="w-48 h-64 bg-surface-container rounded-lg shadow-sm mb-6 flex items-center justify-center overflow-hidden border border-outline-variant/60 relative group mx-auto"
+          >
             <!-- Menampilkan preview gambar atau cover ikon yang kaya -->
             <img
               v-if="previewItem.type === 'file' && isImageFile(previewItem.name)"
@@ -427,40 +454,59 @@
             <div v-else class="flex flex-col items-center justify-center">
               <span
                 class="material-symbols-outlined text-7xl"
-                :class="[previewItem.type === 'folder' ? 'text-[#ffc107]' : getFileIconDetails(previewItem.name).color]"
+                :class="[
+                  previewItem.type === 'folder'
+                    ? 'text-[#ffc107]'
+                    : getFileIconDetails(previewItem.name).color
+                ]"
                 :style="{ fontVariationSettings: '\'FILL\' 1' }"
               >
-                {{ previewItem.type === 'folder' ? getFolderIcon(previewItem.name) : getFileIconDetails(previewItem.name).icon }}
+                {{
+                  previewItem.type === "folder"
+                    ? getFolderIcon(previewItem.name)
+                    : getFileIconDetails(previewItem.name).icon
+                }}
               </span>
             </div>
-            <div class="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors"></div>
+            <div
+              class="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors"
+            ></div>
           </div>
 
-          <h2 class="font-title-sm text-title-sm mb-1 truncate w-full px-2" :title="previewItem.name">
+          <h2
+            class="font-title-sm text-title-sm mb-1 truncate w-full px-2"
+            :title="previewItem.name"
+          >
             {{ previewItem.name }}
           </h2>
           <p class="text-label-sm font-label-sm text-on-surface-variant mb-6">
-            {{ previewItem.type === 'folder' ? 'Folder' : getFileType(previewItem.name) }}
+            {{ previewItem.type === "folder" ? "Folder" : getFileType(previewItem.name) }}
           </p>
 
           <div class="w-full space-y-4 text-left border-t border-outline-variant/20 pt-4">
             <div>
-              <div class="text-[11px] font-bold text-on-surface-variant uppercase mb-2">Details</div>
+              <div class="text-[11px] font-bold text-on-surface-variant uppercase mb-2">
+                Details
+              </div>
               <div class="grid grid-cols-2 gap-y-2.5 text-body-sm font-body-sm">
                 <span class="text-on-surface-variant">Author:</span>
-                <span class="text-on-surface truncate">{{ previewItem.type === 'file' ? 'Alex Rivera' : 'System' }}</span>
-                
+                <span class="text-on-surface truncate">{{
+                  previewItem.type === "file" ? "Alex Rivera" : "System"
+                }}</span>
+
                 <span class="text-on-surface-variant">Created:</span>
                 <span class="text-on-surface">10/24/2023</span>
 
                 <span class="text-on-surface-variant">Size:</span>
                 <span class="text-on-surface">
-                  {{ previewItem.type === 'file' ? formatBytes((previewItem as any).size) : '—' }}
+                  {{ previewItem.type === "file" ? formatBytes((previewItem as any).size) : "—" }}
                 </span>
 
                 <span class="text-on-surface-variant">Tags:</span>
-                <span class="px-2 py-0.5 bg-secondary-container text-on-secondary-container rounded-full w-fit text-xs font-semibold">
-                  {{ previewItem.type === 'file' ? 'Internal' : 'System Folder' }}
+                <span
+                  class="px-2 py-0.5 bg-secondary-container text-on-secondary-container rounded-full w-fit text-xs font-semibold"
+                >
+                  {{ previewItem.type === "file" ? "Internal" : "System Folder" }}
                 </span>
 
                 <template v-if="previewItem.type === 'folder' && !activeItem">
@@ -479,7 +525,9 @@
             </button>
 
             <div class="pt-4 border-t border-outline-variant/30">
-              <div class="text-[11px] font-bold text-on-surface-variant uppercase mb-2">Properties</div>
+              <div class="text-[11px] font-bold text-on-surface-variant uppercase mb-2">
+                Properties
+              </div>
               <div class="text-body-sm font-body-sm space-y-2">
                 <div class="flex justify-between items-center">
                   <span class="text-on-surface-variant">Status</span>
@@ -493,7 +541,10 @@
           </div>
         </div>
 
-        <div v-else class="h-full flex flex-col items-center justify-center text-center text-on-surface-variant/60 p-4">
+        <div
+          v-else
+          class="h-full flex flex-col items-center justify-center text-center text-on-surface-variant/60 p-4"
+        >
           <span class="material-symbols-outlined text-5xl mb-3">info</span>
           <p class="text-body-sm">Select a file or folder to view details preview.</p>
         </div>
@@ -501,7 +552,9 @@
     </div>
 
     <!-- Status Bar (Footer Logic) -->
-    <footer class="h-7 bg-surface-container dark:bg-surface-container-high border-t border-outline-variant/30 flex items-center justify-between px-4 flex-none z-50 text-label-sm font-label-sm text-on-surface-variant select-none">
+    <footer
+      class="h-7 bg-surface-container dark:bg-surface-container-high border-t border-outline-variant/30 flex items-center justify-between px-4 flex-none z-50 text-label-sm font-label-sm text-on-surface-variant select-none"
+    >
       <div class="flex items-center gap-4">
         <span>{{ totalItemsCount }} items</span>
         <div v-if="selectedCount > 0" class="flex items-center gap-4">
@@ -705,7 +758,7 @@ const previewItem = computed(() => {
     else if (selectedFolderId.value === "network") name = "Network";
     else if (selectedFolderId.value === "linux") name = "Linux";
     else if (selectedFolderId.value === "onedrive-root") name = "OneDrive - Personal";
-    
+
     return {
       id: selectedFolderId.value,
       name,

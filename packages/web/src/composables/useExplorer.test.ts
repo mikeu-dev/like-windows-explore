@@ -26,9 +26,15 @@ const mockPath: FolderDTO[] = [{ id: "1", name: "Documents", parentId: null, has
 const getSubfoldersMock = mock((parentId: string | null = null) => {
   if (parentId === null) return Promise.resolve(mockRootFolders);
   if (parentId === "1") return Promise.resolve(mockContents.subfolders);
-  if (parentId === "onedrive-id") return Promise.resolve([
-    { id: "onedrive-sub-1", name: "OneDrive Subfolder", parentId: "onedrive-id", hasChildren: false }
-  ]);
+  if (parentId === "onedrive-id")
+    return Promise.resolve([
+      {
+        id: "onedrive-sub-1",
+        name: "OneDrive Subfolder",
+        parentId: "onedrive-id",
+        hasChildren: false
+      }
+    ]);
   return Promise.resolve([]);
 });
 
@@ -42,17 +48,19 @@ const getFolderPathMock = mock((folderId: string) => {
   return Promise.resolve([]);
 });
 
-const getShortcutsMock = mock(() => Promise.resolve({
-  desktop: "",
-  downloads: "",
-  documents: "1",
-  pictures: "2",
-  music: "",
-  videos: "",
-  onedrive: "onedrive-id",
-  localC: "1",
-  localD: "2"
-}));
+const getShortcutsMock = mock(() =>
+  Promise.resolve({
+    desktop: "",
+    downloads: "",
+    documents: "1",
+    pictures: "2",
+    music: "",
+    videos: "",
+    onedrive: "onedrive-id",
+    localC: "1",
+    localD: "2"
+  })
+);
 
 const createFolderMock = mock(() => Promise.resolve({} as any));
 const createFileMock = mock(() => Promise.resolve({} as any));
@@ -87,7 +95,6 @@ mock.module("../services/api", () => {
     }
   };
 });
-
 
 describe("useExplorer Composable Tests", () => {
   beforeEach(() => {
@@ -270,15 +277,22 @@ describe("useExplorer Composable Tests", () => {
 
     // 1. Level 1: Virtual Folder / "This PC"
     const startL1 = performance.now();
-    await explorer.expandFolder({ id: "this-pc", name: "This PC", parentId: null, hasChildren: true });
+    await explorer.expandFolder({
+      id: "this-pc",
+      name: "This PC",
+      parentId: null,
+      hasChildren: true
+    });
     const endL1 = performance.now();
     const durationL1 = endL1 - startL1;
 
     // 2. Level 2: Local Disk C (Root DB Folder)
     // We load root folders first to populate folderMap and rootFolders
     await explorer.loadRootFolders();
-    const localC = explorer.rootFolders.value.find(f => f.name.includes("Documents")) || explorer.rootFolders.value[0];
-    
+    const localC =
+      explorer.rootFolders.value.find((f) => f.name.includes("Documents")) ||
+      explorer.rootFolders.value[0];
+
     const startL2 = performance.now();
     await explorer.expandFolder(localC);
     const endL2 = performance.now();

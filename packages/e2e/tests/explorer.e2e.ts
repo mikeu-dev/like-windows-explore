@@ -24,9 +24,7 @@ test.describe("File Explorer App", () => {
     // Verify "No folder selected" message in the right panel on initial load
     await expect(page.locator("text=No folder selected")).toBeVisible();
     await expect(
-      page.locator(
-        "text=Please click a folder in the left navigation panel to view its contents."
-      )
+      page.locator("text=Please click a folder in the left navigation panel to view its contents.")
     ).toBeVisible();
   });
 

@@ -59,8 +59,8 @@ export function useExplorer() {
   // Stores the open/collapsed state of virtual folders
   const openFolderIds = ref<Record<string, boolean>>({
     "this-pc": true, // Open by default
-    "network": false,
-    "linux": false,
+    network: false,
+    linux: false,
     "onedrive-root": false
   });
 
@@ -230,11 +230,13 @@ export function useExplorer() {
     if (
       folder.id === "onedrive-root" ||
       folder.id === "onedrive-virtual" ||
-      (shortcutFolderIds.value.onedrive && folder.id === shortcutFolderIds.value.onedrive && folder.parentId === null)
+      (shortcutFolderIds.value.onedrive &&
+        folder.id === shortcutFolderIds.value.onedrive &&
+        folder.parentId === null)
     ) {
       const isNowOpen = !openFolderIds.value["onedrive-root"];
       openFolderIds.value["onedrive-root"] = isNowOpen;
-      
+
       const dbId = shortcutFolderIds.value.onedrive;
       if (isNowOpen && dbId) {
         let targetNode = folderMap.get(dbId);
@@ -252,7 +254,7 @@ export function useExplorer() {
           folderMap.set(dbId, rawNode);
           targetNode = folderMap.get(dbId);
         }
-        
+
         if (targetNode && !targetNode.isLoaded && !targetNode.isLoading) {
           targetNode.isLoading = true;
           try {
@@ -454,7 +456,6 @@ export function useExplorer() {
       }
     }
   }
-
 
   // Reload current view
   async function refreshView() {

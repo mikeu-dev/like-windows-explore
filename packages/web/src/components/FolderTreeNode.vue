@@ -107,7 +107,8 @@ const getFolderIconColor = (name: string, isSelected: boolean) => {
   if (n === "onedrive" || n === "onedrive - personal") return "text-primary";
   if (n === "network") return "text-secondary";
   if (n === "linux") return "text-primary-container";
-  if (n.startsWith("local disk") || n.includes("(c:)") || n.includes("(d:)")) return "text-secondary";
+  if (n.startsWith("local disk") || n.includes("(c:)") || n.includes("(d:)"))
+    return "text-secondary";
   return "text-[#ffc107]";
 };
 </script>
