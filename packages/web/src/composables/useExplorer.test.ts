@@ -245,4 +245,49 @@ describe("useExplorer Composable Tests", () => {
 
     promptSpy.mockRestore();
   });
+
+  it("should benchmark collapsible duration at different levels", async () => {
+    const explorer = useExplorer();
+
+    // 1. Level 1: Virtual Folder / "This PC"
+    const startL1 = performance.now();
+    await explorer.expandFolder({ id: "this-pc", name: "This PC", parentId: null, hasChildren: true });
+    const endL1 = performance.now();
+    const durationL1 = endL1 - startL1;
+
+    // 2. Level 2: Local Disk C (Root DB Folder)
+    // We load root folders first to populate folderMap and rootFolders
+    await explorer.loadRootFolders();
+    const localC = explorer.rootFolders.value.find(f => f.name.includes("Documents")) || explorer.rootFolders.value[0];
+    
+    const startL2 = performance.now();
+    await explorer.expandFolder(localC);
+    const endL2 = performance.now();
+    const durationL2 = endL2 - startL2;
+
+    // 3. Level 3: Subfolder (Child DB Folder)
+    // Since localC is loaded, we can find its children in folderMap
+    const subfolder = localC.children?.[0];
+    let durationL3 = 0;
+    if (subfolder) {
+      const startL3 = performance.now();
+      await explorer.expandFolder(subfolder);
+      const endL3 = performance.now();
+      durationL3 = endL3 - startL3;
+    }
+
+    console.log("\n==========================================");
+    console.log("   BENCHMARK DURASI COLLAPSIBLE TIAP LEVEL");
+    console.log("==========================================");
+    console.log(`Level 1 (This PC - Virtual) : ${durationL1.toFixed(4)} ms`);
+    console.log(`Level 2 (Documents - DB Root): ${durationL2.toFixed(4)} ms`);
+    if (subfolder) {
+      console.log(`Level 3 (Work - DB Child)    : ${durationL3.toFixed(4)} ms`);
+    } else {
+      console.log("Level 3 (Work - DB Child)    : N/A");
+    }
+    console.log("==========================================\n");
+
+    expect(durationL1).toBeLessThan(50); // Level 1 virtual is sync & very fast
+  });
 });

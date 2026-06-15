@@ -1,4 +1,4 @@
-import { ref, computed } from "vue";
+import { ref, computed, reactive } from "vue";
 import { FolderDTO, FileDTO, FolderContentsDTO } from "@explorer/common";
 import { explorerApi } from "../services/api";
 
@@ -42,7 +42,7 @@ export function useExplorer() {
   } | null>(null);
 
   // Map untuk akses cepat O(1) ke node mana pun dalam pohon
-  const folderMap = new Map<string, ClientFolderNode>();
+  const folderMap = reactive(new Map<string, ClientFolderNode>());
 
   // Daftar folder virtual
   const virtualFolders = [
@@ -201,25 +201,26 @@ export function useExplorer() {
   // Memuat folder tingkat teratas (Root)
   async function loadRootFolders() {
     try {
-      const shortcuts = await explorerApi.getShortcuts();
+      const [shortcuts, data] = await Promise.all([
+        explorerApi.getShortcuts(),
+        explorerApi.getSubfolders(null)
+      ]);
       shortcutFolderIds.value = shortcuts;
+      rootFolders.value = data.map((f) => {
+        const node: ClientFolderNode = {
+          ...f,
+          parentId: "this-pc",
+          children: [],
+          isOpen: false,
+          isLoading: false,
+          isLoaded: false
+        };
+        folderMap.set(node.id, node);
+        return node;
+      });
     } catch (e) {
-      console.error("Gagal memuat shortcuts", e);
+      console.error("Gagal memuat root folders/shortcuts", e);
     }
-
-    const data = await explorerApi.getSubfolders(null);
-    rootFolders.value = data.map((f) => {
-      const node: ClientFolderNode = {
-        ...f,
-        parentId: "this-pc",
-        children: [],
-        isOpen: false,
-        isLoading: false,
-        isLoaded: false
-      };
-      folderMap.set(node.id, node);
-      return node;
-    });
   }
 
   // Melakukan ekspansi folder dan memuat subfolder di dalamnya secara bertahap (lazy loading)
@@ -268,6 +269,10 @@ export function useExplorer() {
       return;
     }
 
+    if (targetNode.isLoading) {
+      return;
+    }
+
     if (!targetNode.hasChildren) {
       targetNode.isLoaded = true;
       targetNode.isOpen = !targetNode.isOpen;
@@ -275,6 +280,7 @@ export function useExplorer() {
     }
 
     targetNode.isLoading = true;
+    targetNode.isOpen = true; // Buka chevron dan area subfolder segera agar UI responsif (perceived performance)
     try {
       const childrenData = await explorerApi.getSubfolders(targetNode.id);
       targetNode.children = childrenData.map((f) => {
@@ -289,9 +295,9 @@ export function useExplorer() {
         return node;
       });
       targetNode.isLoaded = true;
-      targetNode.isOpen = true;
     } catch (e) {
       console.error("Gagal memuat subfolder", e);
+      targetNode.isOpen = false; // Batalkan pembukaan jika gagal memuat
     } finally {
       targetNode.isLoading = false;
     }
