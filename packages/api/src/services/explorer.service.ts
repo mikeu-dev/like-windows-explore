@@ -246,4 +246,52 @@ export class ExplorerService {
       folderId: copiedFile.folderId
     };
   }
+
+  // Mendapatkan ID folder khusus (shortcuts)
+  async getShortcutFolderIds(): Promise<Record<string, string>> {
+    const shortcuts: Record<string, string> = {
+      desktop: "",
+      downloads: "",
+      documents: "",
+      pictures: "",
+      music: "",
+      videos: "",
+      onedrive: "",
+      localC: "",
+      localD: ""
+    };
+
+    // 1. Dapatkan drive root (C: dan D:)
+    const roots = await this.folderRepo.findSubfolders(null);
+    const localC = roots.find((r) => r.name.toLowerCase().includes("(c:)"));
+    const localD = roots.find((r) => r.name.toLowerCase().includes("(d:)"));
+    if (localC) shortcuts.localC = localC.id;
+    if (localD) shortcuts.localD = localD.id;
+
+    // 2. Temukan folder mikeudev
+    const matchingFolders = await this.folderRepo.searchFolders("mikeudev");
+    const mikeudevFolder = matchingFolders.find((f) => f.name.toLowerCase() === "mikeudev");
+    if (mikeudevFolder) {
+      const subfolders = await this.folderRepo.findSubfolders(mikeudevFolder.id);
+      const map: Record<string, string> = {
+        desktop: "Desktop",
+        downloads: "Downloads",
+        documents: "Documents",
+        pictures: "Pictures",
+        music: "Music",
+        videos: "Videos",
+        onedrive: "OneDrive"
+      };
+
+      for (const [key, name] of Object.entries(map)) {
+        const found = subfolders.find((sf) => sf.name.toLowerCase() === name.toLowerCase());
+        if (found) {
+          shortcuts[key] = found.id;
+        }
+      }
+    }
+
+    return shortcuts;
+  }
 }
+
