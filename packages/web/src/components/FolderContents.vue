@@ -196,7 +196,6 @@ const emit = defineEmits<{
 
 const viewMode = defineModel<"grid" | "list">("viewMode", { default: "grid" });
 
-const itemsCount = computed(() => props.subfolders.length + props.files.length);
 const isEmpty = computed(() => props.subfolders.length === 0 && props.files.length === 0);
 
 const selectItem = (item: any, type: "folder" | "file") => {

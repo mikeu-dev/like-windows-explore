@@ -663,14 +663,11 @@ import Breadcrumbs from "./components/Breadcrumbs.vue";
 import ExplorerSearch from "./components/ExplorerSearch.vue";
 
 const {
-  rootFolders,
   selectedFolderId,
   selectedFolderContentsLoading,
-  selectedFolderContents,
   breadcrumbs,
   searchQuery,
   isSearching,
-  searchResults,
   searchLoading,
   historyStack,
   forwardStack,

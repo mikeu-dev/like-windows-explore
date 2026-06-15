@@ -17,51 +17,51 @@ export async function seedFolders(db: DbType) {
   const progData = await createFolder(db, "ProgramData", localC.id);
   const users = await createFolder(db, "Users", localC.id);
   const windows = await createFolder(db, "Windows", localC.id);
-  const intel = await createFolder(db, "Intel", localC.id);
-  const perfLogs = await createFolder(db, "PerfLogs", localC.id);
-  const recovery = await createFolder(db, "Recovery", localC.id);
-  const sysVolInfo = await createFolder(db, "System Volume Information", localC.id);
+  await createFolder(db, "Intel", localC.id);
+  await createFolder(db, "PerfLogs", localC.id);
+  await createFolder(db, "Recovery", localC.id);
+  await createFolder(db, "System Volume Information", localC.id);
   const tools = await createFolder(db, "Tools", localC.id);
   const xampp = await createFolder(db, "xampp", localC.id);
 
   // --- SUBFOLDERS UNDER C:\Program Files ---
-  const commonFilesCF = await createFolder(db, "Common Files", progFiles.id);
+  await createFolder(db, "Common Files", progFiles.id);
   const googlePF = await createFolder(db, "Google", progFiles.id);
-  const msOfficePF = await createFolder(db, "Microsoft Office", progFiles.id);
-  const msVSCodePF = await createFolder(db, "Microsoft VS Code", progFiles.id);
-  const nodejsPF = await createFolder(db, "Nodejs", progFiles.id);
+  await createFolder(db, "Microsoft Office", progFiles.id);
+  await createFolder(db, "Microsoft VS Code", progFiles.id);
+  await createFolder(db, "Nodejs", progFiles.id);
   const postgresPF = await createFolder(db, "PostgreSQL", progFiles.id);
-  const windowsAppsPF = await createFolder(db, "WindowsApps", progFiles.id);
+  await createFolder(db, "WindowsApps", progFiles.id);
 
   // Nested C:\Program Files\Google\Chrome
-  const chromePF = await createFolder(db, "Chrome", googlePF.id);
+  await createFolder(db, "Chrome", googlePF.id);
 
   // Nested C:\Program Files\PostgreSQL\16
-  const postgres16PF = await createFolder(db, "16", postgresPF.id);
+  await createFolder(db, "16", postgresPF.id);
 
   // --- SUBFOLDERS UNDER C:\Program Files (x86) ---
-  const commonFilesX86 = await createFolder(db, "Common Files", progFilesX86.id);
-  const microsoftX86 = await createFolder(db, "Microsoft", progFilesX86.id);
-  const steamX86 = await createFolder(db, "Steam", progFilesX86.id);
+  await createFolder(db, "Common Files", progFilesX86.id);
+  await createFolder(db, "Microsoft", progFilesX86.id);
+  await createFolder(db, "Steam", progFilesX86.id);
 
   // --- SUBFOLDERS UNDER C:\ProgramData ---
-  const dockerPD = await createFolder(db, "Docker", progData.id);
-  const microsoftPD = await createFolder(db, "Microsoft", progData.id);
-  const pkgCachePD = await createFolder(db, "Package Cache", progData.id);
-  const chocolateyPD = await createFolder(db, "chocolatey", progData.id);
+  await createFolder(db, "Docker", progData.id);
+  await createFolder(db, "Microsoft", progData.id);
+  await createFolder(db, "Package Cache", progData.id);
+  await createFolder(db, "chocolatey", progData.id);
 
   // --- SUBFOLDERS UNDER C:\Users ---
-  const defaultUser = await createFolder(db, "Default", users.id);
+  await createFolder(db, "Default", users.id);
   const publicUser = await createFolder(db, "Public", users.id);
   const mikeudevUser = await createFolder(db, "mikeudev", users.id);
 
   // --- SUBFOLDERS UNDER C:\Users\Public ---
-  const publicDocs = await createFolder(db, "Documents", publicUser.id);
-  const publicDownloads = await createFolder(db, "Downloads", publicUser.id);
-  const publicPics = await createFolder(db, "Pictures", publicUser.id);
+  await createFolder(db, "Documents", publicUser.id);
+  await createFolder(db, "Downloads", publicUser.id);
+  await createFolder(db, "Pictures", publicUser.id);
 
   // --- SUBFOLDERS UNDER C:\Users\mikeudev ---
-  const contacts = await createFolder(db, "Contacts", mikeudevUser.id);
+  await createFolder(db, "Contacts", mikeudevUser.id);
   const desktop = await createFolder(db, "Desktop", mikeudevUser.id);
   const documents = await createFolder(db, "Documents", mikeudevUser.id);
   const downloads = await createFolder(db, "Downloads", mikeudevUser.id);
@@ -70,11 +70,11 @@ export async function seedFolders(db: DbType) {
   const pictures = await createFolder(db, "Pictures", mikeudevUser.id);
   const videos = await createFolder(db, "Videos", mikeudevUser.id);
   const appData = await createFolder(db, "AppData", mikeudevUser.id);
-  const sshFolder = await createFolder(db, ".ssh", mikeudevUser.id);
+  await createFolder(db, ".ssh", mikeudevUser.id);
 
   // Subfolders under Desktop
   const projects = await createFolder(db, "Projects", desktop.id);
-  const shortcuts = await createFolder(db, "Shortcuts", desktop.id);
+  await createFolder(db, "Shortcuts", desktop.id);
 
   // Subfolders under Desktop\Projects
   const explorerClone = await createFolder(db, "explorer-clone", projects.id);
@@ -102,36 +102,36 @@ export async function seedFolders(db: DbType) {
 
   // Subfolders under AppData
   const appDataLocal = await createFolder(db, "Local", appData.id);
-  const appDataLocalLow = await createFolder(db, "LocalLow", appData.id);
+  await createFolder(db, "LocalLow", appData.id);
   const appDataRoaming = await createFolder(db, "Roaming", appData.id);
 
   // Subfolders under AppData\Local
-  const dockerLocal = await createFolder(db, "Docker", appDataLocal.id);
-  const googleLocal = await createFolder(db, "Google", appDataLocal.id);
-  const microsoftLocal = await createFolder(db, "Microsoft", appDataLocal.id);
-  const programsLocal = await createFolder(db, "Programs", appDataLocal.id);
+  await createFolder(db, "Docker", appDataLocal.id);
+  await createFolder(db, "Google", appDataLocal.id);
+  await createFolder(db, "Microsoft", appDataLocal.id);
+  await createFolder(db, "Programs", appDataLocal.id);
 
   // Subfolders under AppData\Roaming
-  const codeRoaming = await createFolder(db, "Code", appDataRoaming.id);
-  const npmRoaming = await createFolder(db, "npm", appDataRoaming.id);
-  const postmanRoaming = await createFolder(db, "Postman", appDataRoaming.id);
+  await createFolder(db, "Code", appDataRoaming.id);
+  await createFolder(db, "npm", appDataRoaming.id);
+  await createFolder(db, "Postman", appDataRoaming.id);
 
   // --- SUBFOLDERS UNDER C:\Windows ---
-  const fontsWin = await createFolder(db, "Fonts", windows.id);
-  const logsWin = await createFolder(db, "Logs", windows.id);
+  await createFolder(db, "Fonts", windows.id);
+  await createFolder(db, "Logs", windows.id);
   const system32Win = await createFolder(db, "System32", windows.id);
-  const tempWin = await createFolder(db, "Temp", windows.id);
-  const winSxSWin = await createFolder(db, "WinSxS", windows.id);
+  await createFolder(db, "Temp", windows.id);
+  await createFolder(db, "WinSxS", windows.id);
 
   // --- SUBFOLDERS UNDER C:\Tools ---
-  const gitTools = await createFolder(db, "Git", tools.id);
-  const pythonTools = await createFolder(db, "Python", tools.id);
-  const scriptsTools = await createFolder(db, "Scripts", tools.id);
+  await createFolder(db, "Git", tools.id);
+  await createFolder(db, "Python", tools.id);
+  await createFolder(db, "Scripts", tools.id);
 
   // --- SUBFOLDERS UNDER C:\xampp ---
-  const apacheXampp = await createFolder(db, "apache", xampp.id);
-  const htdocsXampp = await createFolder(db, "htdocs", xampp.id);
-  const mysqlXampp = await createFolder(db, "mysql", xampp.id);
+  await createFolder(db, "apache", xampp.id);
+  await createFolder(db, "htdocs", xampp.id);
+  await createFolder(db, "mysql", xampp.id);
 
   // --- SUBFOLDERS UNDER D: ---
   const gamesD = await createFolder(db, "Games", localD.id);
@@ -139,14 +139,14 @@ export async function seedFolders(db: DbType) {
   const backupsD = await createFolder(db, "Backups", localD.id);
 
   // Subfolders under Games
-  const cyberpunkGames = await createFolder(db, "Cyberpunk 2077", gamesD.id);
-  const gtaGames = await createFolder(db, "Grand Theft Auto V", gamesD.id);
-  const witcherGames = await createFolder(db, "The Witcher 3", gamesD.id);
+  await createFolder(db, "Cyberpunk 2077", gamesD.id);
+  await createFolder(db, "Grand Theft Auto V", gamesD.id);
+  await createFolder(db, "The Witcher 3", gamesD.id);
 
   // Subfolders under Movies
-  const actionMovies = await createFolder(db, "Action", moviesD.id);
-  const comedyMovies = await createFolder(db, "Comedy", moviesD.id);
-  const sciFiMovies = await createFolder(db, "Sci-Fi", moviesD.id);
+  await createFolder(db, "Action", moviesD.id);
+  await createFolder(db, "Comedy", moviesD.id);
+  await createFolder(db, "Sci-Fi", moviesD.id);
 
   // Subfolders under Backups
   const photosBackups = await createFolder(db, "Photos", backupsD.id);
