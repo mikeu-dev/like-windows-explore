@@ -134,12 +134,13 @@ export async function seedFolders(db: DbType) {
     .returning();
 
   // Subfolders under Documents
-  const [invoices, personal, work] = await db
+  const [invoices, personal, work, archive] = await db
     .insert(folders)
     .values([
       { name: "Invoices", parentId: documents.id },
       { name: "Personal", parentId: documents.id },
-      { name: "Work", parentId: documents.id }
+      { name: "Work", parentId: documents.id },
+      { name: "Archive", parentId: documents.id }
     ])
     .returning();
 
@@ -292,6 +293,7 @@ export async function seedFolders(db: DbType) {
     invoices,
     personal,
     work,
+    archive,
     installers,
     pdfFolder,
     tempDownloads,

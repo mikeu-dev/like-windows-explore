@@ -80,8 +80,8 @@ const getFolderIcon = (name: string) => {
   const n = name.toLowerCase();
   if (n === "documents") return "description";
   if (n === "pictures") return "image";
-  if (n === "music") return "music_note";
-  if (n === "downloads") return "download";
+  if (n === "music") return "audiotrack";
+  if (n === "downloads") return "save_alt";
   if (n === "desktop") return "desktop_windows";
   if (n === "videos") return "movie";
   if (n === "this pc") return "desktop_windows";
