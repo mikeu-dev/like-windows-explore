@@ -211,5 +211,28 @@ export const explorerApi = {
       console.error("API Error (deleteFile):", error);
       return false;
     }
+  },
+
+  // Mendapatkan ID folder pintasan (shortcuts) dari database
+  async getShortcuts(): Promise<Record<string, string>> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/shortcuts`);
+      if (!response.ok) throw new Error("Gagal mengambil folder pintasan");
+      return await response.json();
+    } catch (error) {
+      console.error("API Error (getShortcuts):", error);
+      return {
+        desktop: "",
+        downloads: "",
+        documents: "",
+        pictures: "",
+        music: "",
+        videos: "",
+        onedrive: "",
+        localC: "",
+        localD: ""
+      };
+    }
   }
 };
+
