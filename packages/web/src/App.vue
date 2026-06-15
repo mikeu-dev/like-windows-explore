@@ -57,14 +57,30 @@
 
         <!-- Address Bar / Breadcrumbs -->
         <div
-          class="flex-grow flex items-center bg-surface-container-lowest border border-outline-variant rounded px-2 h-8 address-bar-focus transition-all overflow-hidden"
+          class="flex-grow flex items-center bg-surface-container-lowest border border-outline-variant rounded px-2 h-8 address-bar-focus transition-all overflow-hidden cursor-text"
+          @click="startEditingPath"
         >
           <span
-            class="material-symbols-outlined text-primary-container mr-2"
+            class="material-symbols-outlined text-primary-container mr-2 shrink-0 select-none"
             :style="{ fontVariationSettings: '\'FILL\' 1' }"
             >folder</span
           >
-          <Breadcrumbs :path="breadcrumbs" @navigate="selectFolder" />
+          <div class="flex-grow overflow-hidden h-full flex items-center">
+            <template v-if="!isEditingPath">
+              <Breadcrumbs :path="breadcrumbs" @navigate="selectFolder" />
+            </template>
+            <template v-else>
+              <input
+                ref="pathInputRef"
+                v-model="pathInputVal"
+                type="text"
+                class="bg-transparent border-none focus:ring-0 text-body-sm font-body-sm w-full h-full p-0 outline-none text-on-surface"
+                @keydown.enter="submitPath"
+                @keydown.esc="cancelEditingPath"
+                @blur="handlePathInputBlur"
+              />
+            </template>
+          </div>
         </div>
 
         <!-- Search Bar -->
@@ -416,9 +432,13 @@
             :is-searching="isSearching"
             :search-query="searchQuery"
             :active-item="activeItem"
+            :renaming-item-id="renamingItemId"
             @navigate="selectFolder"
             @select-item="activeItem = $event"
             @open-file="modalFile = $event"
+            @submit-rename="submitRename"
+            @cancel-rename="cancelRename"
+            @start-rename="renameItem"
           />
         </div>
       </main>
@@ -657,12 +677,13 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, computed } from "vue";
+import { onMounted, onUnmounted, ref, computed, nextTick } from "vue";
 import { useExplorer } from "./composables/useExplorer";
 import FolderTree from "./components/FolderTree.vue";
 import FolderContents from "./components/FolderContents.vue";
 import Breadcrumbs from "./components/Breadcrumbs.vue";
 import ExplorerSearch from "./components/ExplorerSearch.vue";
+import { explorerApi } from "./services/api";
 
 const {
   selectedFolderId,
@@ -677,6 +698,7 @@ const {
   sortOrder,
   activeItem,
   clipboard,
+  rootFolders,
   sortedSubfolders,
   sortedFiles,
   sidebarSection1,
@@ -692,12 +714,180 @@ const {
   createNewItem,
   deleteItem,
   renameItem,
+  submitRename,
+  cancelRename,
+  renamingItemId,
   cutItem,
   copyItem,
   pasteItem
 } = useExplorer();
 
 const isTreeLoading = ref(true);
+
+// Address bar edit mode & parsing logic
+const isEditingPath = ref(false);
+const pathInputVal = ref("");
+const pathInputRef = ref<HTMLInputElement | null>(null);
+
+const getPathString = () => {
+  if (breadcrumbs.value.length === 0) {
+    return "This PC";
+  }
+  return ["This PC", ...breadcrumbs.value.map((b) => b.name)].join(" / ");
+};
+
+const startEditingPath = (event: MouseEvent) => {
+  const target = event.target as HTMLElement;
+  if (target.closest("button")) {
+    return;
+  }
+  isEditingPath.value = true;
+  pathInputVal.value = getPathString();
+
+  nextTick(() => {
+    if (pathInputRef.value) {
+      pathInputRef.value.focus();
+      pathInputRef.value.select();
+    }
+  });
+};
+
+const cancelEditingPath = () => {
+  isEditingPath.value = false;
+};
+
+const handlePathInputBlur = () => {
+  setTimeout(() => {
+    isEditingPath.value = false;
+  }, 180);
+};
+
+const resolvePathAndNavigate = async (pathStr: string) => {
+  const cleanPath = pathStr.trim();
+  if (!cleanPath) return;
+
+  const parts = cleanPath
+    .split(/[\\/>→]+/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+
+  if (parts.length === 0) return;
+
+  const shortcuts = await explorerApi.getShortcuts();
+  const firstPartLower = parts[0].toLowerCase();
+
+  let currentFolderId: string | null = null;
+  let startIndex = 0;
+
+  if (firstPartLower === "this pc" || firstPartLower === "this-pc") {
+    currentFolderId = "this-pc";
+    startIndex = 1;
+  } else if (firstPartLower === "home") {
+    currentFolderId = "home";
+    startIndex = 1;
+  } else if (firstPartLower === "gallery") {
+    currentFolderId = "gallery";
+    startIndex = 1;
+  } else if (firstPartLower === "recycle bin" || firstPartLower === "recycle-bin") {
+    currentFolderId = "recycle-bin";
+    startIndex = 1;
+  } else if (firstPartLower === "network") {
+    currentFolderId = "network";
+    startIndex = 1;
+  } else if (firstPartLower === "linux") {
+    currentFolderId = "linux";
+    startIndex = 1;
+  } else if (firstPartLower.includes("onedrive")) {
+    currentFolderId = "onedrive-root";
+    startIndex = 1;
+  } else if (firstPartLower === "desktop" && shortcuts.desktop) {
+    currentFolderId = shortcuts.desktop;
+    startIndex = 1;
+  } else if (firstPartLower === "downloads" && shortcuts.downloads) {
+    currentFolderId = shortcuts.downloads;
+    startIndex = 1;
+  } else if (firstPartLower === "documents" && shortcuts.documents) {
+    currentFolderId = shortcuts.documents;
+    startIndex = 1;
+  } else if (firstPartLower === "pictures" && shortcuts.pictures) {
+    currentFolderId = shortcuts.pictures;
+    startIndex = 1;
+  } else if (firstPartLower === "music" && shortcuts.music) {
+    currentFolderId = shortcuts.music;
+    startIndex = 1;
+  } else if (firstPartLower === "videos" && shortcuts.videos) {
+    currentFolderId = shortcuts.videos;
+    startIndex = 1;
+  }
+
+  if (currentFolderId && startIndex >= parts.length) {
+    await selectFolder(currentFolderId);
+    return;
+  }
+
+  if (!currentFolderId) {
+    currentFolderId = "this-pc";
+    startIndex = 0;
+  }
+
+  let currentId: string | null = currentFolderId;
+  const virtualFolders = [
+    "this-pc",
+    "desktop",
+    "videos",
+    "home",
+    "gallery",
+    "onedrive-root",
+    "network",
+    "linux"
+  ];
+
+  for (let i = startIndex; i < parts.length; i++) {
+    const partName = parts[i].toLowerCase();
+
+    let subfolders: any[] = [];
+    if (currentId === "this-pc") {
+      if (rootFolders.value.length === 0) {
+        await loadRootFolders();
+      }
+      subfolders = rootFolders.value;
+    } else if (currentId === "onedrive-root") {
+      const onedriveId = shortcuts.onedrive;
+      if (onedriveId) {
+        const contents = await explorerApi.getFolderContents(onedriveId);
+        subfolders = contents.subfolders;
+        currentId = onedriveId;
+      } else {
+        break;
+      }
+    } else if (currentId && !virtualFolders.includes(currentId)) {
+      const contents = await explorerApi.getFolderContents(currentId);
+      subfolders = contents.subfolders;
+    } else {
+      break;
+    }
+
+    const match = subfolders.find((sf) => sf.name.toLowerCase() === partName);
+    if (match) {
+      currentId = match.id;
+    } else {
+      await performSearch(pathStr);
+      return;
+    }
+  }
+
+  if (currentId && currentId !== "this-pc") {
+    await selectFolder(currentId);
+  } else if (currentId === "this-pc") {
+    await selectFolder("this-pc");
+  }
+};
+
+const submitPath = async () => {
+  const targetPath = pathInputVal.value;
+  isEditingPath.value = false;
+  await resolvePathAndNavigate(targetPath);
+};
 
 // UI popup local menu toggles
 const isSortMenuOpen = ref(false);
@@ -864,7 +1054,15 @@ const formatBytes = (bytes: number): string => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
 };
 
+const handleGlobalKeyDown = (e: KeyboardEvent) => {
+  if (e.key === "F2" && activeItem.value && !renamingItemId.value) {
+    e.preventDefault();
+    renameItem();
+  }
+};
+
 onMounted(async () => {
+  window.addEventListener("keydown", handleGlobalKeyDown);
   try {
     await loadRootFolders();
   } catch (e) {
@@ -872,6 +1070,10 @@ onMounted(async () => {
   } finally {
     isTreeLoading.value = false;
   }
+});
+
+onUnmounted(() => {
+  window.removeEventListener("keydown", handleGlobalKeyDown);
 });
 </script>
 

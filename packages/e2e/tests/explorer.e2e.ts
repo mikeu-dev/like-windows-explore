@@ -221,13 +221,13 @@ test.describe("File Explorer App", () => {
 
     // 2. Rename folder to TestCrudFolder
     await page.locator('[id^="content-folder-"]:has-text("New Folder")').click();
-
-    // Set prompt dialog handler before clicking Rename
-    page.once("dialog", async (dialog) => {
-      expect(dialog.type()).toBe("prompt");
-      await dialog.accept("TestCrudFolder");
-    });
     await page.locator('button[title="Rename"]').click();
+
+    // Fill the inline rename input and submit by pressing Enter
+    const renameInput = page.locator("main input.rename-input");
+    await expect(renameInput).toBeVisible();
+    await renameInput.fill("TestCrudFolder");
+    await renameInput.press("Enter");
 
     // Ensure folder name is changed
     await expect(page.locator("main >> text=TestCrudFolder")).toBeVisible();
@@ -260,10 +260,6 @@ test.describe("File Explorer App", () => {
 
     // 9. Delete file inside TestCrudFolder
     await page.locator('[id^="content-file-"]:has-text("New File.txt")').click();
-    page.once("dialog", async (dialog) => {
-      expect(dialog.type()).toBe("confirm");
-      await dialog.accept();
-    });
     await page.locator('button[title="Delete"]').click();
     await expect(page.locator("main >> text=New File.txt")).not.toBeVisible();
 
@@ -272,17 +268,11 @@ test.describe("File Explorer App", () => {
 
     // 11. Delete the copied New File.txt file in Documents
     await page.locator('[id^="content-file-"]:has-text("New File.txt")').click();
-    page.once("dialog", async (dialog) => {
-      await dialog.accept();
-    });
     await page.locator('button[title="Delete"]').click();
     await expect(page.locator("main >> text=New File.txt")).not.toBeVisible();
 
     // 12. Delete TestCrudFolder in Documents
     await page.locator('[id^="content-folder-"]:has-text("TestCrudFolder")').click();
-    page.once("dialog", async (dialog) => {
-      await dialog.accept();
-    });
     await page.locator('button[title="Delete"]').click();
     await expect(page.locator("main >> text=TestCrudFolder")).not.toBeVisible();
   });

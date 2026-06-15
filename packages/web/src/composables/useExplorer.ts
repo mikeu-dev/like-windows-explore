@@ -33,6 +33,9 @@ export function useExplorer() {
   // Selection state
   const activeItem = ref<{ id: string; type: "folder" | "file"; name: string } | null>(null);
 
+  // Renaming state
+  const renamingItemId = ref<string | null>(null);
+
   // Clipboard state
   const clipboard = ref<{
     item: any;
@@ -481,8 +484,6 @@ export function useExplorer() {
   // Delete selected item
   async function deleteItem() {
     if (!activeItem.value || !selectedFolderId.value) return;
-    const confirmDelete = confirm(`Apakah Anda yakin ingin menghapus "${activeItem.value.name}"?`);
-    if (!confirmDelete) return;
 
     if (activeItem.value.type === "folder") {
       await explorerApi.deleteFolder(activeItem.value.id);
@@ -493,19 +494,50 @@ export function useExplorer() {
     await refreshView();
   }
 
-  // Rename selected item
-  async function renameItem() {
+  // Rename selected item (enters edit mode)
+  function renameItem() {
     if (!activeItem.value || !selectedFolderId.value) return;
-    const newName = prompt(`Rename "${activeItem.value.name}" to:`, activeItem.value.name);
-    if (!newName || newName.trim() === "") return;
+    renamingItemId.value = activeItem.value.id;
+  }
 
-    if (activeItem.value.type === "folder") {
-      await explorerApi.renameFolder(activeItem.value.id, newName);
-    } else {
-      await explorerApi.renameFile(activeItem.value.id, newName);
+  // Submit the new name (save)
+  async function submitRename(newName: string) {
+    if (!renamingItemId.value || !selectedFolderId.value) return;
+    const cleanName = newName.trim();
+    if (!cleanName) {
+      cancelRename();
+      return;
     }
-    activeItem.value = null;
-    await refreshView();
+
+    // Find the item to check if the name actually changed
+    const currentName = activeItem.value?.id === renamingItemId.value ? activeItem.value.name : "";
+    if (cleanName === currentName) {
+      cancelRename();
+      return;
+    }
+
+    try {
+      const isFolder = activeItem.value?.type === "folder";
+      if (isFolder) {
+        await explorerApi.renameFolder(renamingItemId.value, cleanName);
+      } else {
+        await explorerApi.renameFile(renamingItemId.value, cleanName);
+      }
+      // Update the active item's name locally so selection doesn't break
+      if (activeItem.value && activeItem.value.id === renamingItemId.value) {
+        activeItem.value.name = cleanName;
+      }
+    } catch (e) {
+      console.error("Gagal mengganti nama item", e);
+    } finally {
+      renamingItemId.value = null;
+      await refreshView();
+    }
+  }
+
+  // Cancel rename mode
+  function cancelRename() {
+    renamingItemId.value = null;
   }
 
   // Cut & Copy Item
@@ -640,6 +672,9 @@ export function useExplorer() {
     createNewItem,
     deleteItem,
     renameItem,
+    submitRename,
+    cancelRename,
+    renamingItemId,
     cutItem,
     copyItem,
     pasteItem
