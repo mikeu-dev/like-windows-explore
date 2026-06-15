@@ -26,6 +26,9 @@ const mockPath: FolderDTO[] = [{ id: "1", name: "Documents", parentId: null, has
 const getSubfoldersMock = mock((parentId: string | null = null) => {
   if (parentId === null) return Promise.resolve(mockRootFolders);
   if (parentId === "1") return Promise.resolve(mockContents.subfolders);
+  if (parentId === "onedrive-id") return Promise.resolve([
+    { id: "onedrive-sub-1", name: "OneDrive Subfolder", parentId: "onedrive-id", hasChildren: false }
+  ]);
   return Promise.resolve([]);
 });
 
@@ -305,5 +308,26 @@ describe("useExplorer Composable Tests", () => {
     console.log("==========================================\n");
 
     expect(durationL1).toBeLessThan(50); // Level 1 virtual is sync & very fast
+  });
+
+  it("should expand and lazy load OneDrive contents", async () => {
+    const explorer = useExplorer();
+
+    // Load root folders first to populate shortcutFolderIds
+    await explorer.loadRootFolders();
+    expect(explorer.sidebarSection1.value[2].id).toBe("onedrive-id");
+
+    // Expand OneDrive root
+    await explorer.expandFolder(explorer.sidebarSection1.value[2]);
+
+    // Check that open status is toggled and children are lazy loaded
+    expect(explorer.sidebarSection1.value[2].isOpen).toBe(true);
+    expect(explorer.sidebarSection1.value[2].isLoaded).toBe(true);
+    expect(explorer.sidebarSection1.value[2].children).toHaveLength(1);
+    expect(explorer.sidebarSection1.value[2].children?.[0].name).toBe("OneDrive Subfolder");
+
+    // Collapse OneDrive root
+    await explorer.expandFolder(explorer.sidebarSection1.value[2]);
+    expect(explorer.sidebarSection1.value[2].isOpen).toBe(false);
   });
 });

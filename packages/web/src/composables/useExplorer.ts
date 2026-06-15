@@ -226,28 +226,54 @@ export function useExplorer() {
   // Melakukan ekspansi folder dan memuat subfolder di dalamnya secara bertahap (lazy loading)
   async function expandFolder(folder: ClientFolderNode) {
     if (!folder) return;
-    if (folder.id === "onedrive-root" || folder.id === shortcutFolderIds.value.onedrive) {
-      openFolderIds.value["onedrive-root"] = !openFolderIds.value["onedrive-root"];
-      const id = shortcutFolderIds.value.onedrive;
-      if (id) {
-        let mapNode = folderMap.get(id);
-        if (!mapNode) {
-          mapNode = {
-            id,
-            name: "OneDrive",
+    // Penanganan khusus untuk OneDrive
+    if (
+      folder.id === "onedrive-root" ||
+      folder.id === "onedrive-virtual" ||
+      (shortcutFolderIds.value.onedrive && folder.id === shortcutFolderIds.value.onedrive && folder.parentId === null)
+    ) {
+      const isNowOpen = !openFolderIds.value["onedrive-root"];
+      openFolderIds.value["onedrive-root"] = isNowOpen;
+      
+      const dbId = shortcutFolderIds.value.onedrive;
+      if (isNowOpen && dbId) {
+        let targetNode = folderMap.get(dbId);
+        if (!targetNode) {
+          const rawNode: ClientFolderNode = {
+            id: dbId,
+            name: "OneDrive - Personal",
             parentId: null,
             children: [],
-            isOpen: false,
+            isOpen: true,
             isLoading: false,
             isLoaded: false,
             hasChildren: true
           };
-          folderMap.set(id, mapNode);
+          folderMap.set(dbId, rawNode);
+          targetNode = folderMap.get(dbId);
         }
-        if (!mapNode.isLoaded) {
-          await expandFolder(mapNode);
-        } else {
-          mapNode.isOpen = !mapNode.isOpen;
+        
+        if (targetNode && !targetNode.isLoaded && !targetNode.isLoading) {
+          targetNode.isLoading = true;
+          try {
+            const childrenData = await explorerApi.getSubfolders(dbId);
+            targetNode.children = childrenData.map((f) => {
+              const node: ClientFolderNode = {
+                ...f,
+                children: [],
+                isOpen: false,
+                isLoading: false,
+                isLoaded: false
+              };
+              folderMap.set(node.id, node);
+              return node;
+            });
+            targetNode.isLoaded = true;
+          } catch (e) {
+            console.error("Gagal memuat subfolder OneDrive", e);
+          } finally {
+            targetNode.isLoading = false;
+          }
         }
       }
       return;
@@ -262,8 +288,9 @@ export function useExplorer() {
     let targetNode = folderMap.get(folder.id);
     if (!targetNode) {
       folderMap.set(folder.id, folder);
-      targetNode = folder;
+      targetNode = folderMap.get(folder.id);
     }
+    if (!targetNode) return;
 
     if (targetNode.isLoaded) {
       targetNode.isOpen = !targetNode.isOpen;
